@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "548263883069",
+    "project_id": "doctors-app-fb-9a147",
+    "storage_bucket": "doctors-app-fb-9a147.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548263883069:android:a8d47751ba831a5eed9554",
+        "android_client_info": {
+          "package_name": "com.example.doctors_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4K0hvjI1T5CtHBH6Psx22Qpq4p_nV_BA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
