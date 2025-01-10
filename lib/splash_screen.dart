@@ -1,8 +1,10 @@
+import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -50,19 +52,35 @@ class _SplashScreenState extends State<SplashScreen> {
     
   }
 
+  //theme color: #2b962b
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: const Center(
-        child: Text(
-          'Splash Screen',
-          style: TextStyle(
-            fontSize: 24,
-            color: Colors.black,
-          ),
-        ),
-      ),
+    double textPosition = MediaQuery.of(context).size.height * 0.1;
+    double imagePosition = MediaQuery.of(context).size.height * 0.2;
+
+    return Scaffold(
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        color: Colors.white,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: textPosition),
+              child: Text('Doctors App', style: GoogleFonts.poppins(fontSize: 24, color: Colors.black, fontWeight: FontWeight.normal),),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: imagePosition),
+              child: Image.asset('lib/assets/images/doctors_symbol.png', height: 300, width: MediaQuery.of(context).size.width * 0.7, alignment: Alignment.center,),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 20), 
+              child: CircularProgressIndicator(),
+            ),
+          ]
+        )
+      )
     );
 
   }

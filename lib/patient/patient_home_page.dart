@@ -22,7 +22,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
           ),
         ),
       ),
+    ),
     );
-    )
   }
 }
