@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,78 +27,160 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _isNavigating = false;
 
+  bool _obscureText = true;
+
   @override
   Widget build(BuildContext context) {
     double topPadding = 0.1 * MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: _isLoading ? const Center(child: CircularProgressIndicator(),) : 
-      Form(
-        key: _formKey,
-        child: Padding(
-           padding: const EdgeInsets.all(16.0),
-           child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: topPadding, bottom: 20),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (value) {
-                    email = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter email';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 20),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                  ),
-                  keyboardType: TextInputType.text,
-                  obscureText: true,
-                  onChanged: (value) {
-                    password = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: ElevatedButton(
-                  onPressed: _login,
-                  child: const Text('Login'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterPage()));
-                  },
-                  child: const Text('Register new account'),
-                ),
-              ),
-            ],
-           )
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Login'),
         ),
-      )
+        body: _isLoading ? const Center(child: CircularProgressIndicator(),) : 
+        SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Padding(
+               padding: const EdgeInsets.all(16.0),
+               child: Column(
+                spacing: 10,
+                children: [
+                  SizedBox(height: 48,),
+                  Image.asset('lib/assets/images/doctors_symbol.png', height: 200,),
+                  SizedBox(height: 10,),
+                  Text('Welcome', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w600),),
+                  Text('Login to continue', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w400),),
+                  SizedBox(height: 60,),
+                  SizedBox(
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'Email',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      onChanged: (value) {
+                        email = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter email';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'Password',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off, color: Colors.grey.shade400,),
+                          onPressed: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: _obscureText,
+                      keyboardType: TextInputType.text,
+                      onChanged: (value) {
+                        password = value;
+                      },
+                      validator: (value) {
+                        if (value!= null && value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 20,),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2B962B),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Login', style: TextStyle(fontSize: 16, color: Colors.white),),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterPage()));
+                      },
+                      child: Text('Register new account', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
+                    ),
+                  ),
+                ],
+               )
+            ),
+          ),
+        )
+      ),
     );
   }
 
