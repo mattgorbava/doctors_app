@@ -51,7 +51,8 @@ class _RegisterPageState extends State<RegisterPage> {
       appBar: AppBar(
         title: const Text('Register'),
       ),
-      body: SingleChildScrollView(
+      body: _isLoading ? CircularProgressIndicator() :
+       SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Padding(
@@ -180,12 +181,12 @@ class _RegisterPageState extends State<RegisterPage> {
                 decoration: InputDecoration(labelText: 'City'),
                 validator: (val) => val == null ? 'Please select a city' : null,),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: ElevatedButton(onPressed: _pickImage,
-                child: Text('Upload profile image')),
-              ),
-              _imageFile == null ? Text('No image selected') : Image.file(File(_imageFile!.path)),
+              // Padding(
+              //   padding: const EdgeInsets.only(bottom: 20),
+              //   child: ElevatedButton(onPressed: _pickImage,
+              //   child: Text('Upload profile image')),
+              // ),
+              // _imageFile == null ? Text('No image selected') : Image.file(File(_imageFile!.path)),
               if(userType == 'Doctor') ... [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20, top: 20),
@@ -203,25 +204,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                     onSaved: (value) {
                       category = value!;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Qualification',
-                    ),
-                    keyboardType: TextInputType.text,
-                    onChanged: (val) => qualification = val,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter qualification';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      qualification = value!;
                     },
                   ),
                 ),
@@ -323,19 +305,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
           await _db.child(userTypePath).child(user.uid).set(userData);
 
-          if (_imageFile != null) {
-            Reference storageReference = FirebaseStorage.instance
-                .ref()
-                .child('$userTypePath/${user.uid}/profile.jpg');
-            UploadTask uploadTask =
-                storageReference.putFile(File(_imageFile!.path));
-            TaskSnapshot taskSnapshot = await uploadTask;
+          // if (_imageFile != null) {
+          //   Reference storageReference = FirebaseStorage.instance.ref()
+          //       .child('$userTypePath/${user.uid}/profile.jpg');
+          //   //UploadTask uploadTask = storageReference.putFile(File(_imageFile!.path));
+          //   final TaskSnapshot taskSnapshot = await storageReference.putFile(File(_imageFile!.path));
 
-            String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-            await _db.child(userTypePath).child(user.uid).update({
-              'profileImageUrl': downloadUrl,
-            });
-          }
+          //   final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+          //   await _db.child(userTypePath).child(user.uid).update({
+          //     'profileImageUrl': downloadUrl,
+          //   });
+          // }
 
           Navigator.of(context).push(
             MaterialPageRoute(

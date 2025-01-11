@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "548263883069",
+    "firebase_url": "https://doctors-app-fb-9a147-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "doctors-app-fb-9a147",
     "storage_bucket": "doctors-app-fb-9a147.firebasestorage.app"
   },
