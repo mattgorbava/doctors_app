@@ -1,6 +1,8 @@
+import 'package:doctors_app/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? doctorId;
@@ -149,4 +151,23 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  Future<void> showNotification(String title, String body) async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+    'chat_notifications', 
+    'Chat Notifications', 
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+  const NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+
+  await flutterLocalNotificationsPlugin.show(
+    0,
+    title,
+    body,
+    platformChannelSpecifics,
+  );
+}
 }

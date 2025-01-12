@@ -17,7 +17,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
   List<Booking> _bookings = <Booking>[];
   bool _isLoading = true;
   List<String> statuses = ['Pending', 'Confirmed', 'Cancelled'];
-  String? currentStatus = 'Pending'; // Initial selected status
+  String? currentStatus = 'Pending';
 
   @override
   void initState() {
@@ -93,7 +93,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
     showDialog(
       context: context,
       builder: (context) {
-        String? dialogStatus = currentStatus; // Local state for the dialog
+        String? dialogStatus = currentStatus;
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(

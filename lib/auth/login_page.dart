@@ -40,6 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Login'),
+          automaticallyImplyLeading: false,
         ),
         body: _isLoading ? const Center(child: CircularProgressIndicator(),) : 
         SingleChildScrollView(

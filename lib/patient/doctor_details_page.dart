@@ -1,8 +1,10 @@
 import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/main.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -40,16 +42,24 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
             children: [
               Row(
                 children: [
-                  // Container(
-                  //   width: 115,
-                  //   height: 115,
-                  //   decoration: BoxDecoration(
-                  //     color: Color(0xFF84c384),
-                  //     borderRadius: BorderRadius.circular(12)
-                  //   ),
-
-                  // ) 
-                  //Profile image container, numa daca mai ai timp
+                  Container(
+                    width: 115,
+                    height: 115,
+                    decoration: BoxDecoration(
+                      color: Color(0xffF0EFFF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: widget.doctor.profileImageUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              widget.doctor.profileImageUrl,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          )
+                        : Icon(Icons.person, size: 60, color: Colors.grey),
+                  ),
+                  SizedBox(width: 20,),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
@@ -297,11 +307,32 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         content: Text('Appointment booked successfully'),
         backgroundColor: Colors.green,
       ));
+      _sendNotification();
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Failed to book appointment'),
         backgroundColor: Colors.red,
       ));
     });
+  }
+
+  void _sendNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'your_channel_id',
+      'your_channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Appointment',
+      'New appointment created',
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
   }
 }

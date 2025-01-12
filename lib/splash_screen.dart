@@ -52,8 +52,6 @@ class _SplashScreenState extends State<SplashScreen> {
     
   }
 
-  //theme color: #2b962b
-
   @override
   Widget build(BuildContext context) {
     double textPosition = MediaQuery.of(context).size.height * 0.1;

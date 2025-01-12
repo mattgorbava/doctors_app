@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
@@ -46,6 +47,12 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
   bool _obscureText = true;
 
+  final cloudinary = CloudinaryPublic(
+    'do7w8aw8e',  
+    'doctors-app', 
+    cache: false,
+  );
+
   @override
   Widget build(BuildContext context) {
     double topPadding = 0.1 * MediaQuery.of(context).size.height;
@@ -57,6 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Register', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
+          automaticallyImplyLeading: false,
         ),
         body: _isLoading ? CircularProgressIndicator() :
          Form(
@@ -368,12 +376,26 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: (val) => val == null ? 'Please select a city' : null,),
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.only(bottom: 20),
-                //   child: ElevatedButton(onPressed: _pickImage,
-                //   child: Text('Upload profile image')),
-                // ),
-                // _imageFile == null ? Text('No image selected') : Image.file(File(_imageFile!.path)),
+                GestureDetector(
+                  onTap: _pickImage, 
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100), 
+                    child: _imageFile != null ? Image.file(
+                      File(_imageFile!.path),
+                      width: 100, 
+                      height: 100,
+                      fit: BoxFit.cover,)
+                    : Container(
+                        color: Color(0xffF0EFFF), 
+                        width: 100, 
+                        height: 100,
+                        child: Center(
+                          child: Icon(Icons.add_a_photo, color: Colors.grey.shade600, size: 30,),
+                            ),
+                          ),
+                        ),
+                      ),
+                _imageFile == null ? Text('No image selected') : Image.file(File(_imageFile!.path)),
                 if(userType == 'Doctor') ... [
                   SizedBox(
                   height: 44,
@@ -573,6 +595,26 @@ class _RegisterPageState extends State<RegisterPage> {
         User? user = userCredential.user;
          if (user != null) {
           String userTypePath = userType == 'Doctor' ? 'Doctors' : 'Patients';
+
+          if (_imageFile != null) {
+            try {
+              CloudinaryResponse response = await cloudinary.uploadFile(
+                CloudinaryFile.fromFile(
+                  _imageFile!.path,
+                  folder: userTypePath.toLowerCase(), 
+                ),
+              );
+              profileImageUrl = response.secureUrl;
+            } catch (e) {
+              print('Error uploading to Cloudinary: $e');
+              _showErrorDialog('Failed to upload profile image');
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            }
+          }
+
           Map<String, dynamic> userData = {
             'uid': user.uid,
             'email': email,
@@ -596,17 +638,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           await _db.child(userTypePath).child(user.uid).set(userData);
 
-          // if (_imageFile != null) {
-          //   Reference storageReference = FirebaseStorage.instance.ref()
-          //       .child('$userTypePath/${user.uid}/profile.jpg');
-          //   //UploadTask uploadTask = storageReference.putFile(File(_imageFile!.path));
-          //   final TaskSnapshot taskSnapshot = await storageReference.putFile(File(_imageFile!.path));
-
-          //   final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-          //   await _db.child(userTypePath).child(user.uid).update({
-          //     'profileImageUrl': downloadUrl,
-          //   });
-          // }
+          
 
           Navigator.of(context).push(
             MaterialPageRoute(

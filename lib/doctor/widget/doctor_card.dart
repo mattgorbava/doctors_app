@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctors_app/model/doctor.dart';
 
 class DoctorCard extends StatelessWidget {
@@ -23,6 +24,19 @@ class DoctorCard extends StatelessWidget {
           leading: Container(
             width: 55,
             height: 60,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(60),
+              border: Border.all(color: Color(0xff0064FA)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(60),
+              child: CachedNetworkImage(
+                imageUrl: doctor.profileImageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.person),
+              ),
+            ),
           ),
           title: Text(
             '${doctor.firstName} ${doctor.lastName}',
