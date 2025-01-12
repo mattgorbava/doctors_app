@@ -1,9 +1,6 @@
 import 'package:doctors_app/doctor/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
-import 'package:doctors_app/patient/doctor_list_page.dart';
-import 'package:doctors_app/patient/chat_list_page.dart';
-import 'package:doctors_app/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

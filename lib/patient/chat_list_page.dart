@@ -16,7 +16,6 @@ class _ChatListPageState extends State<ChatListPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _chatListRef = FirebaseDatabase.instance.ref().child('ChatList');
   final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
-  final DatabaseReference _patientsDatabase = FirebaseDatabase.instance.ref().child('Patients');
   List<Doctor> _chatList = [];
   bool _isLoading = true;
 
@@ -74,10 +73,6 @@ class _ChatListPageState extends State<ChatListPage> {
         itemCount: _chatList.length,
         itemBuilder: (context, index) {
           Doctor doctor = _chatList[index];
-          // DataSnapshot firstNameSnapshot = await _patientsDatabase.child(_auth.currentUser!.uid).child('firstName').get();
-          // DataSnapshot lastNameSnapshot = await _patientsDatabase.child(_auth.currentUser!.uid).child('lastName').get();
-          // String currentUserName = '${firstNameSnapshot.value} ${lastNameSnapshot.value}';
-          // String doctorName = '${doctor.firstName} ${doctor.lastName}';
           return Card(
             child: ListTile(
               title: Text('Chat with ${doctor.firstName} ${doctor.lastName}'),
