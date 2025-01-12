@@ -1,5 +1,5 @@
-import 'package:doctors_app/doctor/doctor_details_page.dart';
-import 'package:doctors_app/doctor/model/doctor.dart';
+import 'package:doctors_app/patient/doctor_details_page.dart';
+import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/doctor/widget/doctor_card.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';

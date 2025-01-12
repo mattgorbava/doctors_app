@@ -1,4 +1,5 @@
-import 'package:doctors_app/doctor/model/doctor.dart';
+import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class DoctorDetailsPage extends StatefulWidget {
 class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseReference _patientsDatabase = FirebaseDatabase.instance.ref().child('Patients');
   final DatabaseReference _requestDatabase = FirebaseDatabase.instance.ref().child('Requests');
 
   TextEditingController _descriptionController = TextEditingController();
@@ -73,14 +75,17 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                             icon: Image.asset('lib/assets/images/phone.png', height: 30, width: 30), 
                           ),
                           IconButton(
-                            onPressed: (){
+                            onPressed: () async {
                               String currentUserId = _auth.currentUser!.uid;
+                              DataSnapshot firstNameSnapshot = await _patientsDatabase.child(currentUserId).child('firstName').get();
+                              DataSnapshot lastNameSnapshot = await _patientsDatabase.child(currentUserId).child('lastName').get();
+                              String currentUserName = '${firstNameSnapshot.value} ${lastNameSnapshot.value}';
                               String doctorName = '${widget.doctor.firstName} ${widget.doctor.lastName}';
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(builder: (context) => ChatPage(
-                              //     patientId: currentUserId, doctorName: doctorName, doctorId:widget.doctor.uid)),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ChatScreen(
+                                  patientName: currentUserName, patientId: currentUserId, doctorName: doctorName, doctorId:widget.doctor.uid)),
+                              );
                             }, 
                             icon: Image.asset('lib/assets/images/chat.png', height: 30, width: 30), 
                           )

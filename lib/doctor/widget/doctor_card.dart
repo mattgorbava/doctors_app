@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:doctors_app/doctor/model/doctor.dart';
+import 'package:doctors_app/model/doctor.dart';
 
 class DoctorCard extends StatelessWidget {
   final Doctor doctor;
