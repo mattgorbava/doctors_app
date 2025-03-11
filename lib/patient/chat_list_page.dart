@@ -1,7 +1,6 @@
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -52,8 +51,7 @@ class _ChatListPageState extends State<ChatListPage> {
           _isLoading = false;
         });
       } catch (e) {
-        print('Error: $e');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not get chats.'),
         backgroundColor: Colors.red,
       ));

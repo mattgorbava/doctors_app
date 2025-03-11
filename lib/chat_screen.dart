@@ -83,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
               stream: _chatRef.onValue,
               builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                 if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
-                  return Center(child: Text('No messages yet'));
+                  return const Center(child: Text('No messages yet'));
                 } else {
 
                   Map<dynamic, dynamic> messagesMap = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
@@ -111,13 +111,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     return Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
-                        margin: EdgeInsets.all(8),
-                        padding: EdgeInsets.all(8),
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: isMe ? Colors.blue : Colors.grey,
                           borderRadius: BorderRadius.circular(8)
                         ),
-                        child: Text(messages[index]['message'], style: TextStyle(color: Colors.white),),
+                        child: Text(messages[index]['message'], style: const TextStyle(color: Colors.white),),
                       ),
                     );
                   });
@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: const Icon(Icons.send),
                   onPressed: _sendMessage,
                 )
               ],

@@ -35,7 +35,7 @@ class _DoctorListPageState extends State<DoctorListPage> {
           spacing: 30,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Text(
               'Find your doctor, \nand book an appointment',
               style: GoogleFonts.poppins(
@@ -110,19 +110,19 @@ Widget _buildCategoryCard(BuildContext context, String title, dynamic icon,
   return Container(
     width: MediaQuery.of(context).size.width * 0.4,
     decoration: BoxDecoration(
-        color: isHighlighed ? Color(0xFF2B962B) : Colors.white,
+        color: isHighlighed ? const Color(0xFF2B962B) : Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: isHighlighed
             ? null
-            : Border.all(color: Color(0xffC8C4FF), width: 2)),
+            : Border.all(color: const Color(0xffC8C4FF), width: 2)),
     child: Card(
-      color: isHighlighed ? Color(0xFF2B962B) : Colors.white,
+      color: isHighlighed ? const Color(0xFF2B962B) : Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -138,14 +138,14 @@ Widget _buildCategoryCard(BuildContext context, String title, dynamic icon,
                 width: 40,
                 height: 40,
               ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
             Text(
               title,
               style: GoogleFonts.poppins(
                 fontSize: 15,
-                color: isHighlighed ? Colors.white : Color(0xFF2B962B),
+                color: isHighlighed ? Colors.white : const Color(0xFF2B962B),
               ),
             )
           ],

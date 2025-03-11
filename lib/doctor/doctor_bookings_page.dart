@@ -45,7 +45,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
         });
       }).catchError((error) {
         print('Error: $error');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Could not get bookings.'),
           backgroundColor: Colors.red,
         ));
@@ -61,10 +61,10 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await _auth.signOut();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LoginPage()),
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
                     (Route<dynamic> route) => false);
             },
           ),
@@ -101,8 +101,8 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Select new status for this booking.'),
-                  SizedBox(height: 16),
+                  const Text('Select new status for this booking.'),
+                  const SizedBox(height: 16),
                   Column(
                     children: List.generate(statuses.length, (index) {
                       return RadioListTile<String>(

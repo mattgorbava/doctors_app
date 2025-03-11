@@ -1,25 +1,50 @@
 import 'package:doctors_app/patient/doctor_list_page.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
 import 'package:doctors_app/patient/user_profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PatientHomePage extends StatefulWidget {
-  const PatientHomePage({super.key});
+  final bool rememberMe;
+
+  const PatientHomePage({super.key, required this.rememberMe});
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
 }
 
-class _PatientHomePageState extends State<PatientHomePage> {
-  
+class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingObserver {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   int _selectedIndex = 0;
 
   final List<Widget> _children= <Widget>[
-    DoctorListPage(),
-    ChatListPage(), 
-    UserProfile(),
+    const DoctorListPage(),
+    const ChatListPage(), 
+    const UserProfile(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
+      if (!widget.rememberMe) {
+        _auth.signOut();
+      }
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {

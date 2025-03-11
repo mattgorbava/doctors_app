@@ -52,7 +52,7 @@ class _DoctorChatlistPageState extends State<DoctorChatlistPage> {
 
       } catch (e) {
         print('Error: $e');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not get chats.'),
         backgroundColor: Colors.red,
       ));

@@ -2,7 +2,6 @@ import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,7 +13,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
 
   final _formKey = GlobalKey<FormState>();
 
@@ -28,10 +27,31 @@ class _LoginPageState extends State<LoginPage> {
   bool _isNavigating = false;
 
   bool _obscureText = true;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
+      if (!_rememberMe) {
+        _auth.signOut();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    double topPadding = 0.1 * MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () {
@@ -51,38 +71,38 @@ class _LoginPageState extends State<LoginPage> {
                child: Column(
                 spacing: 10,
                 children: [
-                  SizedBox(height: 48,),
+                  const SizedBox(height: 48,),
                   Image.asset('lib/assets/images/doctors_symbol.png', height: 200,),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   Text('Welcome', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w600),),
                   Text('Login to continue', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w400),),
-                  SizedBox(height: 60,),
+                  const SizedBox(height: 60,),
                   SizedBox(
                     height: 44,
                     child: TextFormField(
                       style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Color.fromARGB(255, 191, 230, 191),
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
                         labelText: 'Email',
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0xFF84c384),
                             width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0xFF58ab58),
                             width: 1,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0xFF84c384),
                             width: 1,
                           ),
@@ -106,26 +126,26 @@ class _LoginPageState extends State<LoginPage> {
                       style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Color.fromARGB(255, 191, 230, 191),
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
                         labelText: 'Password',
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0xFF84c384),
                             width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0xFF58ab58),
                             width: 1,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Color(0xFF84c384),
                             width: 1,
                           ),
@@ -152,7 +172,17 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                   ),
-                  SizedBox(height: 20,),
+                  const SizedBox(height: 20,),
+                  CheckboxListTile(
+                    title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
+                    value: _rememberMe,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _rememberMe = value ?? false;
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: ElevatedButton(
@@ -171,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: MediaQuery.of(context).size.width,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterPage()));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
                       },
                       child: Text('Register new account', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
                     ),
@@ -215,7 +245,6 @@ class _LoginPageState extends State<LoginPage> {
           }
         }
       } catch (e) {
-        print(e);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid email or password')));
       }
 
@@ -228,14 +257,14 @@ class _LoginPageState extends State<LoginPage> {
   void _navigateToDoctorHomePage() {
     if (!_isNavigating) {
       _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DoctorHomePage()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DoctorHomePage(rememberMe: _rememberMe)));
     }
   }
   
   void _navigateToPatientHomePage() {
     if (!_isNavigating) {
       _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientHomePage()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientHomePage(rememberMe: _rememberMe)));
     }
   }
   

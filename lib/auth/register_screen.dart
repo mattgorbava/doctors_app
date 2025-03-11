@@ -5,9 +5,7 @@ import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -46,6 +44,7 @@ class _RegisterPageState extends State<RegisterPage> {
   
   bool _isLoading = false;
   bool _obscureText = true;
+  bool _rememberMe = false;
 
   final cloudinary = CloudinaryPublic(
     'do7w8aw8e',  
@@ -55,7 +54,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    double topPadding = 0.1 * MediaQuery.of(context).size.height;
     
     return GestureDetector(
       onTap: () {
@@ -66,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
           title: Text('Register', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
           automaticallyImplyLeading: false,
         ),
-        body: _isLoading ? CircularProgressIndicator() :
+        body: _isLoading ? const CircularProgressIndicator() :
          Form(
            key: _formKey,
            child: SingleChildScrollView(
@@ -89,13 +87,13 @@ class _RegisterPageState extends State<RegisterPage> {
                             checkmarkColor: Colors.black,
                             label: Text(type, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black),),
                             selected: isSelected,
-                            selectedColor: Color.fromARGB(255, 41, 148, 41),
-                            backgroundColor: Color.fromARGB(255, 191, 230, 191),
-                            labelStyle: GoogleFonts.poppins(color: isSelected ? Colors.white : Color(0xFF58ab58)),
+                            selectedColor: const Color.fromARGB(255, 41, 148, 41),
+                            backgroundColor: const Color.fromARGB(255, 191, 230, 191),
+                            labelStyle: GoogleFonts.poppins(color: isSelected ? Colors.white : const Color(0xFF58ab58)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                               side: BorderSide(
-                                color: isSelected ? Color(0xFF58ab58) : Color(0xFF84c384),
+                                color: isSelected ? const Color(0xFF58ab58) : const Color(0xFF84c384),
                                 width: 2,
                               ),
                             ),
@@ -116,26 +114,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'Email',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -159,26 +157,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'Password',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -211,26 +209,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'Phone number',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -254,26 +252,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'First name',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -297,26 +295,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'Last name',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -348,27 +346,27 @@ class _RegisterPageState extends State<RegisterPage> {
                   }, 
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Color.fromARGB(255, 191, 230, 191),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    fillColor: const Color.fromARGB(255, 191, 230, 191),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                     labelText: 'City',
                     labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF84c384),
                         width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF58ab58),
                         width: 1,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF84c384),
                         width: 1,
                       ),
@@ -386,7 +384,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       height: 100,
                       fit: BoxFit.cover,)
                     : Container(
-                        color: Color(0xffF0EFFF), 
+                        color: const Color(0xffF0EFFF), 
                         width: 100, 
                         height: 100,
                         child: Center(
@@ -395,7 +393,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ),
-                _imageFile == null ? Text('No image selected') : Image.file(File(_imageFile!.path)),
+                _imageFile == null ? const Text('No image selected') : Image.file(File(_imageFile!.path)),
                 if(userType == 'Doctor') ... [
                   SizedBox(
                   height: 44,
@@ -403,26 +401,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'Qualification',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -450,27 +448,27 @@ class _RegisterPageState extends State<RegisterPage> {
                   },
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Color.fromARGB(255, 191, 230, 191),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    fillColor: const Color.fromARGB(255, 191, 230, 191),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                     labelText: 'Category',
                     labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF84c384),
                         width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF58ab58),
                         width: 1,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Color(0xFF84c384),
                         width: 1,
                       ),
@@ -483,26 +481,26 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Color.fromARGB(255, 191, 230, 191),
+                      fillColor: const Color.fromARGB(255, 191, 230, 191),
                       labelText: 'Years of experience',
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF58ab58),
                           width: 1,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Color(0xFF84c384),
                           width: 1,
                         ),
@@ -521,24 +519,34 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 ],
-                SizedBox(height: 10,),
+                const SizedBox(height: 10,),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _getLocation,
-                    child: Text('Get current location', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF2B962B),
-                      padding: EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: const Color(0xFF2B962B),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
+                    child: Text('Get current location', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),),
                   )
                 ),
                 if(latitude != '0.0' && longitude != '0.0' && latitude != '' && longitude != '')
                   Text('Location: ($latitude, $longitude)'),
-                SizedBox(height: 10,),
+                const SizedBox(height: 10,),
+                CheckboxListTile(
+                    title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
+                    value: _rememberMe,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _rememberMe = value ?? false;
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: ElevatedButton(
@@ -557,7 +565,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: MediaQuery.of(context).size.width,
                   child: TextButton(
                     onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginPage()));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginPage()));
                     },
                     child: Text('Already have an account? Login', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
                   ),
@@ -606,7 +614,6 @@ class _RegisterPageState extends State<RegisterPage> {
               );
               profileImageUrl = response.secureUrl;
             } catch (e) {
-              print('Error uploading to Cloudinary: $e');
               _showErrorDialog('Failed to upload profile image');
               setState(() {
                 _isLoading = false;
@@ -643,12 +650,12 @@ class _RegisterPageState extends State<RegisterPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
-                  userType == 'Doctor' ? DoctorHomePage() : PatientHomePage(),
+                  userType == 'Doctor' ? DoctorHomePage(rememberMe: _rememberMe,) : PatientHomePage(rememberMe: _rememberMe),
             ),
           );
         }
       } catch (e) {
-        print('Error: $e');
+        _showErrorDialog('Failed to register user');
       }
     }
   }
@@ -658,14 +665,14 @@ class _RegisterPageState extends State<RegisterPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('An error occurred'),
+          title: const Text('An error occurred'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       );

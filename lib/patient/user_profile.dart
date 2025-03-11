@@ -43,7 +43,7 @@ class _UserProfileState extends State<UserProfile> {
         });
       }).catchError((error) {
         print('Error: $error');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Could not get bookings.'),
           backgroundColor: Colors.red,
         ));
@@ -59,18 +59,18 @@ class _UserProfileState extends State<UserProfile> {
         title: const Text('User Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await _auth.signOut();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => LoginPage()),
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
                     (Route<dynamic> route) => false);
             },
           ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _bookings.isEmpty ? Center(child: Text('No bookings found.')) 
+          ? const Center(child: CircularProgressIndicator())
+          : _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
           : ListView.builder(
               itemCount: _bookings.length,
               itemBuilder: (context, index) {

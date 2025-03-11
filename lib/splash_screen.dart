@@ -31,14 +31,14 @@ class _SplashScreenState extends State<SplashScreen> {
       await Future.delayed(const Duration(seconds: 3));
       _navigateToLogin();
     } else {
-      DatabaseReference userRef = _db.child('Doctor').child(user.uid);
+      DatabaseReference userRef = _db.child('Doctors').child(user.uid);
       DataSnapshot snapshot = await userRef.get();
 
       if (snapshot.exists) {
         await Future.delayed(const Duration(seconds: 3));  
         _navigateToDoctorHomePage();
       } else {
-        userRef = _db.child('Patient').child(user.uid);
+        userRef = _db.child('Patients').child(user.uid);
         snapshot = await userRef.get();
         if (snapshot.exists) {
           await Future.delayed(const Duration(seconds: 3));  
@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
               padding: EdgeInsets.only(top: imagePosition),
               child: Image.asset('lib/assets/images/doctors_symbol.png', height: 300, width: MediaQuery.of(context).size.width * 0.7, alignment: Alignment.center,),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 20), 
               child: CircularProgressIndicator(),
             ),
@@ -83,14 +83,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   }
   void _navigateToPatientHomePage() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientHomePage()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientHomePage(rememberMe: true)));
   }
 
   void _navigateToDoctorHomePage() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => DoctorHomePage()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DoctorHomePage(rememberMe: true,)));
   }
 
   void _navigateToLogin() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginPage()));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 }

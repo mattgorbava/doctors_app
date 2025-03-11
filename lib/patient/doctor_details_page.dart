@@ -32,7 +32,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Doctor details'),
+        title: const Text('Doctor details'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -46,7 +46,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                     width: 115,
                     height: 115,
                     decoration: BoxDecoration(
-                      color: Color(0xffF0EFFF),
+                      color: const Color(0xffF0EFFF),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: widget.doctor.profileImageUrl.isNotEmpty
@@ -57,9 +57,9 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                               fit: BoxFit.fitWidth,
                             ),
                           )
-                        : Icon(Icons.person, size: 60, color: Colors.grey),
+                        : const Icon(Icons.person, size: 60, color: Colors.grey),
                   ),
-                  SizedBox(width: 20,),
+                  const SizedBox(width: 20,),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
@@ -105,13 +105,13 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   )
                 ],
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2B962B),
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    backgroundColor: const Color(0xFF2B962B),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)
                     )
@@ -122,15 +122,15 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   child: Text('Open location in maps', style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),),
                 ),
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
               Text('Select date and time', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
-              SizedBox(height: 8,),
+              const SizedBox(height: 8,),
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xFF84c384),
+                  color: const Color(0xFF84c384),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Color.fromARGB(255, 98, 176, 98), width: 1)
+                  border: Border.all(color: const Color.fromARGB(255, 98, 176, 98), width: 1)
                 ),
                 child: Column(
                   children: [
@@ -141,8 +141,8 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                           child: ElevatedButton(
                             onPressed: () => _selectDate(context),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF2B962B),
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: const Color(0xFF2B962B),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)
                               )
@@ -154,13 +154,13 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                             ),
                           )
                         ),
-                        SizedBox(width: 16,),
+                        const SizedBox(width: 16,),
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () => _selectTime(context),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF2B962B),
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: const Color(0xFF2B962B),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)
                               )
@@ -174,7 +174,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         )
                       ],
                     ),
-                    SizedBox(height: 16,),
+                    const SizedBox(height: 16,),
                     TextField(
                       controller: _descriptionController,
                       style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
@@ -191,13 +191,13 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   ],
                 )
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2B962B),
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    backgroundColor: const Color(0xFF2B962B),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)
                     )
@@ -241,7 +241,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         throw 'Could not open the map.';
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not open the map.'),
         backgroundColor: Colors.red,
       ));
@@ -274,7 +274,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
 
   void _bookAppointment() {
     if(_selectedDate == null || _selectedTime == null){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please select date and time'),
         backgroundColor: Colors.red,
       ));
@@ -303,13 +303,13 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         _selectedTime = null;
         _descriptionController.clear();
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Appointment booked successfully'),
         backgroundColor: Colors.green,
       ));
       _sendNotification();
     }).catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Failed to book appointment'),
         backgroundColor: Colors.red,
       ));
