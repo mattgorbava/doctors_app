@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/patient/map/directions_model.dart';
 import 'package:doctors_app/patient/map/directons_repository.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({super.key});
+  const MapPage({super.key, required this.doctors});
+
+  final List<Doctor> doctors;
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -31,6 +34,7 @@ class _MapPageState extends State<MapPage> {
       target: _currentPosition ?? const LatLng(0, 0),
       zoom: 14.5,
     );
+    addDoctorMarkers();
   }
 
   @override
@@ -51,10 +55,11 @@ class _MapPageState extends State<MapPage> {
         alignment: Alignment.center,
         children: [
           GoogleMap(
-            myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
             initialCameraPosition: _initialCameraPosition,
             onMapCreated: (controller) => _googleMapController = controller,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
             markers: _markers,
           ),
           if (_isLoading) 
@@ -90,8 +95,9 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        shape: const CircleBorder(),
         onPressed: () => _googleMapController!.animateCamera(
           _info != null 
             ? CameraUpdate.newLatLngBounds(_info!.bounds, 100.0)
@@ -132,13 +138,13 @@ class _MapPageState extends State<MapPage> {
       
       setState(() {
         _currentPosition = LatLng(position.latitude, position.longitude);
-        _addCurrentLocationMarker();
         _isLoading = false;
       });
       
       _googleMapController?.animateCamera(
         CameraUpdate.newLatLng(_currentPosition!),
       );
+
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -146,62 +152,43 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  void _startLocationUpdates() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return;
-      }
-    }
-    
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    _positionStreamSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      ),
-    ).listen((Position position) {
-      setState(() {
-        _currentPosition = LatLng(position.latitude, position.longitude);
-        _updateCurrentLocationMarker();
-      });
-    });
-  }
-
-  void _updateCurrentLocationMarker() {
-    if (_currentPosition == null) return;
-    
-    setState(() {
-      _markers.removeWhere(
-        (marker) => marker.markerId == const MarkerId('currentLocation')
-      );
-      
+  Future<void> addDoctorMarkers() async {
+    for (Doctor doctor in widget.doctors) {
       _markers.add(
         Marker(
-          markerId: const MarkerId('currentLocation'),
-          position: _currentPosition!,
-          infoWindow: const InfoWindow(title: 'My Location'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          markerId: MarkerId(doctor.uid),
+          position: LatLng(double.parse(doctor.latitude), double.parse(doctor.longitude)),
+          infoWindow: InfoWindow(
+            title: '${doctor.lastName} ${doctor.firstName}',
+            snippet: doctor.category,
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          onTap: () async {
+          if (_currentPosition != null) {
+            Directions? directions = await DirectionsRepository().getDirections(
+              origin: _currentPosition!,
+              destination: LatLng(double.parse(doctor.latitude), double.parse(doctor.longitude)),
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Duration to ${doctor.lastName} ${doctor.firstName}: ${directions!.totalDuration}',
+                ),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Current location not available'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        },
         ),
       );
-    });
-  }
-
-  void _addCurrentLocationMarker() {
-    _updateCurrentLocationMarker();
-  }
-
-  // void _addMarker(LatLng pos) async {
-  //   final directions = await DirectionsRepository().getDirections(
-  //     origin: _origin!.position,
-  //     destination: _destination!.position,
-  //   );
-  //   setState(() {
-  //     _info = directions;
-  //   });
-  // }
+    }
+  }  
 }

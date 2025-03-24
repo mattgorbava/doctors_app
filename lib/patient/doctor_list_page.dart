@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DoctorListPage extends StatefulWidget {
-  const DoctorListPage({super.key});
+  const DoctorListPage({super.key, required this.doctors});
+  
+  final List<Doctor> doctors;
 
   @override
   State<DoctorListPage> createState() => _DoctorListPageState();
@@ -14,22 +16,12 @@ class DoctorListPage extends StatefulWidget {
 
 class _DoctorListPageState extends State<DoctorListPage> {
 
-  final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
-  List<Doctor> _doctors = [];
-  bool _isLoading = true;
   String _selectedCategory = 'Cardiologist';
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchDoctors();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading ? const Center(child: CircularProgressIndicator()) : 
-      Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 30,
@@ -64,16 +56,16 @@ class _DoctorListPageState extends State<DoctorListPage> {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: _doctors.length,
+                itemCount: widget.doctors.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: (){
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => DoctorDetailsPage(doctor: _doctors[index]),),
+                        MaterialPageRoute(builder: (context) => DoctorDetailsPage(doctor: widget.doctors[index]),),
                       );
                     },
-                    child: DoctorCard(doctor: _doctors[index])
+                    child: DoctorCard(doctor: widget.doctors[index])
                   );
                 },
               )
@@ -82,26 +74,6 @@ class _DoctorListPageState extends State<DoctorListPage> {
         )
       )
     );
-  }
-  
-  
-  
-  Future<void> _fetchDoctors() async {
-    await _doctorRef.once().then((DatabaseEvent event){
-      DataSnapshot snapshot = event.snapshot;
-      List<Doctor> doctors = [];
-      if(snapshot.value != null){
-        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
-        values.forEach((key, value) {
-          Doctor doctorMap = Doctor.fromMap(value, key);
-          doctors.add(doctorMap);
-        });
-      }
-      setState(() {
-        _doctors = doctors;
-        _isLoading = false;
-      });
-    });
   }
 }
 

@@ -5,6 +5,8 @@ import 'package:doctors_app/patient/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:doctors_app/model/doctor.dart';
 
 class PatientHomePage extends StatefulWidget {
   final bool rememberMe;
@@ -18,19 +20,19 @@ class PatientHomePage extends StatefulWidget {
 class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingObserver {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
+  List<Doctor> _doctors = [];
+  bool _isLoading = true;
+
   int _selectedIndex = 0;
 
-  final List<Widget> _children= <Widget>[
-    const DoctorListPage(),
-    const MapPage(),
-    const ChatListPage(), 
-    const UserProfile(),
-  ];
-
+  late List<Widget> _children;
+  
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _fetchDoctors();
   }
 
   @override
@@ -38,6 +40,9 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
+  
+
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -82,7 +87,8 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return _isLoading ? const Center(child: CircularProgressIndicator(),)
+      : PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
         if (didPop) {
@@ -144,5 +150,30 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
         ),
       ),
     );
+  }
+
+  Future<void> _fetchDoctors() async {
+    await _doctorRef.once().then((DatabaseEvent event){
+      DataSnapshot snapshot = event.snapshot;
+      List<Doctor> doctors = [];
+      if(snapshot.value != null){
+        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, value) {
+          Doctor doctorMap = Doctor.fromMap(value, key);
+          doctors.add(doctorMap);
+        });
+      }
+      setState(() {
+        _doctors = doctors;
+        _isLoading = false;
+
+        _children= <Widget>[
+          DoctorListPage(doctors: _doctors,),
+          MapPage(doctors: _doctors),
+          const ChatListPage(), 
+          const UserProfile(),
+        ];
+      });
+    });
   }
 }

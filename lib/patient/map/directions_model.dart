@@ -85,26 +85,13 @@ class Directions {
   }
 
   static String _formatDuration(String durationString) {
-    
-    final durationRegex = RegExp(r'(\d+)h|(\d+)m|(\d+)s');
-    final matches = durationRegex.allMatches(durationString);
-    
-    int hours = 0;
-    int minutes = 0;
-    int seconds = 0;
-    
-    for (final match in matches) {
-      if (match.group(1) != null) {
-        hours = int.parse(match.group(1)!);
-      } else if (match.group(2) != null) {
-        minutes = int.parse(match.group(2)!);
-      } else if (match.group(3) != null) {
-        seconds = int.parse(match.group(3)!);
-      }
-    }
+    final duration = Duration(seconds: int.parse(durationString.substring(0, durationString.length - 1)));
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
     
     if (hours > 0) {
-      return '$hours hr ${minutes > 0 ? '$minutes min' : ''}';
+      return '$hours h $minutes min';
     } else if (minutes > 0) {
       return '$minutes min';
     } else {
