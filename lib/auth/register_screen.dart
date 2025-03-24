@@ -47,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _rememberMe = false;
 
   final cloudinary = CloudinaryPublic(
-    'do7w8aw8e',  
+    '',  
     'doctors-app', 
     cache: false,
   );

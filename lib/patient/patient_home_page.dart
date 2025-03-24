@@ -1,5 +1,6 @@
 import 'package:doctors_app/patient/doctor_list_page.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
+import 'package:doctors_app/patient/map/map_page.dart';
 import 'package:doctors_app/patient/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
 
   final List<Widget> _children= <Widget>[
     const DoctorListPage(),
+    const MapPage(),
     const ChatListPage(), 
     const UserProfile(),
   ];
@@ -80,15 +82,51 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) {
+          return;
+        }
+        
+        // Show the confirmation dialog
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Are you sure?'),
+            content: const Text('Do you want to exit the app?'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('No'),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+              ),
+              TextButton(
+                child: const Text('Yes'),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                  SystemNavigator.pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
       child: Scaffold(
-        body: _children.elementAt(_selectedIndex),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _children,
+        ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home_filled),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              label: 'Map',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.chat),
@@ -101,6 +139,7 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.grey,
           onTap: _onItemTapped,
         ),
       ),
