@@ -45,16 +45,6 @@ class DoctorCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4,),
-              Row(children: [
-                Text('${doctor.category} - ${doctor.city}', style: GoogleFonts.poppins(fontSize: 13),),
-              ],),
-              Text('Experience: ${doctor.yearsOfExperience} years', style: GoogleFonts.poppins(fontSize: 12),),
-            ],
-          ),
         ),
       ),
     );

@@ -69,10 +69,6 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        '${widget.doctor.category}',
-                        style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
-                      ),
-                      Text(
                         '${widget.doctor.city}',
                         style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
                       ),
@@ -106,22 +102,22 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 ],
               ),
               const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B962B),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)
-                    )
-                  ),
-                  onPressed: (){
-                    _openMap();
-                  },
-                  child: Text('Open location in maps', style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),),
-                ),
-              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton(
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: const Color(0xFF2B962B),
+              //       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(12)
+              //       )
+              //     ),
+              //     onPressed: (){
+              //       _openMap();
+              //     },
+              //     child: Text('Open location in maps', style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),),
+              //   ),
+              // ),
               const SizedBox(height: 50),
               Text('Select date and time', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
               const SizedBox(height: 8,),
@@ -231,22 +227,22 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
     }
   }
 
-  void _openMap() async {
-    String google = 'https://www.google.com/maps/search/?api=1&query=${widget.doctor.latitude},${widget.doctor.longitude}';
-    Uri googleUrl = Uri.parse(google);
-    try {
-      if (await canLaunchUrl(googleUrl)) {
-        await launchUrl(googleUrl);
-      } else {
-        throw 'Could not open the map.';
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not open the map.'),
-        backgroundColor: Colors.red,
-      ));
-    }
-  }
+  // void _openMap() async {
+  //   String google = 'https://www.google.com/maps/search/?api=1&query=${widget.doctor.latitude},${widget.doctor.longitude}';
+  //   Uri googleUrl = Uri.parse(google);
+  //   try {
+  //     if (await canLaunchUrl(googleUrl)) {
+  //       await launchUrl(googleUrl);
+  //     } else {
+  //       throw 'Could not open the map.';
+  //     }
+  //   } catch (error) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //       content: Text('Could not open the map.'),
+  //       backgroundColor: Colors.red,
+  //     ));
+  //   }
+  // }
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(

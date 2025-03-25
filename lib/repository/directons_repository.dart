@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:doctors_app/patient/map/directions_model.dart';
+import 'package:doctors_app/model/directions_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '.env.dart';
-import '.env.dart';
+import 'package:doctors_app/.env.dart';
 
 class DirectionsRepository {
   static const String _baseUrl = 'https://routes.googleapis.com/directions/v2:computeRoutes';

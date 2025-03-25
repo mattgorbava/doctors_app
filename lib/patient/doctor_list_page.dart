@@ -16,7 +16,6 @@ class DoctorListPage extends StatefulWidget {
 
 class _DoctorListPageState extends State<DoctorListPage> {
 
-  String _selectedCategory = 'Cardiologist';
 
   @override
   Widget build(BuildContext context) {
@@ -34,25 +33,6 @@ class _DoctorListPageState extends State<DoctorListPage> {
                 fontSize: 20,
                 fontWeight: FontWeight.bold
               ),
-            ),
-            Text(
-              'Find doctor by category',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w500
-              ),
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-              _buildCategoryCard(context, 'Cardiologist', 'lib/assets/images/cardiology.png'),
-              _buildCategoryCard(context, 'Dentist', 'lib/assets/images/dentist.png'),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [_buildCategoryCard(context, 'Oncologist', 'lib/assets/images/oncology.png'),],
             ),
             Expanded(
               child: ListView.builder(

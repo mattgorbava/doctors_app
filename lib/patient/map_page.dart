@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:doctors_app/model/doctor.dart';
-import 'package:doctors_app/patient/map/directions_model.dart';
-import 'package:doctors_app/patient/map/directons_repository.dart';
+import 'package:doctors_app/model/directions_model.dart';
+import 'package:doctors_app/repository/directons_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -34,7 +34,7 @@ class _MapPageState extends State<MapPage> {
       target: _currentPosition ?? const LatLng(0, 0),
       zoom: 14.5,
     );
-    addDoctorMarkers();
+    //addDoctorMarkers();
   }
 
   @override
@@ -152,43 +152,43 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Future<void> addDoctorMarkers() async {
-    for (Doctor doctor in widget.doctors) {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(doctor.uid),
-          position: LatLng(double.parse(doctor.latitude), double.parse(doctor.longitude)),
-          infoWindow: InfoWindow(
-            title: '${doctor.lastName} ${doctor.firstName}',
-            snippet: doctor.category,
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          onTap: () async {
-          if (_currentPosition != null) {
-            Directions? directions = await DirectionsRepository().getDirections(
-              origin: _currentPosition!,
-              destination: LatLng(double.parse(doctor.latitude), double.parse(doctor.longitude)),
-            );
+  // Future<void> addDoctorMarkers() async {
+  //   for (Doctor doctor in widget.doctors) {
+  //     _markers.add(
+  //       Marker(
+  //         markerId: MarkerId(doctor.uid),
+  //         position: LatLng(double.parse(doctor.latitude), double.parse(doctor.longitude)),
+  //         infoWindow: InfoWindow(
+  //           title: '${doctor.lastName} ${doctor.firstName}',
+  //           snippet: doctor.category,
+  //         ),
+  //         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+  //         onTap: () async {
+  //         if (_currentPosition != null) {
+  //           Directions? directions = await DirectionsRepository().getDirections(
+  //             origin: _currentPosition!,
+  //             destination: LatLng(double.parse(doctor.latitude), double.parse(doctor.longitude)),
+  //           );
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Duration to ${doctor.lastName} ${doctor.firstName}: ${directions!.totalDuration}',
-                ),
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Current location not available'),
-                duration: Duration(seconds: 3),
-              ),
-            );
-          }
-        },
-        ),
-      );
-    }
-  }  
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(
+  //               content: Text(
+  //                 'Duration to ${doctor.lastName} ${doctor.firstName}: ${directions!.totalDuration}',
+  //               ),
+  //               duration: const Duration(seconds: 3),
+  //             ),
+  //           );
+  //         } else {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(
+  //               content: Text('Current location not available'),
+  //               duration: Duration(seconds: 3),
+  //             ),
+  //           );
+  //         }
+  //       },
+  //       ),
+  //     );
+  //   }
+  // }  
 }

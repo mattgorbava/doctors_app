@@ -1,15 +1,17 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:location/location.dart';
+import 'package:logger/logger.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -30,14 +32,15 @@ class _RegisterPageState extends State<RegisterPage> {
   String lastName = '';
   String? city;
   String profileImageUrl = '';
-  String category = '';
-  String qualification = '';
-  String yearsOfExperience = '';
-  String latitude = '';
-  String longitude = '';
-
+  String university = '';
+  String legitimationNumber = '';
+  String cvUrl = '';
+  
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
+
+  String? pdfFileName;
+  String? pdfFilePath;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
@@ -46,11 +49,161 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscureText = true;
   bool _rememberMe = false;
 
+  var logger = Logger();
+
   final cloudinary = CloudinaryPublic(
     'do7w8aw8e',  
     'doctors-app', 
     cache: false,
   );
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _imageFile = pickedFile;
+    });
+  }
+
+  Future<void> _pickPdf() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          pdfFileName = result.files.single.name;
+          pdfFilePath = result.files.single.path;
+        });
+      }
+    } catch (e) {
+      _showErrorDialog('Failed to pick PDF file');
+    }
+  }
+
+  Future<void> _registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        if (userType == 'Doctor') {
+          final doctorsNodeSnapshot = await _db.child('Doctors').once();
+          if (doctorsNodeSnapshot.snapshot.exists)
+          {
+            final snapshot = await _db
+              .child('Doctors')
+              .orderByChild('legitimationNumber')
+              .equalTo(legitimationNumber)
+              .once();
+
+            if (snapshot.snapshot.exists) {
+              _showErrorDialog('Legitimation number already exists. Please use a unique number.');
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            }
+          }
+        }
+
+        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+        User? user = userCredential.user;
+         if (user != null) {
+          String userTypePath = userType == 'Doctor' ? 'Doctors' : 'Patients';
+
+          if (_imageFile != null) {
+            try {
+              CloudinaryResponse response = await cloudinary.uploadFile(
+                CloudinaryFile.fromFile(
+                  _imageFile!.path,
+                  folder: userTypePath.toLowerCase(), 
+                ),
+              );
+              profileImageUrl = response.secureUrl;
+            } catch (e) {
+              _showErrorDialog('Failed to upload profile image');
+              logger.d(e);
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            }
+          }
+
+          if (pdfFilePath != null) {
+            try {
+              CloudinaryResponse response = await cloudinary.uploadFile(
+                CloudinaryFile.fromFile(
+                  pdfFilePath!,
+                  folder: 'cvs',
+                  resourceType: CloudinaryResourceType.Raw,
+                ),
+              );
+              cvUrl = response.secureUrl;
+            } catch (e) {
+              _showErrorDialog('Failed to upload PDF file');
+              
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            }
+          }
+
+          Map<String, dynamic> userData = {
+            'uid': user.uid,
+            'email': email,
+            'phoneNumber': phoneNumber,
+            'firstName': firstName,
+            'lastName': lastName,
+            'city': city,
+            'profileImageUrl': profileImageUrl,
+          };
+
+          if (userType == 'Doctor') {
+            userData['university'] = university;
+            userData['legitimationNumber'] = legitimationNumber;
+            userData['cvUrl'] = cvUrl;
+          }
+
+          await _db.child(userTypePath).child(user.uid).set(userData);
+
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  userType == 'Doctor' ? DoctorHomePage(rememberMe: _rememberMe,) : PatientHomePage(rememberMe: _rememberMe),
+            ),
+          );
+        }
+      } catch (e) {
+        _showErrorDialog('Failed to register user');
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
+        logger.d(e);
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('An error occurred'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +217,7 @@ class _RegisterPageState extends State<RegisterPage> {
           title: Text('Register', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
           automaticallyImplyLeading: false,
         ),
-        body: _isLoading ? const CircularProgressIndicator() :
+        body: _isLoading ? const Center(child: CircularProgressIndicator()) :
          Form(
            key: _formKey,
            child: SingleChildScrollView(
@@ -396,146 +549,117 @@ class _RegisterPageState extends State<RegisterPage> {
                 _imageFile == null ? const Text('No image selected') : Image.file(File(_imageFile!.path)),
                 if(userType == 'Doctor') ... [
                   SizedBox(
-                  height: 44,
-                  child: TextFormField(
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 191, 230, 191),
-                      labelText: 'Qualification',
-                      labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'Legitimation number',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF58ab58),
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    keyboardType: TextInputType.text,
-                    onChanged: (value) {
-                      qualification = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter qualification';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                  DropdownButtonFormField(items: ['Dentist', 'Cardiology', 'Oncology', 'Surgeon'].map((String category) {
-                    return DropdownMenuItem(value: category, child: Text(category, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      category = val as String;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 191, 230, 191),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    labelText: 'Category',
-                    labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF84c384),
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF58ab58),
-                        width: 1,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF84c384),
-                        width: 1,
-                      ),
+                      keyboardType: TextInputType.text,
+                      onChanged: (value) {
+                        legitimationNumber = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your legitimation number';
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                  validator: (val) => val == null ? 'Select a category' : null,),
                   SizedBox(
-                  height: 44,
-                  child: TextFormField(
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 191, 230, 191),
-                      labelText: 'Years of experience',
-                      labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'University',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF58ab58),
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
-                        ),
-                      ),
+                      keyboardType: TextInputType.text,
+                      onChanged: (value) {
+                        university = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter the university you graduated from';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType: TextInputType.text,
-                    onChanged: (value) {
-                      yearsOfExperience = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter years of experience';
-                      }
-                      return null;
-                    },
                   ),
-                ),
-                ],
-                const SizedBox(height: 10,),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _getLocation,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2B962B),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: _pickPdf,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 191, 230, 191),
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFF84c384),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            pdfFileName ?? 'Pick CV',
+                            style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                          ),
+                          const Icon(Icons.attach_file, color: Color(0xFF58ab58)),
+                        ],
                       ),
                     ),
-                    child: Text('Get current location', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),),
-                  )
-                ),
-                if(latitude != '0.0' && longitude != '0.0' && latitude != '' && longitude != '')
-                  Text('Location: ($latitude, $longitude)'),
+                  ),
+                ],
                 const SizedBox(height: 10,),
                 CheckboxListTile(
                     title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
@@ -578,105 +702,5 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _imageFile = pickedFile;
-    });
-  }
-
-  Future<void> _getLocation() async {
-    final locationData = await Location().getLocation();
-    setState(() {
-      latitude = locationData.latitude.toString();
-      longitude = locationData.longitude.toString();
-    });
-  }
-
-  Future<void> _registerUser() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-        User? user = userCredential.user;
-         if (user != null) {
-          String userTypePath = userType == 'Doctor' ? 'Doctors' : 'Patients';
-
-          if (_imageFile != null) {
-            try {
-              CloudinaryResponse response = await cloudinary.uploadFile(
-                CloudinaryFile.fromFile(
-                  _imageFile!.path,
-                  folder: userTypePath.toLowerCase(), 
-                ),
-              );
-              profileImageUrl = response.secureUrl;
-            } catch (e) {
-              _showErrorDialog('Failed to upload profile image');
-              setState(() {
-                _isLoading = false;
-              });
-              return;
-            }
-          }
-
-          Map<String, dynamic> userData = {
-            'uid': user.uid,
-            'email': email,
-            'phoneNumber': phoneNumber,
-            'firstName': firstName,
-            'lastName': lastName,
-            'city': city,
-            'profileImageUrl': profileImageUrl,
-            'latitude': latitude,
-            'longitude': longitude,
-          };
-
-          if (userType == 'Doctor') {
-            userData['qualification'] = qualification;
-            userData['category'] = category;
-            userData['yearsOfExperience'] = yearsOfExperience;
-            userData['totalReviews'] = 0;
-            userData['averageRating'] = 0.0;
-            userData['numberOfReviews'] = 0;
-          }
-
-          await _db.child(userTypePath).child(user.uid).set(userData);
-
-          
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  userType == 'Doctor' ? DoctorHomePage(rememberMe: _rememberMe,) : PatientHomePage(rememberMe: _rememberMe),
-            ),
-          );
-        }
-      } catch (e) {
-        _showErrorDialog('Failed to register user');
-      }
-    }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('An error occurred'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      );
-      },
-    );
-  }
+  
 }
