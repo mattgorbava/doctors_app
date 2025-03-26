@@ -52,7 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
   var logger = Logger();
 
   final cloudinary = CloudinaryPublic(
-    'do7w8aw8e',  
+    '',  
     'doctors-app', 
     cache: false,
   );

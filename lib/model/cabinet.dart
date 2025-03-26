@@ -8,6 +8,7 @@ class Cabinet {
   final DateTime createdAt;
   final DateTime updatedAt;
   final LatLng location;
+  final String address;
   final double rating;
   final int totalReviews;
   final int capacity;
@@ -21,25 +22,27 @@ class Cabinet {
     required this.createdAt,
     required this.updatedAt,
     required this.location,
+    required this.address,
     required this.rating,
     required this.totalReviews,
     required this.capacity,
     required this.numberOfPatients,
   });
 
-  factory Cabinet.fromJson(Map<String, dynamic> json) {
+  factory Cabinet.fromMap(Map<String, dynamic> map) {
     return Cabinet(
-      uid: json['uid'],
-      name: json['name'],
-      doctorId: json['doctorId'],
-      image: json['image'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-      location: LatLng(json['location']['latitude'], json['location']['longitude']),
-      rating: json['rating'],
-      totalReviews: json['totalReviews'],
-      capacity: json['capacity'],
-      numberOfPatients: json['numberOfPatients'],
+      uid: map['uid'],
+      name: map['name'],
+      doctorId: map['doctorId'],
+      image: map['image'],
+      createdAt: map['createdAt'],
+      updatedAt: map['updatedAt'],
+      location: LatLng(map['location']['latitude'], map['location']['longitude']),
+      address: map['address'],
+      rating: map['rating'],
+      totalReviews: map['totalReviews'],
+      capacity: map['capacity'],
+      numberOfPatients: map['numberOfPatients'],
     );
   }
 }

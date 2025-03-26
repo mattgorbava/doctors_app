@@ -1,3 +1,4 @@
+import 'package:doctors_app/doctor/cabinet_page.dart';
 import 'package:doctors_app/doctor/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
@@ -20,6 +21,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
   int _selectedIndex = 0;
 
   final List<Widget> _children= <Widget>[
+    const CabinetPage(),
     const DoctorBookingsPage(),
     const DoctorChatlistPage(), 
     const DoctorProfile(),
@@ -83,12 +85,19 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        body: _children.elementAt(_selectedIndex),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _children,
+        ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled),
-              label: 'Home',
+              icon: Icon(Icons.home),
+              label: 'Cabinet'
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Bookings',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.chat),
@@ -101,6 +110,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.grey,
           onTap: _onItemTapped,
         ),
       ),
