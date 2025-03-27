@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
-import 'package:doctors_app/doctor/cabinet_location_picker.dart';
+import 'package:doctors_app/cabinet/cabinet_location_picker.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';

@@ -1,4 +1,7 @@
-import 'package:doctors_app/patient/doctor_list_page.dart';
+import 'package:doctors_app/cabinet/doctor_cabinet_page.dart';
+import 'package:doctors_app/cabinet/patient_cabinet_page.dart';
+import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/doctor/doctor_list_page.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
 import 'package:doctors_app/patient/map_page.dart';
 import 'package:doctors_app/patient/user_profile.dart';
@@ -20,7 +23,8 @@ class PatientHomePage extends StatefulWidget {
 class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingObserver {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
+  final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
+  List<Cabinet> _cabinets = [];
   List<Doctor> _doctors = [];
   bool _isLoading = true;
 
@@ -85,6 +89,29 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     return result ?? false;
   }
 
+  Future<void> _fetchDoctors() async {
+    await _cabinetRef.once().then((DatabaseEvent event){
+      DataSnapshot snapshot = event.snapshot;
+      List<Cabinet> cabinets = [];
+      if(snapshot.value != null){
+        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, value) {
+          cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+      setState(() {
+        _cabinets = cabinets;
+        _isLoading = false;
+
+        _children= <Widget>[
+          PatientCabinetPage(cabinets: _cabinets),
+          const ChatListPage(),
+          const UserProfile(),
+        ];
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return _isLoading ? const Center(child: CircularProgressIndicator(),)
@@ -131,10 +158,6 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.map),
-              label: 'Map',
-            ),
-            BottomNavigationBarItem(
               icon: Icon(Icons.chat),
               label: 'Chat',
             ),
@@ -152,28 +175,4 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     );
   }
 
-  Future<void> _fetchDoctors() async {
-    await _doctorRef.once().then((DatabaseEvent event){
-      DataSnapshot snapshot = event.snapshot;
-      List<Doctor> doctors = [];
-      if(snapshot.value != null){
-        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
-        values.forEach((key, value) {
-          Doctor doctorMap = Doctor.fromMap(value, key);
-          doctors.add(doctorMap);
-        });
-      }
-      setState(() {
-        _doctors = doctors;
-        _isLoading = false;
-
-        _children= <Widget>[
-          DoctorListPage(doctors: _doctors,),
-          MapPage(doctors: _doctors),
-          const ChatListPage(), 
-          const UserProfile(),
-        ];
-      });
-    });
-  }
 }

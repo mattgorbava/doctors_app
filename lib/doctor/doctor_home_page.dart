@@ -1,4 +1,4 @@
-import 'package:doctors_app/doctor/cabinet_page.dart';
+import 'package:doctors_app/cabinet/doctor_cabinet_page.dart';
 import 'package:doctors_app/doctor/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';

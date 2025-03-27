@@ -23,9 +23,9 @@ class Doctor {
     required this.legitimationNumber,
   });
 
-  factory Doctor.fromMap(Map<dynamic, dynamic> map, String uid) {
+  factory Doctor.fromMap(Map<dynamic, dynamic> map, [String id = '']) {
     return Doctor(
-      uid: uid,
+      uid: id,
       city: map['city'],
       email: map['email'],
       firstName: map['firstName'],

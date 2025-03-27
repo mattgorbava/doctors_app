@@ -1,10 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoctorProfile extends StatefulWidget {
@@ -47,6 +45,20 @@ class _DoctorProfileState extends State<DoctorProfile> {
     }
   }
 
+  Future<void> _logout() async {
+    try {
+      await _auth.signOut();
+      // Navigate to login screen after logout
+      Navigator.of(context).pushReplacementNamed('/login'); // Replace '/login' with your login route
+    } catch (e) {
+      print('Error logging out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not log out.'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
   @override
   void initState() {
     _fetchDoctorDetails();
@@ -65,6 +77,14 @@ class _DoctorProfileState extends State<DoctorProfile> {
       appBar: AppBar(
         title: const Text('Profile'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await _logout();
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

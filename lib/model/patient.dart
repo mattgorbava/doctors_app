@@ -8,6 +8,7 @@ class Patient {
   final String phoneNumber;
   final String profileImageUrl;
   final String uid;
+  final String cabinetId;
 
   Patient({
     required this.city,
@@ -19,9 +20,10 @@ class Patient {
     required this.phoneNumber,
     required this.profileImageUrl,
     required this.uid,
+    required this.cabinetId,
   });
 
-  factory Patient.fromMap(Map<String, dynamic> data) {
+  factory Patient.fromMap(Map<String, dynamic> data, [String id = '']) {
     return Patient(
       city: data['city'] ?? '',
       email: data['email'] ?? '',
@@ -31,7 +33,8 @@ class Patient {
       longitude: data['longitude'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
       profileImageUrl: data['profileImageUrl'] ?? '',
-      uid: data['uid'] ?? '',
+      uid: id,
+      cabinetId: data['cabinetId'] ?? '',
     );
   }
 
@@ -46,6 +49,7 @@ class Patient {
       'phoneNumber': phoneNumber,
       'profileImageUrl': profileImageUrl,
       'uid': uid,
+      'cabinetId': cabinetId,
     };
   }
 }

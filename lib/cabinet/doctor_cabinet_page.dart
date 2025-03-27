@@ -1,4 +1,4 @@
-import 'package:doctors_app/doctor/register_cabinet_page.dart';
+import 'package:doctors_app/cabinet/register_cabinet_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -28,7 +28,7 @@ class _CabinetPageState extends State<CabinetPage> {
   Future<void> _fetchCabinet() async {
     String? currentUserId = _auth.currentUser?.uid;
     if (currentUserId != null) {
-      final cabinetReference = await FirebaseDatabase.instance.ref().child('Cabinets').child(currentUserId).once();
+      final cabinetReference = await FirebaseDatabase.instance.ref().child('Cabinets').once();
       Cabinet? cabinet;
       if (cabinetReference.snapshot.exists) {
         final snapshot = await _db
@@ -39,7 +39,12 @@ class _CabinetPageState extends State<CabinetPage> {
 
 
         if (snapshot.snapshot.exists) {
-          cabinet = Cabinet.fromMap(snapshot.snapshot.value as Map<String, dynamic>);
+          final Map<dynamic, dynamic> values = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        
+          if (values.isNotEmpty) {
+            final key = values.keys.first;
+            cabinet = Cabinet.fromMap(Map<String, dynamic>.from(values[key]), key);
+          }
         }
 
       }

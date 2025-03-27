@@ -102,22 +102,6 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 ],
               ),
               const SizedBox(height: 30),
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: ElevatedButton(
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: const Color(0xFF2B962B),
-              //       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(12)
-              //       )
-              //     ),
-              //     onPressed: (){
-              //       _openMap();
-              //     },
-              //     child: Text('Open location in maps', style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),),
-              //   ),
-              // ),
               const SizedBox(height: 50),
               Text('Select date and time', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
               const SizedBox(height: 8,),
