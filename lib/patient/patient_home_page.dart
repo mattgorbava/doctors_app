@@ -1,9 +1,6 @@
-import 'package:doctors_app/cabinet/doctor_cabinet_page.dart';
 import 'package:doctors_app/cabinet/patient_cabinet_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/doctor/doctor_list_page.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
-import 'package:doctors_app/patient/map_page.dart';
 import 'package:doctors_app/patient/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
