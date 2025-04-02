@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -41,13 +42,83 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
-      if (!_rememberMe) {
-        _auth.signOut();
+  Future<void> _saveRememberMePreference(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('rememberMe', value);
+  }
+
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password
+        );
+        User? user = userCredential.user;
+
+        if (user != null) {
+          DatabaseReference userRef = _db.child('Doctors').child(user.uid);
+          DataSnapshot snapshot = await userRef.get();
+          _saveRememberMePreference(_rememberMe);
+          
+          if (snapshot.exists) {
+            _navigateToDoctorHomePage();
+          } else {
+            userRef = _db.child('Patients').child(user.uid);
+            snapshot = await userRef.get();
+            if (snapshot.exists) {
+              _navigateToPatientHomePage();
+            } else {
+              _showErrorDialog('User not found');
+            }
+          }
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid email or password')));
       }
+
+      setState(() {
+        _isLoading = false;
+      });
+  }
+}
+
+  void _navigateToDoctorHomePage() {
+    if (!_isNavigating) {
+      _isNavigating = true;
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DoctorHomePage()));
     }
+  }
+  
+  void _navigateToPatientHomePage() {
+    if (!_isNavigating) {
+      _isNavigating = true;
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientHomePage()));
+    }
+  }
+  
+  void _showErrorDialog(String s) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(s),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            )
+          ],
+        );
+      }
+    );
   }
 
   @override
@@ -215,76 +286,5 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email,
-          password: password
-        );
-        User? user = userCredential.user;
-
-        if (user != null) {
-          DatabaseReference userRef = _db.child('Doctors').child(user.uid);
-          DataSnapshot snapshot = await userRef.get();
-          
-          if (snapshot.exists) {
-            _navigateToDoctorHomePage();
-          } else {
-            userRef = _db.child('Patients').child(user.uid);
-            snapshot = await userRef.get();
-            if (snapshot.exists) {
-              _navigateToPatientHomePage();
-            } else {
-              _showErrorDialog('User not found');
-            }
-          }
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid email or password')));
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-  }
-}
-
-  void _navigateToDoctorHomePage() {
-    if (!_isNavigating) {
-      _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => DoctorHomePage(rememberMe: _rememberMe)));
-    }
-  }
   
-  void _navigateToPatientHomePage() {
-    if (!_isNavigating) {
-      _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientHomePage(rememberMe: _rememberMe)));
-    }
-  }
-  
-  void _showErrorDialog(String s) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(s),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            )
-          ],
-        );
-      }
-    );
-  }
 }

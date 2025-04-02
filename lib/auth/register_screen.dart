@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -57,6 +58,11 @@ class _RegisterPageState extends State<RegisterPage> {
     cache: false,
   );
 
+  Future<void> _saveRememberMePreference(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('rememberMe', value);
+  }
+
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -88,6 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
       try {
+        _saveRememberMePreference(_rememberMe);
         if (userType == 'Doctor') {
           final doctorsNodeSnapshot = await _db.child('Doctors').once();
           if (doctorsNodeSnapshot.snapshot.exists)
@@ -173,7 +180,7 @@ class _RegisterPageState extends State<RegisterPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
-                  userType == 'Doctor' ? DoctorHomePage(rememberMe: _rememberMe,) : PatientHomePage(rememberMe: _rememberMe),
+                  userType == 'Doctor' ? DoctorHomePage() : PatientHomePage(),
             ),
           );
         }

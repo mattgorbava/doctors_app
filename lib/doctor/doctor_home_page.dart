@@ -2,14 +2,13 @@ import 'package:doctors_app/cabinet/doctor_cabinet_page.dart';
 import 'package:doctors_app/doctor/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
+import 'package:doctors_app/doctor/registration_requests_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class DoctorHomePage extends StatefulWidget {
-  final bool rememberMe;
-
-  const DoctorHomePage({super.key, required this.rememberMe});
+  const DoctorHomePage({super.key});
 
   @override
   State<DoctorHomePage> createState() => _DoctorHomePageState();
@@ -22,6 +21,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
 
   final List<Widget> _children= <Widget>[
     const CabinetPage(),
+    const RegistrationRequestsPage(),
     const DoctorBookingsPage(),
     const DoctorChatlistPage(), 
     const DoctorProfile(),
@@ -37,15 +37,6 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
-      if (!widget.rememberMe) {
-        _auth.signOut();
-      }
-    }
   }
 
   void _onItemTapped(int index) {
@@ -94,6 +85,10 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Cabinet'
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_add),
+              label: 'Requests',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.book),

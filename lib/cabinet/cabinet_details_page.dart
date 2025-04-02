@@ -1,9 +1,12 @@
+import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
+import 'package:doctors_app/model/patient.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CabinetDetailsPage extends StatefulWidget {
   const CabinetDetailsPage({super.key, required this.cabinet});
@@ -16,6 +19,12 @@ class CabinetDetailsPage extends StatefulWidget {
 
 class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
   Doctor? _doctor;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDoctor();
+  }
   
   Future<void> _fetchDoctor() async {
     final snapshot = await FirebaseDatabase.instance.ref().child('Doctors').child(widget.cabinet.doctorId).once();
@@ -24,6 +33,12 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
     setState(() {
       _doctor = doctor;
     });
+  }
+
+  Future<Patient> _fetchPatient(String patientId) async {
+    final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(patientId).once();
+    final value = snapshot.snapshot.value as Map<dynamic, dynamic>;
+    return Patient.fromMap(Map<String, dynamic>.from(value), patientId);
   }
 
   Future<void> _sendRegistrationRequest() async {
@@ -49,6 +64,22 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
           content: Text('Failed to send registration request. Please try again later.'),
         ),
       );
+    }
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri phoneCall = Uri(scheme: 'tel', path: phoneNumber);
+    try {
+      if (await canLaunchUrl(phoneCall)) {
+        await launchUrl(phoneCall);
+      } else {
+        throw 'Could not call $phoneCall';
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Could not call $phoneNumber'),
+        backgroundColor: Colors.red,
+      ));
     }
   }
 
@@ -132,7 +163,76 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                   ),
                 ),
               ),
-            ]
+            ],
+            const SizedBox(height: 20.0,),
+            Text(
+              'Contact doctor',
+              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
+            ),
+            const SizedBox(height: 10.0,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 0.4 * MediaQuery.of(context).size.width,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B962B),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () {
+                      _makePhoneCall(_doctor!.phoneNumber);
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.phone, color: Colors.white, size: 20),
+                        const SizedBox(width: 10,),
+                        Text(
+                          'Call',
+                          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
+                        ),
+                      ],
+                    )
+                  ),
+                ),
+                SizedBox(
+                  width: 0.4 * MediaQuery.of(context).size.width,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B962B),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () async {
+                      Patient patient = await _fetchPatient(FirebaseAuth.instance.currentUser!.uid);
+                      String currentUserName = '${patient.firstName} ${patient.lastName}';
+                      String doctorName = '${_doctor!.firstName} ${_doctor!.lastName}';
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ChatScreen(
+                          patientName: currentUserName, patientId: patient.uid, doctorName: doctorName, doctorId:_doctor!.uid,)),
+                      );
+                    }, 
+                    child: Row(
+                      children: [
+                        const Icon(Icons.message, color: Colors.white, size: 20),
+                        const SizedBox(width: 10,),
+                        Text(
+                          'Message',
+                          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
+                        ),
+                      ],
+                    )
+                  ),
+                ),
+              ],
+            )
+            
           ],
         ),
       ),

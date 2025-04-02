@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -48,8 +49,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
   Future<void> _logout() async {
     try {
       await _auth.signOut();
-      // Navigate to login screen after logout
-      Navigator.of(context).pushReplacementNamed('/login'); // Replace '/login' with your login route
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginPage()));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Logged out successfully.'),
+        backgroundColor: Colors.green,
+      ));
     } catch (e) {
       print('Error logging out: $e');
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

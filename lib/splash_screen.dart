@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,6 +26,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuthUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool rememberMe = prefs.getBool('rememberMe') ?? false;
+
+    if (!rememberMe) {
+      await FirebaseAuth.instance.signOut();
+    }
+
     User? user = _auth.currentUser;
 
     if (user == null) {
@@ -83,11 +91,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   }
   void _navigateToPatientHomePage() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientHomePage(rememberMe: true)));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientHomePage()));
   }
 
   void _navigateToDoctorHomePage() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DoctorHomePage(rememberMe: true,)));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DoctorHomePage()));
   }
 
   void _navigateToLogin() {

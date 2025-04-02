@@ -9,9 +9,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:doctors_app/model/doctor.dart';
 
 class PatientHomePage extends StatefulWidget {
-  final bool rememberMe;
-
-  const PatientHomePage({super.key, required this.rememberMe});
+  const PatientHomePage({super.key});
 
   @override
   State<PatientHomePage> createState() => _PatientHomePageState();
@@ -33,25 +31,13 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _fetchDoctors();
+    _fetchCabinets();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  
-
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached || state == AppLifecycleState.paused) {
-      if (!widget.rememberMe) {
-        _auth.signOut();
-      }
-    }
   }
 
   void _onItemTapped(int index) {
@@ -86,27 +72,38 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     return result ?? false;
   }
 
-  Future<void> _fetchDoctors() async {
-    await _cabinetRef.once().then((DatabaseEvent event){
-      DataSnapshot snapshot = event.snapshot;
-      List<Cabinet> cabinets = [];
-      if(snapshot.value != null){
-        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
-        values.forEach((key, value) {
-          cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
-        });
-      }
-      setState(() {
-        _cabinets = cabinets;
-        _isLoading = false;
+  Future<void> _fetchCabinets() async {
+    try {
+      await _cabinetRef.once().then((DatabaseEvent event){
+        DataSnapshot snapshot = event.snapshot;
+        List<Cabinet> cabinets = [];
+        if(snapshot.value != null){
+          Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+          values.forEach((key, value) {
+            cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
+          });
+        }
+        setState(() {
+          _cabinets = cabinets;
+          _isLoading = false;
 
-        _children= <Widget>[
-          PatientCabinetPage(cabinets: _cabinets),
-          const ChatListPage(),
-          const UserProfile(),
-        ];
+          _children= <Widget>[
+            PatientCabinetPage(cabinets: _cabinets),
+            const ChatListPage(),
+            const UserProfile(),
+          ];
+        });
       });
-    });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to fetch cabinets. Please try again later.'),
+        ),
+      );
+    }
   }
 
   @override
