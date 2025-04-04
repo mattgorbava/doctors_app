@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoctorProfile extends StatefulWidget {
-  const DoctorProfile({super.key});
+  const DoctorProfile({super.key, required this.doctorId});
+
+  final String? doctorId;
 
   @override
   State<DoctorProfile> createState() => _DoctorProfileState();
@@ -20,15 +22,14 @@ class _DoctorProfileState extends State<DoctorProfile> {
   bool _isLoading = true;
 
   Future<void> _fetchDoctorDetails() async {
-    String? currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
+    if (widget.doctorId != null) {
       try {
-      DatabaseEvent event = await _doctorRef.child(currentUserId).once();
+      DatabaseEvent event = await _doctorRef.child(widget.doctorId!).once();
       DataSnapshot snapshot = event.snapshot;
       Doctor? doctor;
 
       if (snapshot.value != null) {
-        doctor = Doctor.fromMap(snapshot.value as Map<dynamic, dynamic>, currentUserId);
+        doctor = Doctor.fromMap(snapshot.value as Map<dynamic, dynamic>, widget.doctorId!);
       }
 
       setState(() {

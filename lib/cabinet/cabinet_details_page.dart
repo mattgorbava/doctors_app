@@ -1,4 +1,5 @@
 import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/doctor/doctor_profile.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
@@ -231,8 +232,29 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                   ),
                 ),
               ],
+            ),
+            SizedBox(
+              width: 0.6 * MediaQuery.of(context).size.width,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2B962B),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DoctorProfile(doctorId: _doctor!.uid,)),
+                  );
+                }, 
+                child: Text(
+                  'View doctor profile',
+                  style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
+                )
+              ),
             )
-            
           ],
         ),
       ),

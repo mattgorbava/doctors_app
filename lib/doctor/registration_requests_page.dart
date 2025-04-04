@@ -1,4 +1,5 @@
 import 'package:doctors_app/doctor/registration_request_card.dart';
+import 'package:doctors_app/doctor/registration_request_details_page.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -68,7 +69,12 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
             final request = _registrationRequests[index];
             return GestureDetector(
               onTap: () {
-
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegistrationRequestDetailsPage(request: request),
+                  ),
+                );
               },
               child: RegistrationRequestCard(request: request)
             );

@@ -91,10 +91,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   messagesMap.entries.forEach((entry) {
                     var value = entry.value;
-                    if ((value['senderId'] == currentUserId && value['receiverId'] == widget.doctorId) ||
-                        (value['senderId'] == widget.doctorId && value['receiverId'] == currentUserId) ||
-                        (value['senderId'] == currentUserId && value['receiverId'] == widget.patientId)||
-                        (value['senderId'] == widget.patientId && value['receiverId'] == currentUserId)) {
+                    String otherUserId = isDoctor ? widget.patientId! : widget.doctorId!;
+  
+                    if ((value['senderId'] == currentUserId && value['receiverId'] == otherUserId) || 
+                        (value['senderId'] == otherUserId && value['receiverId'] == currentUserId)) {
                       messages.add({
                         'senderId': value['senderId'],
                         'message': value['message'],

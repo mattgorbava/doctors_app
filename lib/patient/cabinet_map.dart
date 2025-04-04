@@ -1,3 +1,4 @@
+import 'package:doctors_app/cabinet/cabinet_details_page.dart';
 import 'package:doctors_app/model/directions_model.dart';
 import 'package:flutter/material.dart';
 import 'package:doctors_app/model/cabinet.dart';
@@ -99,9 +100,62 @@ class _CabinetMapState extends State<CabinetMap> {
             title: cabinet.name,
             snippet: cabinet.address,
           ),
+          onTap: () {
+            _showCabinetInfo(cabinet);
+          },
         ),
       );
     }
+  }
+
+  void _showCabinetInfo(Cabinet cabinet) {
+    showModalBottomSheet(
+    context: context,
+    builder: (context) => Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            cabinet.name,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(cabinet.address),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B962B),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context); // Close the bottom sheet
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CabinetDetailsPage(cabinet: cabinet),
+                  ),
+                );
+              },
+              child: const Text(
+                'View Details',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
   }
 
   @override

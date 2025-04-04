@@ -1,4 +1,4 @@
-import 'package:doctors_app/cabinet/doctor_cabinet_page.dart';
+import 'package:doctors_app/doctor/doctor_cabinet_page.dart';
 import 'package:doctors_app/doctor/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
@@ -15,22 +15,23 @@ class DoctorHomePage extends StatefulWidget {
 }
 
 class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObserver {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final String _doctorId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   int _selectedIndex = 0;
 
-  final List<Widget> _children= <Widget>[
-    const CabinetPage(),
-    const RegistrationRequestsPage(),
-    const DoctorBookingsPage(),
-    const DoctorChatlistPage(), 
-    const DoctorProfile(),
-  ];
+  late final List<Widget> _children;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _children = <Widget>[
+      const CabinetPage(),
+      const RegistrationRequestsPage(),
+      const DoctorBookingsPage(),
+      const DoctorChatlistPage(),
+      DoctorProfile(doctorId: _doctorId),
+    ];
   }
 
   @override

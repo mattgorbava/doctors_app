@@ -169,6 +169,10 @@ class _RegisterPageState extends State<RegisterPage> {
             'profileImageUrl': profileImageUrl,
           };
 
+          if (userType == 'Patient') {
+            userData['cabinetId'] = '';
+          }
+
           if (userType == 'Doctor') {
             userData['university'] = university;
             userData['legitimationNumber'] = legitimationNumber;

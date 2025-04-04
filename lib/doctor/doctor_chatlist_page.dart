@@ -41,7 +41,7 @@ class _DoctorChatlistPageState extends State<DoctorChatlistPage> {
             DataSnapshot patientSnapshot = patientEvent.snapshot;
             if(patientSnapshot.value != null){
               Map<dynamic, dynamic> patientMap = patientSnapshot.value as Map<dynamic, dynamic>;
-              chatList.add(Patient.fromMap(Map<String, dynamic>.from(patientMap)));
+              chatList.add(Patient.fromMap(Map<String, dynamic>.from(patientMap), userId));
             }
           }
         }
