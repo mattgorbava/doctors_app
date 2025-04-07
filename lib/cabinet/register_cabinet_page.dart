@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/cabinet/cabinet_location_picker.dart';
-import 'package:doctors_app/model/cabinet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:get/utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,6 +23,11 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
   LatLng? _cabinetLocation;
   String? _cabinetAddress;
   int _cabinetCapacity = 0;
+  String? _cabinetOpeningTime;
+  String? _cabinetClosingTime;
+
+  final _openingTimeController = TextEditingController();
+  final _closingTimeController = TextEditingController();
   
   XFile? _imageFile;
   final ImagePicker _picker = ImagePicker();
@@ -34,10 +37,43 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
   bool _isLoading = false;
 
   final cloudinary = CloudinaryPublic(
-      '',  
+      '',
       'doctors-app', 
       cache: false,
   );
+
+  @override
+  void dispose() {
+    _openingTimeController.dispose();
+    _closingTimeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectOpening() async {
+    TimeOfDay? selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (selectedTime != null) {
+      setState(() {
+        _cabinetOpeningTime = selectedTime.format(context);
+        _openingTimeController.text = _cabinetOpeningTime!;
+      });
+    }
+  }
+
+  Future<void> _selectClosing() async {
+    TimeOfDay? selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (selectedTime != null) {
+      setState(() {
+        _cabinetClosingTime = selectedTime.format(context);
+        _closingTimeController.text = _cabinetClosingTime!;
+      });
+    }
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -106,6 +142,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
           'totalReviews': 0,
           'createdAt': DateTime.now().toIso8601String(),
           'updatedAt': DateTime.now().toIso8601String(),
+          'openingTime': _cabinetOpeningTime,
+          'closingTime': _cabinetClosingTime,
         };
 
         String cabinetId = FirebaseDatabase.instance.ref().child('Cabinets').push().key!;
@@ -249,6 +287,101 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                           return null;
                         },
                       ),
+                    ),
+                    const SizedBox(height: 10,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 44,
+                            child: TextFormField(
+                              controller: _openingTimeController,
+                              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: const Color.fromARGB(255, 191, 230, 191),
+                                labelText: 'Cabinet opening time',
+                                labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF84c384),
+                                    width: 1,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF58ab58),
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF84c384),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              readOnly: true,
+                              onTap: _selectOpening,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select opening time';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10,),
+                        Expanded(
+                          child: SizedBox(
+                            height: 44,
+                            child: TextFormField(
+                              controller: _closingTimeController,
+                              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: const Color.fromARGB(255, 191, 230, 191),
+                                labelText: 'Cabinet closing time',
+                                labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF84c384),
+                                    width: 1,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF58ab58),
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF84c384),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              readOnly: true,
+                              onTap: _selectClosing,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select closing time';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 10,),
                     GestureDetector(

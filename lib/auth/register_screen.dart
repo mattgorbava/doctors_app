@@ -177,6 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
             userData['university'] = university;
             userData['legitimationNumber'] = legitimationNumber;
             userData['cvUrl'] = cvUrl;
+            userData['cabinetId'] = '';
           }
 
           await _db.child(userTypePath).child(user.uid).set(userData);

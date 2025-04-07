@@ -31,20 +31,19 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
           });
           setState(() {
             _registrationRequests = requests;
-            _isLoading = false;
           });
         }
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch registration requests. Please try again later.'),
         ),
       );
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override

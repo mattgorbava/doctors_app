@@ -1,5 +1,4 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:logger/logger.dart';
 
 class Cabinet {
   final String uid;
@@ -14,6 +13,8 @@ class Cabinet {
   final int totalReviews;
   final int capacity;
   final int numberOfPatients;
+  final String openingTime;
+  final String closingTime;
 
   Cabinet({
     required this.uid,
@@ -28,22 +29,11 @@ class Cabinet {
     required this.totalReviews,
     required this.capacity,
     required this.numberOfPatients,
+    required this.openingTime,
+    required this.closingTime,
   });
 
   factory Cabinet.fromMap(Map<String, dynamic> map, [String id = '']) {
-    Logger logger = Logger();
-    logger.d(map['name']);
-    logger.d(map['doctorId']);
-    logger.d(map['image']);
-    logger.d(map['createdAt']);
-    logger.d(map['updatedAt']);
-    logger.d(map['location']);
-    logger.d(map['address']);
-    logger.d(map['rating']);
-    logger.d(map['totalReviews']);
-    logger.d(map['capacity']);
-    logger.d(map['numberOfPatients']);
-
     return Cabinet(
       uid: id,
       name: map['name'],
@@ -57,6 +47,8 @@ class Cabinet {
       totalReviews: map['totalReviews'],
       capacity: map['capacity'],
       numberOfPatients: map['numberOfPatients'],
+      openingTime: map['openingTime'],
+      closingTime: map['closingTime'],
     );
   }
 }

@@ -116,7 +116,6 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
           return;
         }
         
-        // Show the confirmation dialog
         final result = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(

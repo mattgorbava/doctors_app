@@ -2,8 +2,8 @@ class Booking {
   final String date;
   final String description;
   final String id;
-  final String receiver;
-  final String sender;
+  final String doctorId;
+  final String patientId;
   final String status;
   final String time;
 
@@ -11,8 +11,8 @@ class Booking {
     required this.date,
     required this.description,
     required this.id,
-    required this.receiver,
-    required this.sender,
+    required this.doctorId,
+    required this.patientId,
     required this.status,
     required this.time,
   });
@@ -22,8 +22,8 @@ class Booking {
       date: data['date'] ?? '',
       description: data['description'] ?? '',
       id: data['id'] ?? '',
-      receiver: data['receiver'] ?? '',
-      sender: data['sender'] ?? '',
+      doctorId: data['doctorId'] ?? '',
+      patientId: data['patientId'] ?? '',
       status: data['status'] ?? 'pending',
       time: data['time'] ?? '',
     );
@@ -34,8 +34,8 @@ class Booking {
       'date': date,
       'description': description,
       'id': id,
-      'receiver': receiver,
-      'sender': sender,
+      'doctorId': doctorId,
+      'patientId': patientId,
       'status': status,
       'time': time,
     };

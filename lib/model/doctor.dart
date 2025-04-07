@@ -9,6 +9,7 @@ class Doctor {
   final String university;
   final String phoneNumber;
   final String legitimationNumber;
+  final String? cabinetId;
 
   Doctor({
     required this.uid,
@@ -21,6 +22,7 @@ class Doctor {
     required this.university,
     required this.phoneNumber,
     required this.legitimationNumber,
+    this.cabinetId,
   });
 
   factory Doctor.fromMap(Map<dynamic, dynamic> map, [String id = '']) {
@@ -35,6 +37,7 @@ class Doctor {
       university: map['university'],
       phoneNumber: map['phoneNumber'],
       legitimationNumber: map['legitimationNumber'],
+      cabinetId: map['cabinetId'],
     );
   }
 }

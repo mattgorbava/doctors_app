@@ -1,3 +1,4 @@
+import 'package:doctors_app/patient/book_appointment_page.dart';
 import 'package:doctors_app/patient/find_cabinet_page.dart';
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/cabinet.dart';
@@ -222,7 +223,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
                 ),
               ),
               onPressed: () {
-                //book appointment
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => BookAppointmentPage(patient: _patient!, cabinet: _cabinet!)));
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

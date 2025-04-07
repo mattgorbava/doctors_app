@@ -7,8 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 class CabinetCard extends StatelessWidget {
   CabinetCard({super.key, required this.cabinet});
 
-  Cabinet cabinet;
-  Doctor? doctor;
+  final Cabinet cabinet;
+  late Doctor? doctor;
 
   @override
   Widget build(BuildContext context) {
