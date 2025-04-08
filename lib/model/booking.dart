@@ -17,11 +17,11 @@ class Booking {
     required this.time,
   });
 
-  factory Booking.fromMap(Map<String, dynamic> data) {
+  factory Booking.fromMap(Map<String, dynamic> data, [String id = '']) {
     return Booking(
+      id: id,
       date: data['date'] ?? '',
       description: data['description'] ?? '',
-      id: data['id'] ?? '',
       doctorId: data['doctorId'] ?? '',
       patientId: data['patientId'] ?? '',
       status: data['status'] ?? 'pending',

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 class RegistrationRequestCard extends StatelessWidget {
   RegistrationRequestCard({super.key, required this.request});
 
-  RegistrationRequest request;
+  final RegistrationRequest request;
 
   final DatabaseReference _patientRef = FirebaseDatabase.instance.ref().child('Patients');
 

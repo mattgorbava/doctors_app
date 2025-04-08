@@ -1,5 +1,5 @@
-import 'package:doctors_app/doctor/registration_request_card.dart';
-import 'package:doctors_app/doctor/registration_request_details_page.dart';
+import 'package:doctors_app/registration_request/registration_request_card.dart';
+import 'package:doctors_app/registration_request/registration_request_details_page.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';

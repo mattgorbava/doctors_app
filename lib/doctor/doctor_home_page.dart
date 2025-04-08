@@ -1,8 +1,8 @@
 import 'package:doctors_app/doctor/doctor_cabinet_page.dart';
-import 'package:doctors_app/doctor/doctor_bookings_page.dart';
+import 'package:doctors_app/booking/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
-import 'package:doctors_app/doctor/registration_requests_page.dart';
+import 'package:doctors_app/registration_request/registration_requests_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

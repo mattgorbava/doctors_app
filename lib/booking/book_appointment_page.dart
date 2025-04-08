@@ -102,7 +102,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     List<TimeOfDay> bookedTimes = [];
     
     for (Booking booking in _bookings) {
-      if (booking.date == dateStr) {
+      if (booking.date == dateStr && booking.status != 'Cancelled') {
         List<String> timeParts = booking.time.split(':');
         bookedTimes.add(TimeOfDay(
           hour: int.parse(timeParts[0]),
