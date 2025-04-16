@@ -200,8 +200,8 @@ class BookingCard extends StatelessWidget {
                           backgroundColor: Colors.blue,
                           ),
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddMedicalHistoryPage(patientId: booking.patientId, doctorId: booking.doctorId),));
-                            //_showCompletionDialog(context, booking);
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddMedicalHistoryPage(bookingId: booking.id,),));
+                            _updateBookingStatus(context, booking.id, 'Completed');
                           },
                           child: const Text('Complete'),
                         )

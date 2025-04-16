@@ -38,7 +38,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
 
   final cloudinary = CloudinaryPublic(
       '',
-      'doctors-app', 
+      'doctors-app',
       cache: false,
   );
 

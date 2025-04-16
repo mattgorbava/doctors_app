@@ -88,6 +88,16 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  Future<DateTime> _getDateOfBirth() async {
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    return selectedDate ?? DateTime.now();
+  }
+
   Future<void> _registerUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -139,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
             }
           }
 
-          if (pdfFilePath != null) {
+          if (userType == 'Doctor' && pdfFilePath != null) {
             try {
               CloudinaryResponse response = await cloudinary.uploadFile(
                 CloudinaryFile.fromFile(
@@ -171,6 +181,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
           if (userType == 'Patient') {
             userData['cabinetId'] = '';
+            userData['birthDate'] = DateTime.now().toIso8601String();
+            userData['insureeCode'] = legitimationNumber;
+            userData['cnp'] = legitimationNumber;
           }
 
           if (userType == 'Doctor') {
@@ -669,6 +682,114 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Icon(Icons.attach_file, color: Color(0xFF58ab58)),
                         ],
                       ),
+                    ),
+                  ),
+                ],
+                if (userType == 'Patient') ... [
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'Insuree code',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.text,
+                      onChanged: (value) {
+                        legitimationNumber = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your insuree code';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'CNP',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.text,
+                      onChanged: (value) {
+                        legitimationNumber = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your insuree code';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10,),
+                  SizedBox(
+                    height: 20,
+                    child: ElevatedButton(
+                      onPressed: _getDateOfBirth, 
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 191, 230, 191),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Text('Select date of birth', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
                     ),
                   ),
                 ],

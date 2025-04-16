@@ -223,7 +223,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => BookAppointmentPage(patient: _patient!, cabinet: _cabinet!)));
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => BookAppointmentPage(patient: _patient!, cabinet: _cabinet!, desiredDate: DateTime.now(),)));
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

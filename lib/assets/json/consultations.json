@@ -1,0 +1,64 @@
+{
+    "consultations": [
+        {
+            "title": "Consultatie nou nascut perioada 1",
+            "periodInMonths": "2",
+            "ageInMonthsStart": "2",
+            "ageInMonthsEnd": "6"
+        },
+        {
+            "title": "Consultatie nou nascut perioada 2",
+            "periodInMonths": "3",
+            "ageInMonthsStart": "9",
+            "ageInMonthsEnd": "18"
+        },
+        {
+            "title": "Consultatie nou nascut perioada 3",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "24",
+            "ageInMonthsEnd": "36"
+        },
+        {
+            "title": "Screeningul anemiei",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "24",
+            "ageInMonthsEnd": "60"
+        },
+        {
+            "title": "Screeningul rahitismului" ,
+            "periodInMonths": "12",
+            "ageInMonthsStart": "24",
+            "ageInMonthsEnd": "60"
+        },
+        {
+            "title": "Screeningul sindromului dismetabolic (SM)",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "72",
+            "ageInMonthsEnd": "108"
+        },
+        {
+            "title": "Profilaxia SM pentru IMC crescut sau la cei cu istoric de HF",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "120",
+            "ageInMonthsEnd": "204"
+        },
+        {
+            "title": "Consultatie adult 18-39",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "216",
+            "ageInMonthsEnd": "468"
+        },
+        {
+            "title": "Consultatie adult 40-60",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "480",
+            "ageInMonthsEnd": "720"
+        },
+        {
+            "title": "Consultatie adult 60+",
+            "periodInMonths": "12",
+            "ageInMonthsStart": "720",
+            "ageInMonthsEnd": "9999"
+        }
+    ]
+}

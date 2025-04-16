@@ -1,6 +1,7 @@
 import 'package:doctors_app/patient/patient_cabinet_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
+import 'package:doctors_app/patient/upcoming_mandatory_consultations.dart';
 import 'package:doctors_app/patient/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +92,7 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
             PatientCabinetPage(cabinets: _cabinets),
             const ChatListPage(),
             const UserProfile(),
+            UpcomingMandatoryConsultations(patientId: _auth.currentUser!.uid),
           ];
         });
       });
@@ -158,6 +160,10 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.medical_services),
+              label: 'Consultations',
+            )
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.green,

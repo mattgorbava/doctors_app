@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BookAppointmentPage extends StatefulWidget {
-  const BookAppointmentPage({super.key, required this.patient, required this.cabinet});
+  const BookAppointmentPage({super.key, required this.patient, required this.cabinet, required this.desiredDate, this.description});
 
   final Patient patient;
   final Cabinet cabinet;
+  final DateTime desiredDate;
+  final String? description;
 
   @override
   State<BookAppointmentPage> createState() => _BookAppointmentPageState();
@@ -24,9 +26,11 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   late List<Booking> _bookings;
 
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime _focusedDay = DateTime.now();
+  DateTime? _focusedDay;
   Map<DateTime, bool> _availabilityCache = {};
   bool _isLoading = true;
+  DateTime? firstDay;
+  DateTime? lastDay;
 
   final _descriptionController = TextEditingController();
   
@@ -34,8 +38,21 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   void initState() {
     super.initState();
     _fetchBookings().then((_) {
-      _precomputeAvailability();
+      _precomputeAvailability(widget.desiredDate);
     });
+    if (widget.description != null) {
+      _descriptionController.text = widget.description!;
+    }
+    selectedDate = widget.desiredDate;
+    _focusedDay = widget.desiredDate;
+  }
+
+  DateTime _firstOfTheMonth(DateTime date) {
+    return DateTime(date.year, date.month, 1);
+  }
+
+  DateTime _lastOfTheMonth(DateTime date) {
+    return DateTime(date.year, date.month + 1, 0);
   }
   
   Future<void> _fetchBookings() async {
@@ -114,14 +131,26 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     return bookedTimes;
   }
   
-  Future<void> _precomputeAvailability() async {
+  Future<void> _precomputeAvailability(DateTime desiredDate) async {
     setState(() {
       _isLoading = true;
     });
     
+    desiredDate.subtract(const Duration(days: 30));
     DateTime now = DateTime.now();
-    for (int i = 1; i < 60; i++) {
-      DateTime date = now.add(Duration(days: i));
+    if (desiredDate.isBefore(now)) {
+      desiredDate = now;
+      firstDay = _firstOfTheMonth(now.subtract(const Duration(days: 30)));
+      lastDay = _lastOfTheMonth(now.add(const Duration(days: 30)));
+    } else {
+      firstDay = _firstOfTheMonth(desiredDate.subtract(const Duration(days: 30)));
+      lastDay = _lastOfTheMonth(desiredDate.add(const Duration(days: 30)));
+    }
+
+    _availabilityCache.clear();
+    DateTime date = firstDay!;
+    for (int i = 1; i < 90 && date.isBefore(lastDay!); i++) {
+      date = firstDay!.add(Duration(days: i));
       DateTime normalizedDate = DateTime(date.year, date.month, date.day);
       bool hasSlots = await _dayHasAvailableSlots(date);
       _availabilityCache[normalizedDate] = hasSlots;
@@ -284,9 +313,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                           ],
                         ),
                         child: TableCalendar(
-                          firstDay: DateTime.now(),
-                          lastDay: DateTime.now().add(const Duration(days: 60)),
-                          focusedDay: _focusedDay,
+                          firstDay: firstDay!,
+                          lastDay: lastDay!,
+                          focusedDay: _focusedDay!,
                           calendarFormat: _calendarFormat,
                           headerStyle: const HeaderStyle(
                             formatButtonVisible: false

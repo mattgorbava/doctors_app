@@ -55,3 +55,4 @@ flutter:
 
   assets: 
     - lib/assets/images/
+    - lib/assets/json/

@@ -1,55 +1,63 @@
 class Patient {
-  final String city;
+  final String uid;
   final String email;
+  final String profileImageUrl;
+  final String city;
   final String firstName;
   final String lastName;
-  final String latitude;
-  final String longitude;
   final String phoneNumber;
-  final String profileImageUrl;
-  final String uid;
+  //final String userId;
   final String cabinetId;
+  final DateTime birthDate;
+  final String insureeCode;
+  final String cnp;
 
   Patient({
-    required this.city,
+    required this.uid,
     required this.email,
+    required this.profileImageUrl,
+    required this.city,
     required this.firstName,
     required this.lastName,
-    required this.latitude,
-    required this.longitude,
     required this.phoneNumber,
-    required this.profileImageUrl,
-    required this.uid,
+    //required this.userId,
     required this.cabinetId,
+    required this.birthDate,
+    required this.insureeCode,
+    required this.cnp,
   });
 
   factory Patient.fromMap(Map<String, dynamic> data, [String id = '']) {
     return Patient(
-      city: data['city'] ?? '',
+      uid: id,
       email: data['email'] ?? '',
+      profileImageUrl: data['profileImageUrl'] ?? '',
+      city: data['city'] ?? '',
       firstName: data['firstName'] ?? '',
       lastName: data['lastName'] ?? '',
-      latitude: data['latitude'] ?? '',
-      longitude: data['longitude'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
-      profileImageUrl: data['profileImageUrl'] ?? '',
-      uid: id,
+      //userId: data['userId'] ?? '',
       cabinetId: data['cabinetId'] ?? '',
+      birthDate: DateTime.parse(data['birthDate']),
+      insureeCode: data['insureeCode'] ?? '',
+      cnp: data['cnp'] ?? '',
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'city': city,
+      'uid': uid,
       'email': email,
+      'profileImageUrl': profileImageUrl,
+      'city': city,
       'firstName': firstName,
       'lastName': lastName,
-      'latitude': latitude,
-      'longitude': longitude,
       'phoneNumber': phoneNumber,
-      'profileImageUrl': profileImageUrl,
-      'uid': uid,
+      //'userId': userId,
       'cabinetId': cabinetId,
+      'birthDate': birthDate.toIso8601String(),
+      'insureeCode': insureeCode,
+      'cnp': cnp,
     };
   }
 }
