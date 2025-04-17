@@ -91,8 +91,8 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
           _children= <Widget>[
             PatientCabinetPage(cabinets: _cabinets),
             const ChatListPage(),
-            const UserProfile(),
             UpcomingMandatoryConsultations(patientId: _auth.currentUser!.uid),
+            const UserProfile(),
           ];
         });
       });
@@ -157,13 +157,13 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
               label: 'Chat',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.medical_services),
+              label: 'Consultations',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.medical_services),
-              label: 'Consultations',
-            )
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.green,

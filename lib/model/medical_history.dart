@@ -3,12 +3,14 @@ class MedicalHistory {
   String bookingId;
   String results;
   String recommendations;
+  String analysisResultsPdfUrl;
 
   MedicalHistory({
     required this.id,
     required this.bookingId,
     required this.results,
     required this.recommendations,
+    required this.analysisResultsPdfUrl,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class MedicalHistory {
       'bookingId': bookingId,
       'results': results,
       'recommendations': recommendations,
+      'analysisResultsPdfUrl': analysisResultsPdfUrl,
     };
   }
 
@@ -26,6 +29,7 @@ class MedicalHistory {
       bookingId: json['bookingId'],
       results: json['results'],
       recommendations: json['recommendations'],
+      analysisResultsPdfUrl: json['analysisResultsPdfUrl'] ?? '',
     );
   }
 }

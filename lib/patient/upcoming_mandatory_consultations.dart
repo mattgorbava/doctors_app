@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/consultation_card.dart';
@@ -22,6 +23,8 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
   late Patient patient;
 
   late Future<List<Consultation>> consultationsFuture;
+
+  late List<Booking> bookings = [];
 
   Future<List<Consultation>> _loadConsultations() async {
     if (patient == null) {
@@ -70,6 +73,31 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     }
   }
 
+  Future<void> _fetchBookings() async {
+    try {
+      final snapshot = await FirebaseDatabase.instance.ref()
+        .child('Bookings')
+        .orderByChild('patientId')
+        .equalTo(widget.patientId)
+        .once();
+      if (snapshot.snapshot.value == null) {
+        throw Exception('Bookings data is null');
+      }
+      final value = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      setState() {
+        bookings = value.entries.map((entry) {
+          return Booking.fromMap(Map<String, dynamic>.from(entry.value), entry.key);
+        }).toList();
+      }
+    } catch (e) {
+      print('Error fetching bookings: $e');
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not get bookings.'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  } 
+
   Future<void> _fetchPatient() async {
     try {
       final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(widget.patientId).once();
@@ -95,7 +123,39 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
 
   Future<List<Consultation>> _loadPatientAndConsultations() async {
     await _fetchPatient();
-    return await _loadConsultations();
+    await _loadConsultations();
+    await _fetchBookings();
+    _filterConsultations();
+    return consultations;
+  }
+
+  void _filterConsultations() {
+    if (consultations.isEmpty || bookings.isEmpty) {
+      return;
+    }
+
+    DateTime now = DateTime.now();
+    
+    setState(() {
+      consultations = consultations.where((consultation) {
+        bool hasMatchingBooking = bookings.any((booking) {
+          bool titleMatches = booking.description.toLowerCase().contains(consultation.title.toLowerCase());
+          
+          DateTime bookingDate = DateTime.parse(booking.date);
+          bool isInFuture = bookingDate.isAfter(now);
+          
+          bool hasValidStatus = booking.status == 'Pending' || 
+            booking.status == 'Confirmed' || 
+            booking.status == 'Completed' ||
+            booking.status == 'AnalysisPending';
+          
+          bool isMandatory = booking.isMandatory;
+
+          return titleMatches && isInFuture && hasValidStatus && isMandatory;
+        });
+        return !hasMatchingBooking;
+      }).toList();
+    });
   }
 
   @override

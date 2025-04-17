@@ -6,6 +6,7 @@ class Booking {
   final String patientId;
   final String status;
   final String time;
+  final bool isMandatory;
 
   Booking({
     required this.date,
@@ -15,6 +16,7 @@ class Booking {
     required this.patientId,
     required this.status,
     required this.time,
+    required this.isMandatory,
   });
 
   factory Booking.fromMap(Map<String, dynamic> data, [String id = '']) {
@@ -26,6 +28,7 @@ class Booking {
       patientId: data['patientId'] ?? '',
       status: data['status'] ?? 'pending',
       time: data['time'] ?? '',
+      isMandatory: data['isMandatory'] ?? false,
     );
   }
 
@@ -38,6 +41,7 @@ class Booking {
       'patientId': patientId,
       'status': status,
       'time': time,
+      'isMandatory': isMandatory,
     };
   }
 }

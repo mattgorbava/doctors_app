@@ -45,90 +45,90 @@ class BookingCard extends StatelessWidget {
     }
   }
 
-  Future<void> _updateMedicalHistory(BuildContext context, String bookingId, String reason, String results, String recommendations) async {
-    try {
-      await _medicalHistoryRef.child(bookingId).set({
-        'doctorId': booking.doctorId,
-        'patientId': booking.patientId,
-        'reason': booking.description,
-        'date': DateTime.now().toIso8601String(),
-        'results': results,
-        'recommendations': recommendations,
-      });
-    } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Could not update medical history.'),
-          backgroundColor: Colors.red,
-        ));
-    }
-  }
+  // Future<void> _updateMedicalHistory(BuildContext context, String bookingId, String reason, String results, String recommendations) async {
+  //   try {
+  //     await _medicalHistoryRef.child(bookingId).set({
+  //       'doctorId': booking.doctorId,
+  //       'patientId': booking.patientId,
+  //       'reason': booking.description,
+  //       'date': DateTime.now().toIso8601String(),
+  //       'results': results,
+  //       'recommendations': recommendations,
+  //     });
+  //   } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         content: Text('Could not update medical history.'),
+  //         backgroundColor: Colors.red,
+  //       ));
+  //   }
+  // }
 
-  void _showCompletionDialog(BuildContext context, Booking booking) {
-    TextEditingController resultsController = TextEditingController();
-    TextEditingController recommendationsController = TextEditingController();
-    TextEditingController reasonController = TextEditingController();
+  // void _showCompletionDialog(BuildContext context, Booking booking) {
+  //   TextEditingController resultsController = TextEditingController();
+  //   TextEditingController recommendationsController = TextEditingController();
+  //   TextEditingController reasonController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Consultation Details'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: reasonController,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason for Consultation',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: resultsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Consultation Results',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: recommendationsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Recommendations',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String reason = reasonController.text;
-                String results = resultsController.text;
-                String recommendations = recommendationsController.text;
-                _updateBookingStatus(context, booking.id, 'Completed');
-                _updateMedicalHistory(context, booking.id, reason, results, recommendations);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Consultation Details'),
+  //         content: SingleChildScrollView(
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               TextFormField(
+  //                 controller: reasonController,
+  //                 decoration: const InputDecoration(
+  //                   labelText: 'Reason for Consultation',
+  //                   border: OutlineInputBorder(),
+  //                 ),
+  //                 maxLines: 2,
+  //               ),
+  //               const SizedBox(height: 10),
+  //               TextFormField(
+  //                 controller: resultsController,
+  //                 decoration: const InputDecoration(
+  //                   labelText: 'Consultation Results',
+  //                   border: OutlineInputBorder(),
+  //                 ),
+  //                 maxLines: 4,
+  //               ),
+  //               const SizedBox(height: 10),
+  //               TextFormField(
+  //                 controller: recommendationsController,
+  //                 decoration: const InputDecoration(
+  //                   labelText: 'Recommendations',
+  //                   border: OutlineInputBorder(),
+  //                 ),
+  //                 maxLines: 4,
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('Cancel'),
+  //           ),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               String reason = reasonController.text;
+  //               String results = resultsController.text;
+  //               String recommendations = recommendationsController.text;
+  //               _updateBookingStatus(context, booking.id, 'Completed');
+  //               _updateMedicalHistory(context, booking.id, reason, results, recommendations);
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('Save'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -195,13 +195,23 @@ class BookingCard extends StatelessWidget {
                       ),
                     ] else if (booking.status == 'Confirmed') ... [
                       _isBookingDateAndTimeBeforeNow(booking.date, booking.time) ?
-                      ElevatedButton(
+                        ElevatedButton(
                           style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           ),
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddMedicalHistoryPage(bookingId: booking.id,),));
-                            _updateBookingStatus(context, booking.id, 'Completed');
+                          onPressed: () async {
+                            final String? newStatus = await Navigator.of(context).push<String>(
+                              MaterialPageRoute(
+                                builder: (context) => AddMedicalHistoryPage(
+                                  bookingId: booking.id,
+                                  isMandatory: booking.isMandatory,
+                                ),
+                              )
+                            );
+                            
+                            if (newStatus != null) {
+                              _updateBookingStatus(context, booking.id, newStatus);
+                            }
                           },
                           child: const Text('Complete'),
                         )

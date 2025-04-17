@@ -33,6 +33,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   DateTime? lastDay;
 
   final _descriptionController = TextEditingController();
+  bool _prefillDescription = false;
+  bool _mandatoryConsultation = false;
   
   @override
   void initState() {
@@ -42,6 +44,8 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     });
     if (widget.description != null) {
       _descriptionController.text = widget.description!;
+      _prefillDescription = true;
+      _mandatoryConsultation = true;
     }
     selectedDate = widget.desiredDate;
     _focusedDay = widget.desiredDate;
@@ -249,6 +253,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           'time': timeStr,
           'description': _descriptionController.text,
           'status': 'Pending',
+          'isMandatory': _mandatoryConsultation,
         };
 
         String bookingId = _bookingsRef.push().key!;
@@ -405,6 +410,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                         keyboardType: TextInputType.multiline,
                         controller: _descriptionController,
                         maxLength: 240,
+                        readOnly: _prefillDescription,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
