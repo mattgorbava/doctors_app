@@ -1,13 +1,16 @@
+import 'package:doctors_app/model/doctor.dart';
+import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_cabinet_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
 import 'package:doctors_app/patient/upcoming_mandatory_consultations.dart';
 import 'package:doctors_app/patient/user_profile.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:doctors_app/model/doctor.dart';
+//import 'package:doctors_app/model/doctor.dart';
 
 class PatientHomePage extends StatefulWidget {
   const PatientHomePage({super.key});
@@ -19,28 +22,28 @@ class PatientHomePage extends StatefulWidget {
 class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingObserver {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  final _userDataService = UserDataService();
+
   final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
   List<Cabinet> _cabinets = [];
-  List<Doctor> _doctors = [];
+  //List<Doctor> _doctors = [];
   bool _isLoading = true;
 
   int _selectedIndex = 0;
 
   late List<Widget> _children;
   
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _fetchCabinets();
-  }
+  Future<void> _loadUserData() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+    await _userDataService.loadPatientData();
+    setState(() {
+      _isLoading = false;
+    });
   }
-
+  
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -108,6 +111,19 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _fetchCabinets();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return _isLoading ? const Center(child: CircularProgressIndicator(),)

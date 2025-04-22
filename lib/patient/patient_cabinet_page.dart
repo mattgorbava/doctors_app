@@ -21,11 +21,30 @@ class PatientCabinetPage extends StatefulWidget {
 }
 
 class _PatientCabinetPageState extends State<PatientCabinetPage> {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   Cabinet? _cabinet;
   Patient? _patient;
   Doctor? _doctor;
   bool _isLoading = true;
+
+  Future<void> _deregisterFromCabinet() async {
+    String? currentUserId = _auth.currentUser?.uid;
+    if (currentUserId != null) {
+      await FirebaseDatabase.instance.ref().child('Patients').child(currentUserId).update({
+        'cabinetId': null,
+      }).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('You have been deregistered from the cabinet.'),
+          backgroundColor: Colors.green,
+        ));
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Could not deregister from cabinet: $error'),
+          backgroundColor: Colors.red,
+        ));
+      });
+    }
+  }
 
   Future<void> _fetchPatientCabinetAndDoctor() async {
     String? currentUserId = _auth.currentUser?.uid;
@@ -123,6 +142,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
       )
       : Column(
         children: [
+          Text('You are registered to:', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
           ListTile(
             title: Text('Cabinet Name: ${_cabinet!.name}', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
             subtitle: Text('Address: ${_cabinet!.address}', style: GoogleFonts.poppins(fontSize: 14),),
@@ -237,7 +257,34 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
                 ],
               ),
             )
-          )
+          ),
+          const SizedBox(height: 20,),
+          SizedBox(
+            width: 0.6 * MediaQuery.of(context).size.width,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2B962B),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {
+                _deregisterFromCabinet();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.search, color: Colors.white, size: 20),
+                  const SizedBox(width: 10,),
+                  Text(
+                    'Deregister from cabinet',
+                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
+                  ),
+                ],
+              ),
+            )
+          ),
         ],
       ) 
     );

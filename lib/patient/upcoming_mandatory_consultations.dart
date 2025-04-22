@@ -59,12 +59,10 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
           }).toList();
           return consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
         } catch (e) {
-          print('JSON format not recognized: $e');
           return [];
         }
       }
     } catch (e) {
-      print('Error loading consultations: $e');
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not get consultations.'),
         backgroundColor: Colors.red,
@@ -90,7 +88,6 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         }).toList();
       }
     } catch (e) {
-      print('Error fetching bookings: $e');
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not get bookings.'),
         backgroundColor: Colors.red,
@@ -112,7 +109,6 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         patient = Patient.fromMap(Map<String, dynamic>.from(value), snapshot.snapshot.key!);
       });
     } catch (e) {
-      print('Error fetching patient: $e');
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not get patient details.'),
         backgroundColor: Colors.red,
@@ -158,6 +154,42 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     });
   }
 
+  int _ageInMonths(Patient patient) {
+    DateTime date = patient.birthDate;
+    DateTime now = DateTime.now();
+    int ageInMonths = (now.year - date.year) * 12 + now.month - date.month;
+    return ageInMonths;
+  }
+
+  DateTime _nextConsultationDate(Consultation consultation) {
+    DateTime nextConsultationDate = DateTime.now();
+
+    if (bookings.any((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
+                              && booking.isMandatory == true)) {
+      DateTime bookingDate = DateTime.parse(
+        bookings.firstWhere((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
+        && booking.isMandatory == true
+        && booking.status == 'Completed')
+        .date
+      );
+      bookingDate.add(Duration(days: (consultation.periodInMonths * 30.44).floor()));
+    }
+    else {
+      int patientAgeInMonths = _ageInMonths(patient);
+      int consultationPeriod = consultation.periodInMonths;
+      int monthsUntilNextConsultation = consultationPeriod - (patientAgeInMonths % consultationPeriod);
+
+      DateTime now = DateTime.now();
+      nextConsultationDate = DateTime(now.year, now.month + monthsUntilNextConsultation, patient.birthDate.day);
+    }
+
+    if (nextConsultationDate.isBefore(DateTime.now().add(const Duration(days: 60)))) {
+      nextConsultationDate = DateTime.now().subtract(const Duration(days: 1));
+    }
+
+    return nextConsultationDate;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -185,7 +217,15 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
               itemCount: consultations.length,
               itemBuilder: (context, index) {
                 Consultation consultation = consultations[index];
-                return ConsultationCard(consultation: consultation, patient: patient);
+                DateTime nextConsultationDate = _nextConsultationDate(consultation);
+                if (nextConsultationDate.isBefore(DateTime.now())) {
+                  return const SizedBox.shrink();
+                }
+                return ConsultationCard(
+                  consultation: consultation,
+                  patient: patient,
+                  nextConsultationDate: nextConsultationDate,
+                );
               },
             );
           }

@@ -7,10 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ConsultationCard extends StatelessWidget {
-  const ConsultationCard({super.key, required this.consultation, required this.patient});
+  const ConsultationCard({
+    super.key,
+    required this.consultation, 
+    required this.patient,
+    required this.nextConsultationDate,
+  });
 
   final Consultation consultation;
   final Patient patient;
+  final DateTime nextConsultationDate;
 
   Future<Cabinet> _fetchCabinet(String cabinetId) async {
    try {
@@ -29,26 +35,8 @@ class ConsultationCard extends StatelessWidget {
     }
   }
 
-  int _ageInMonths(Patient patient) {
-    DateTime date = patient.birthDate;
-    DateTime now = DateTime.now();
-    int ageInMonths = (now.year - date.year) * 12 + now.month - date.month;
-    return ageInMonths;
-  }
-
-  DateTime _nextConsultationDate(DateTime date) {
-    int patientAgeInMonths = _ageInMonths(patient);
-    int consultationPeriod = consultation.periodInMonths;
-    int monthsUntilNextConsultation = consultationPeriod - (patientAgeInMonths % consultationPeriod);
-
-    DateTime now = DateTime.now();
-    DateTime nextConsultationDate = DateTime(now.year, now.month + monthsUntilNextConsultation, date.day);
-    return nextConsultationDate;
-  }
-
   @override
   Widget build(BuildContext context) {
-    DateTime nextConsultationDate = _nextConsultationDate(patient.birthDate);
     String formattedDate = DateFormat('dd/MM/yyyy').format(nextConsultationDate);
     return FutureBuilder<Cabinet>(
       future: _fetchCabinet(patient.cabinetId),

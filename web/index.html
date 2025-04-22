@@ -34,5 +34,27 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8J2K66YaO9mU5qSkGfEsaGEI6j-e5Wc4",
+      authDomain: "doctors-app-fb-9a147.firebaseapp.com",
+      databaseURL: "https://doctors-app-fb-9a147-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "doctors-app-fb-9a147",
+      storageBucket: "doctors-app-fb-9a147.firebasestorage.app",
+      messagingSenderId: "548263883069",
+      appId: "1:548263883069:web:c1133835f6ed4387ed9554",
+      measurementId: "G-W19SXCMYNH"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+
 </body>
 </html>

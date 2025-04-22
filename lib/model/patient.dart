@@ -6,7 +6,6 @@ class Patient {
   final String firstName;
   final String lastName;
   final String phoneNumber;
-  //final String userId;
   final String cabinetId;
   final DateTime birthDate;
   final String insureeCode;
@@ -20,7 +19,6 @@ class Patient {
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
-    //required this.userId,
     required this.cabinetId,
     required this.birthDate,
     required this.insureeCode,
@@ -36,7 +34,6 @@ class Patient {
       firstName: data['firstName'] ?? '',
       lastName: data['lastName'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
-      //userId: data['userId'] ?? '',
       cabinetId: data['cabinetId'] ?? '',
       birthDate: DateTime.parse(data['birthDate']),
       insureeCode: data['insureeCode'] ?? '',
@@ -53,7 +50,6 @@ class Patient {
       'firstName': firstName,
       'lastName': lastName,
       'phoneNumber': phoneNumber,
-      //'userId': userId,
       'cabinetId': cabinetId,
       'birthDate': birthDate.toIso8601String(),
       'insureeCode': insureeCode,
