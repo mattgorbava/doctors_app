@@ -10,7 +10,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
-//import 'package:doctors_app/model/doctor.dart';
 
 class PatientHomePage extends StatefulWidget {
   const PatientHomePage({super.key});
@@ -26,13 +25,12 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
 
   final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
   List<Cabinet> _cabinets = [];
-  //List<Doctor> _doctors = [];
   bool _isLoading = true;
 
   int _selectedIndex = 0;
 
-  late List<Widget> _children;
-  
+  List<Widget> _children = List.generate(4, (_) => const SizedBox.shrink());  
+
   Future<void> _loadUserData() async {
     setState(() {
       _isLoading = true;
@@ -111,11 +109,56 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     }
   }
 
+  void initializeData() async {
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      await _userDataService.loadPatientData();
+
+      final DatabaseEvent event = await _cabinetRef.once();
+      DataSnapshot snapshot = event.snapshot;
+      List<Cabinet> cabinets = [];
+      if (snapshot.value != null) {
+        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, value) {
+          cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _cabinets = cabinets;
+        _children = <Widget>[
+          PatientCabinetPage(cabinets: _cabinets),
+          const ChatListPage(),
+          UpcomingMandatoryConsultations(patientId: _auth.currentUser!.uid),
+          const UserProfile(),
+        ];
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to fetch cabinets. Please try again later.'),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _fetchCabinets();
+    initializeData();
   }
 
   @override

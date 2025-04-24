@@ -8,7 +8,6 @@ class Patient {
   final String phoneNumber;
   final String cabinetId;
   final DateTime birthDate;
-  final String insureeCode;
   final String cnp;
 
   Patient({
@@ -21,7 +20,6 @@ class Patient {
     required this.phoneNumber,
     required this.cabinetId,
     required this.birthDate,
-    required this.insureeCode,
     required this.cnp,
   });
 
@@ -36,7 +34,6 @@ class Patient {
       phoneNumber: data['phoneNumber'] ?? '',
       cabinetId: data['cabinetId'] ?? '',
       birthDate: DateTime.parse(data['birthDate']),
-      insureeCode: data['insureeCode'] ?? '',
       cnp: data['cnp'] ?? '',
     );
   }
@@ -52,7 +49,6 @@ class Patient {
       'phoneNumber': phoneNumber,
       'cabinetId': cabinetId,
       'birthDate': birthDate.toIso8601String(),
-      'insureeCode': insureeCode,
       'cnp': cnp,
     };
   }

@@ -4,6 +4,7 @@ import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -21,67 +22,86 @@ class PatientCabinetPage extends StatefulWidget {
 }
 
 class _PatientCabinetPageState extends State<PatientCabinetPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  //final FirebaseAuth _auth = FirebaseAuth.instance;
   Cabinet? _cabinet;
   Patient? _patient;
   Doctor? _doctor;
   bool _isLoading = true;
+  final UserDataService _userDataService = UserDataService(); 
 
   Future<void> _deregisterFromCabinet() async {
-    String? currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
-      await FirebaseDatabase.instance.ref().child('Patients').child(currentUserId).update({
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseDatabase.instance.ref().child('Patients').child(_patient!.uid).update({
         'cabinetId': null,
-      }).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('You have been deregistered from the cabinet.'),
-          backgroundColor: Colors.green,
-        ));
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Could not deregister from cabinet: $error'),
-          backgroundColor: Colors.red,
-        ));
       });
+
+      if (_cabinet != null) {
+        await FirebaseDatabase.instance.ref().child('Cabinets').child(_cabinet!.uid).update({
+          'numberOfPatients': ServerValue.increment(-1) // Atomically decrement
+        });
+        _cabinet = null;
+        _doctor = null;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('You have been deregistered from the cabinet.'),
+        backgroundColor: Colors.green,
+      ));
+
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Could not deregister from cabinet: $error'),
+        backgroundColor: Colors.red,
+      ));
+      
+      if (mounted) {
+         setState(() {
+           _isLoading = false;
+         });
+      }
     }
   }
 
-  Future<void> _fetchPatientCabinetAndDoctor() async {
-    String? currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
-      Cabinet? cabinet;
-      Patient? patient;
-      Doctor? doctor;
-      final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(currentUserId).once();
-      if (snapshot.snapshot.value != null) {
-        final patientValues = snapshot.snapshot.value as Map<dynamic, dynamic>;
-        patient = Patient.fromMap(Map<String, dynamic>.from(patientValues), currentUserId);
-      }
+  // Future<void> _fetchPatientCabinetAndDoctor() async {
+  //   String? currentUserId = _auth.currentUser?.uid;
+  //   if (currentUserId != null) {
+  //     Cabinet? cabinet;
+  //     Patient? patient;
+  //     Doctor? doctor;
+  //     final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(currentUserId).once();
+  //     if (snapshot.snapshot.value != null) {
+  //       final patientValues = snapshot.snapshot.value as Map<dynamic, dynamic>;
+  //       patient = Patient.fromMap(Map<String, dynamic>.from(patientValues), currentUserId);
+  //     }
 
-      for (Cabinet cab in widget.cabinets) {
-        if (cab.uid == patient!.cabinetId) {
-          cabinet = cab;
-          break;
-        }
-      }
+  //     for (Cabinet cab in widget.cabinets) {
+  //       if (cab.uid == patient!.cabinetId) {
+  //         cabinet = cab;
+  //         break;
+  //       }
+  //     }
 
-      if (cabinet != null)
-      {
-        final doctorSnapshot = await FirebaseDatabase.instance.ref().child('Doctors').child(cabinet!.doctorId).once();
-        if (doctorSnapshot.snapshot.value != null) {
-          final doctorValues = doctorSnapshot.snapshot.value as Map<dynamic, dynamic>;
-          doctor = Doctor.fromMap(Map<String, dynamic>.from(doctorValues), cabinet.doctorId);
-        }
-      }
+  //     if (cabinet != null)
+  //     {
+  //       final doctorSnapshot = await FirebaseDatabase.instance.ref().child('Doctors').child(cabinet!.doctorId).once();
+  //       if (doctorSnapshot.snapshot.value != null) {
+  //         final doctorValues = doctorSnapshot.snapshot.value as Map<dynamic, dynamic>;
+  //         doctor = Doctor.fromMap(Map<String, dynamic>.from(doctorValues), cabinet.doctorId);
+  //       }
+  //     }
 
-      setState(() {
-        _cabinet = cabinet;
-        _patient = patient;
-        _doctor = doctor;
-        _isLoading = false;
-      });
-    }
-  }
+  //     setState(() {
+  //       _cabinet = cabinet;
+  //       _patient = patient;
+  //       _doctor = doctor;
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
 
   void _makePhoneCall(String phoneNumber) async {
     final Uri phoneCall = Uri(scheme: 'tel', path: phoneNumber);
@@ -101,8 +121,11 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
 
   @override
   void initState() {
-    _fetchPatientCabinetAndDoctor();
     super.initState();
+    _patient = _userDataService.patient;
+    _cabinet = _userDataService.cabinet;
+    _doctor = _userDataService.doctor;
+    _isLoading = false;
   }
 
   @override
@@ -272,16 +295,9 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
               onPressed: () {
                 _deregisterFromCabinet();
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.search, color: Colors.white, size: 20),
-                  const SizedBox(width: 10,),
-                  Text(
-                    'Deregister from cabinet',
-                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
-                  ),
-                ],
+              child: Text(
+                'Deregister from cabinet',
+                style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
               ),
             )
           ),

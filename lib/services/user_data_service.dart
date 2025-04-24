@@ -11,65 +11,90 @@ class UserDataService {
   }
   UserDataService._internal();
 
-  Patient? patient;
-  Cabinet? cabinet;
-  Doctor? doctor;
-  bool isLoading = true;
+  Patient? _patient;
+  Cabinet? _cabinet;
+  Doctor? _doctor;
+  bool _isDataLoaded = false;
+
+  Patient? get patient => _patient;
+  Cabinet? get cabinet => _cabinet;
+  Doctor? get doctor => _doctor;
+  bool get isDataLoaded => _isDataLoaded;
 
   Future<void> loadPatientData() async {
-    isLoading = true;
+    if (_isDataLoaded) return;
     
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
+      if (userId == null) return;
+
+      await _loadPatient(userId);
       
-      final patientSnapshot = await FirebaseDatabase.instance
-          .ref()
-          .child('Patients')
-          .child(userId)
-          .once();
-      
-      if (patientSnapshot.snapshot.value != null) {
-        final patientData = patientSnapshot.snapshot.value as Map<dynamic, dynamic>;
-        patient = Patient.fromMap(Map<String, dynamic>.from(patientData), userId);
-        
-        if (patient?.cabinetId != null) {
-          final cabinetSnapshot = await FirebaseDatabase.instance
-              .ref()
-              .child('Cabinets')
-              .child(patient!.cabinetId)
-              .once();
-              
-          if (cabinetSnapshot.snapshot.value != null) {
-            final cabinetData = cabinetSnapshot.snapshot.value as Map<dynamic, dynamic>;
-            cabinet = Cabinet.fromMap(Map<String, dynamic>.from(cabinetData), patient!.cabinetId);
-            
-            final doctorSnapshot = await FirebaseDatabase.instance
-                .ref()
-                .child('Doctors')
-                .child(cabinet!.doctorId)
-                .once();
-                  
-            if (doctorSnapshot.snapshot.value != null) {
-              final doctorData = doctorSnapshot.snapshot.value as Map<dynamic, dynamic>;
-              doctor = Doctor.fromMap(Map<String, dynamic>.from(doctorData), cabinet!.doctorId);
-            }
-          }
+      if (_patient != null && _patient!.cabinetId != null && _patient!.cabinetId!.isNotEmpty) {
+        await _loadCabinet(_patient!.cabinetId!);
+        if (_cabinet != null && _cabinet!.doctorId.isNotEmpty) {
+          await _loadDoctor(_cabinet!.doctorId);
         }
       }
+      
+      _isDataLoaded = true;
     } catch (e) {
-      print('Error loading user data: $e');
-    } finally {
-      isLoading = false;
+      print('Error loading patient data: $e');
     }
   }
 
+  Future<void> _loadPatient(String userId) async {
+    final snapshot = await FirebaseDatabase.instance
+        .ref()
+        .child('Patients')
+        .child(userId)
+        .once();
+    
+    if (snapshot.snapshot.value != null) {
+      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      _patient = Patient.fromMap(
+        Map<String, dynamic>.from(data), 
+        snapshot.snapshot.key!
+      );
+    }
+  }
+  
+  Future<void> _loadCabinet(String cabinetId) async {
+    final snapshot = await FirebaseDatabase.instance
+        .ref()
+        .child('Cabinets')
+        .child(cabinetId)
+        .once();
+    
+    if (snapshot.snapshot.value != null) {
+      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      _cabinet = Cabinet.fromMap(
+        Map<String, dynamic>.from(data), 
+        snapshot.snapshot.key!
+      );
+    }
+  }
+  
+  Future<void> _loadDoctor(String doctorId) async {
+    final snapshot = await FirebaseDatabase.instance
+        .ref()
+        .child('Doctors')
+        .child(doctorId)
+        .once();
+    
+    if (snapshot.snapshot.value != null) {
+      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      _doctor = Doctor.fromMap(
+        Map<String, dynamic>.from(data), 
+        snapshot.snapshot.key!
+      );
+    }
+  }
+  
   void clearData() {
-    patient = null;
-    cabinet = null;
-    doctor = null;
-    isLoading = false;
+    _patient = null;
+    _cabinet = null;
+    _doctor = null;
+    _isDataLoaded = false;
   }
 }
