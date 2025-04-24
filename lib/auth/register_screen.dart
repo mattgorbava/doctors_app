@@ -36,6 +36,8 @@ class _RegisterPageState extends State<RegisterPage> {
   String university = '';
   String legitimationNumber = '';
   String cvUrl = '';
+  DateTime birthDate = DateTime.now();
+  String cnp = '';
   
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
@@ -88,14 +90,18 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future<DateTime> _getDateOfBirth() async {
+  Future<void> _getDateOfBirth() async {
     DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    return selectedDate ?? DateTime.now();
+    setState(() {
+      if (selectedDate != null) {
+        birthDate = selectedDate;
+      }
+    });
   }
 
   Future<void> _registerUser() async {
@@ -694,50 +700,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color.fromARGB(255, 191, 230, 191),
-                        labelText: 'Insuree code',
-                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF84c384),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF58ab58),
-                            width: 1,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF84c384),
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      keyboardType: TextInputType.text,
-                      onChanged: (value) {
-                        legitimationNumber = value;
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your insuree code';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 44,
-                    child: TextFormField(
-                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color.fromARGB(255, 191, 230, 191),
                         labelText: 'CNP',
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
@@ -764,11 +726,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       keyboardType: TextInputType.text,
                       onChanged: (value) {
-                        legitimationNumber = value;
+                        setState(() {
+                          cnp = value;
+                        });
                       },
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your insuree code';
+                          return 'Please enter your CNP';
                         }
                         return null;
                       },
