@@ -5,7 +5,6 @@ import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/user_data_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,7 +21,6 @@ class PatientCabinetPage extends StatefulWidget {
 }
 
 class _PatientCabinetPageState extends State<PatientCabinetPage> {
-  //final FirebaseAuth _auth = FirebaseAuth.instance;
   Cabinet? _cabinet;
   Patient? _patient;
   Doctor? _doctor;
@@ -41,7 +39,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
 
       if (_cabinet != null) {
         await FirebaseDatabase.instance.ref().child('Cabinets').child(_cabinet!.uid).update({
-          'numberOfPatients': ServerValue.increment(-1) // Atomically decrement
+          'numberOfPatients': ServerValue.increment(-1) 
         });
         _cabinet = null;
         _doctor = null;

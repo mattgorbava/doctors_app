@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctors_app/auth/login_page.dart';
+import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -113,24 +114,43 @@ class _DoctorProfileState extends State<DoctorProfile> {
               ),
               const SizedBox(height: 10),
               if (_doctor!.cvUrl != null && _doctor!.cvUrl!.isNotEmpty)
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final url = _doctor!.cvUrl!;
-                  if (await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Could not open CV.'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Open CV'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green,),
-              ),                  
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final url = _doctor!.cvUrl!;
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Could not open CV.'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('Open CV'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green,),
+                ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: 0.5 * MediaQuery.of(context).size.width,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterPage(
+                      doctor: _doctor,
+                    )));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B962B),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Edit Profile', style: TextStyle(fontSize: 16, color: Colors.white),),
+                ),
+              )
             ],
           ),
         ),

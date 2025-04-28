@@ -8,7 +8,6 @@ class Doctor {
   final String phoneNumber;
   //final String userId;
   final String cvUrl;
-  final String university;
   final String legitimationNumber;
   final String? cabinetId;
 
@@ -22,7 +21,6 @@ class Doctor {
     required this.phoneNumber,
     //required this.userId,
     required this.cvUrl,
-    required this.university,
     required this.legitimationNumber,
     this.cabinetId,
   });
@@ -38,7 +36,6 @@ class Doctor {
       phoneNumber: map['phoneNumber'],
       //userId: map['userId'],
       cvUrl: map['cvUrl'],
-      university: map['university'],
       legitimationNumber: map['legitimationNumber'],
       cabinetId: map['cabinetId'],
     );

@@ -103,6 +103,26 @@ class _CabinetPageState extends State<CabinetPage> {
               ListTile(
                 title: Text('Number of Patients: ${_cabinet!.numberOfPatients}'),
               ),
+              const SizedBox(height: 20,),
+              SizedBox(
+                width: 0.5 * MediaQuery.of(context).size.width,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () { 
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterCabinetPage(
+                      cabinet: _cabinet,
+                    )));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B962B),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Edit', style: TextStyle(fontSize: 16, color: Colors.white),),
+                ),
+              )
             ],
           ),
         );

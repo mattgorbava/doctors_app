@@ -2,32 +2,33 @@ import 'dart:io';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/cabinet/cabinet_location_picker.dart';
+import 'package:doctors_app/model/cabinet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterCabinetPage extends StatefulWidget {
-  const RegisterCabinetPage({super.key});
+  const RegisterCabinetPage({super.key, this.cabinet});
+
+  final Cabinet? cabinet;
 
   @override
   State<RegisterCabinetPage> createState() => _RegisterCabinetPageState();
 }
 
 class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
-  String _cabinetName = '';
+  final _cabinetNameController = TextEditingController();
+  final _cabinetCapacityController = TextEditingController();
+  final _openingTimeController = TextEditingController();
+  final _closingTimeController = TextEditingController();
   String _cabinetPhotoUrl = '';
   LatLng? _cabinetLocation;
   String? _cabinetAddress;
-  int _cabinetCapacity = 0;
-  String? _cabinetOpeningTime;
-  String? _cabinetClosingTime;
-
-  final _openingTimeController = TextEditingController();
-  final _closingTimeController = TextEditingController();
   
   XFile? _imageFile;
   final ImagePicker _picker = ImagePicker();
@@ -35,6 +36,21 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.cabinet != null) {
+      _cabinetNameController.text = widget.cabinet!.name;
+      _cabinetPhotoUrl = widget.cabinet!.image;
+      _cabinetLocation = LatLng(widget.cabinet!.location.latitude, widget.cabinet!.location.longitude);
+      _cabinetAddress = widget.cabinet!.address;
+      _cabinetCapacityController.text = widget.cabinet!.capacity.toString();
+      _openingTimeController.text = widget.cabinet!.openingTime;
+      _closingTimeController.text = widget.cabinet!.closingTime;
+      _getAddressFromLatLng(_cabinetLocation!);
+    }
+  }
 
   final cloudinary = CloudinaryPublic(
       '',
@@ -56,8 +72,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
     );
     if (selectedTime != null) {
       setState(() {
-        _cabinetOpeningTime = selectedTime.format(context);
-        _openingTimeController.text = _cabinetOpeningTime!;
+        _openingTimeController.text = selectedTime.format(context);
       });
     }
   }
@@ -69,8 +84,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
     );
     if (selectedTime != null) {
       setState(() {
-        _cabinetClosingTime = selectedTime.format(context);
-        _closingTimeController.text = _cabinetClosingTime!;
+        _closingTimeController.text = selectedTime.format(context);
       });
     }
   }
@@ -128,7 +142,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
         }
 
         Map<String, dynamic> cabinetData = {
-          'name': _cabinetName,
+          'name': _cabinetNameController.text,
           'image': _cabinetPhotoUrl,
           'doctorId': FirebaseAuth.instance.currentUser!.uid,
           'location': {
@@ -136,18 +150,74 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
             'longitude': _cabinetLocation!.longitude,
           },
           'address': _cabinetAddress,
-          'capacity': _cabinetCapacity,
+          'capacity': int.parse(_cabinetCapacityController.text),
           'numberOfPatients': 0,
           'rating': 0,
           'totalReviews': 0,
           'createdAt': DateTime.now().toIso8601String(),
           'updatedAt': DateTime.now().toIso8601String(),
-          'openingTime': _cabinetOpeningTime,
-          'closingTime': _cabinetClosingTime,
+          'openingTime': _openingTimeController.text,
+          'closingTime': _closingTimeController.text,
         };
 
         String cabinetId = FirebaseDatabase.instance.ref().child('Cabinets').push().key!;
         await FirebaseDatabase.instance.ref().child('Cabinets').child(cabinetId).set(cabinetData);
+
+        Navigator.of(context).pop();
+      } catch (e) {
+        _showErrorDialog('Failed to register cabinet');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> editCabinet() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        if (_imageFile != null) {
+          try {
+            CloudinaryResponse response = await cloudinary.uploadFile(
+                CloudinaryFile.fromFile(
+                  _imageFile!.path,
+                  folder: 'cabinets', 
+                ),
+              );
+              _cabinetPhotoUrl = response.secureUrl;
+          } catch (e) {
+            _showErrorDialog('Failed to upload image');
+            setState(() {
+              _isLoading = false;
+            });
+            return;
+          }
+        }
+
+        Map<String, dynamic> cabinetData = {
+          'name': _cabinetNameController.text,
+          'image': _cabinetPhotoUrl,
+          'location': {
+            'latitude': _cabinetLocation!.latitude,
+            'longitude': _cabinetLocation!.longitude,
+          },
+          'address': _cabinetAddress,
+          'capacity': int.parse(_cabinetCapacityController.text),
+          'numberOfPatients': widget.cabinet!.numberOfPatients,
+          'rating': widget.cabinet!.rating,
+          'totalReviews': widget.cabinet!.totalReviews,
+          'createdAt': widget.cabinet!.createdAt.toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
+          'openingTime': _openingTimeController.text,
+          'closingTime': _closingTimeController.text,
+        };
+
+        await FirebaseDatabase.instance.ref().child('Cabinets').child(widget.cabinet!.uid).update(cabinetData);
 
         Navigator.of(context).pop();
       } catch (e) {
@@ -188,7 +258,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Register Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500)),
+          title: widget.cabinet == null ? Text('Register Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500))
+          : Text('Edit Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500)),
           automaticallyImplyLeading: true,
         ),
         body: _isLoading ? const Center(child: CircularProgressIndicator(),)
@@ -204,6 +275,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                     SizedBox(
                       height: 44,
                       child: TextFormField(
+                        controller: _cabinetNameController,
                         style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                         decoration: InputDecoration(
                           filled: true,
@@ -233,9 +305,6 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                           ),
                         ),
                         keyboardType: TextInputType.text,
-                        onChanged: (value) {
-                          _cabinetName = value;
-                        },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter cabinet name';
@@ -248,6 +317,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                     SizedBox(
                       height: 44,
                       child: TextFormField(
+                        controller: _cabinetCapacityController,
                         style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                         decoration: InputDecoration(
                           filled: true,
@@ -277,9 +347,9 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                           ),
                         ),
                         keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          _cabinetCapacity = int.parse(value);
-                        },
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         validator: (value) {
                           if (value == null || value.isEmpty || int.parse(value) <= 0) {
                             return 'Please enter capacity';
@@ -387,20 +457,25 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                     GestureDetector(
                       onTap: _pickImage,
                       child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100), 
-                    child: _imageFile != null ? Image.file(
-                      File(_imageFile!.path),
-                      width: 100, 
-                      height: 100,
-                      fit: BoxFit.cover,)
-                    : Container(
-                        color: const Color(0xffF0EFFF), 
-                        width: 100, 
-                        height: 100,
-                        child: Center(
-                          child: Icon(Icons.add_a_photo, color: Colors.grey.shade600, size: 30,),
-                            ),
+                        borderRadius: BorderRadius.circular(100), 
+                        child: _imageFile != null ? Image.file(
+                          File(_imageFile!.path),
+                          width: 100, 
+                          height: 100,
+                          fit: BoxFit.cover,)
+                      : _cabinetPhotoUrl.isNotEmpty ? Image.network(
+                          _cabinetPhotoUrl,
+                          width: 100, 
+                          height: 100,
+                          fit: BoxFit.cover,)
+                      : Container(
+                          color: const Color(0xffF0EFFF), 
+                          width: 100, 
+                          height: 100,
+                          child: Center(
+                            child: Icon(Icons.add_a_photo, color: Colors.grey.shade600, size: 30,),
                           ),
+                        ),
                       ),
                     ),
                     _imageFile == null ? const Text('Pick an image') 
@@ -477,7 +552,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width,
                       child: ElevatedButton(
-                        onPressed: _registerCabinet,
+                        onPressed: widget.cabinet == null ? _registerCabinet
+                        : editCabinet,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2B962B),
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -485,7 +561,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text('Register', style: TextStyle(fontSize: 16, color: Colors.white),),
+                        child: widget.cabinet == null ? const Text('Register', style: TextStyle(fontSize: 16, color: Colors.white),)
+                        : const Text('Edit', style: TextStyle(fontSize: 16, color: Colors.white),),
                       ),
                     ),
                   ],
