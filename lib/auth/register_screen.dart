@@ -361,7 +361,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           if (userType == 'Patient') {
             userData['cabinetId'] = '';
-            userData['birthDate'] = DateTime.now().toIso8601String();
+            userData['birthDate'] = birthDate.toIso8601String();
             userData['cnp'] = _cnpController.text;
           }
 

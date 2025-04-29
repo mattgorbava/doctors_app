@@ -4,6 +4,7 @@ import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/consultation_card.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -26,7 +27,9 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
 
   late List<Booking> bookings = [];
 
-  Future<List<Consultation>> _loadConsultations() async {
+  final UserDataService _userDataService = UserDataService();
+
+  Future<void> _loadConsultations() async {
     if (patient == null) {
       throw Exception('Patient not loaded yet');
     }
@@ -45,7 +48,9 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
           int ageInMonthsEnd = int.parse(consultation['ageInMonthsEnd']);
           return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
         }).toList();
-        return consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
+        setState(() {
+          consultations = consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
+        });
       } else {
         try {
           List<dynamic> consultationsJson = jsonData as List<dynamic>;
@@ -57,9 +62,11 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
             int ageInMonthsEnd = consultation['ageInMonthsEnd'] as int;
             return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
           }).toList();
-          return consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
+          setState(() {
+            consultations = consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
+          });
         } catch (e) {
-          return [];
+          throw Exception(e);
         }
       }
     } catch (e) {
@@ -67,7 +74,6 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         content: Text('Could not get consultations.'),
         backgroundColor: Colors.red,
       ));
-      return [];
     }
   }
 
@@ -118,7 +124,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
   }
 
   Future<List<Consultation>> _loadPatientAndConsultations() async {
-    await _fetchPatient();
+    patient = _userDataService.patient!;
     await _loadConsultations();
     await _fetchBookings();
     _filterConsultations();
@@ -183,8 +189,12 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
       nextConsultationDate = DateTime(now.year, now.month + monthsUntilNextConsultation, patient.birthDate.day);
     }
 
-    if (nextConsultationDate.isBefore(DateTime.now().add(const Duration(days: 60)))) {
-      nextConsultationDate = DateTime.now().subtract(const Duration(days: 1));
+    // if (nextConsultationDate.isBefore(DateTime.now().add(const Duration(days: 60)))) {
+    //   nextConsultationDate = DateTime.now().subtract(const Duration(days: 1));
+    // }
+
+    if (nextConsultationDate.isBefore(DateTime.now())) {
+      nextConsultationDate = DateTime.now().add(const Duration(days: 7));
     }
 
     return nextConsultationDate;
@@ -201,6 +211,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upcoming Mandatory Consultations'),
+        automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Consultation>>(
         future: consultationsFuture,

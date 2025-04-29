@@ -57,6 +57,7 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registration Requests'),
+        automaticallyImplyLeading: false,
       ),
       body: _isLoading
     ? const Center(child: CircularProgressIndicator())

@@ -65,16 +65,6 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
       appBar: AppBar(
         title: const Text('Bookings'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await _auth.signOut();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
-                    (Route<dynamic> route) => false);
-            },
-          ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

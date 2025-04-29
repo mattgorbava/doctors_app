@@ -51,4 +51,25 @@ class Cabinet {
       closingTime: map['closingTime'],
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'doctorId': doctorId,
+      'image': image,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'location': {
+        'latitude': location.latitude,
+        'longitude': location.longitude,
+      },
+      'address': address,
+      'rating': rating,
+      'totalReviews': totalReviews,
+      'capacity': capacity,
+      'numberOfPatients': numberOfPatients,
+      'openingTime': openingTime,
+      'closingTime': closingTime,
+    };
+  }
 }

@@ -6,7 +6,6 @@ class Doctor {
   final String firstName;
   final String lastName;
   final String phoneNumber;
-  //final String userId;
   final String cvUrl;
   final String legitimationNumber;
   final String? cabinetId;
@@ -19,7 +18,6 @@ class Doctor {
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
-    //required this.userId,
     required this.cvUrl,
     required this.legitimationNumber,
     this.cabinetId,
@@ -34,10 +32,23 @@ class Doctor {
       firstName: map['firstName'],
       lastName: map['lastName'],
       phoneNumber: map['phoneNumber'],
-      //userId: map['userId'],
       cvUrl: map['cvUrl'],
       legitimationNumber: map['legitimationNumber'],
       cabinetId: map['cabinetId'],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'profileImageUrl': profileImageUrl,
+      'city': city,
+      'firstName': firstName,
+      'lastName': lastName,
+      'phoneNumber': phoneNumber,
+      'cvUrl': cvUrl,
+      'legitimationNumber': legitimationNumber,
+      'cabinetId': cabinetId,
+    };
   }
 }

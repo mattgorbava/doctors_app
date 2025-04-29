@@ -64,43 +64,6 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
     }
   }
 
-  // Future<void> _fetchPatientCabinetAndDoctor() async {
-  //   String? currentUserId = _auth.currentUser?.uid;
-  //   if (currentUserId != null) {
-  //     Cabinet? cabinet;
-  //     Patient? patient;
-  //     Doctor? doctor;
-  //     final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(currentUserId).once();
-  //     if (snapshot.snapshot.value != null) {
-  //       final patientValues = snapshot.snapshot.value as Map<dynamic, dynamic>;
-  //       patient = Patient.fromMap(Map<String, dynamic>.from(patientValues), currentUserId);
-  //     }
-
-  //     for (Cabinet cab in widget.cabinets) {
-  //       if (cab.uid == patient!.cabinetId) {
-  //         cabinet = cab;
-  //         break;
-  //       }
-  //     }
-
-  //     if (cabinet != null)
-  //     {
-  //       final doctorSnapshot = await FirebaseDatabase.instance.ref().child('Doctors').child(cabinet!.doctorId).once();
-  //       if (doctorSnapshot.snapshot.value != null) {
-  //         final doctorValues = doctorSnapshot.snapshot.value as Map<dynamic, dynamic>;
-  //         doctor = Doctor.fromMap(Map<String, dynamic>.from(doctorValues), cabinet.doctorId);
-  //       }
-  //     }
-
-  //     setState(() {
-  //       _cabinet = cabinet;
-  //       _patient = patient;
-  //       _doctor = doctor;
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
-
   void _makePhoneCall(String phoneNumber) async {
     final Uri phoneCall = Uri(scheme: 'tel', path: phoneNumber);
     try {
@@ -131,6 +94,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
+        automaticallyImplyLeading: false,
       ),
       body: _isLoading ? const Center(child: CircularProgressIndicator(),)
       : _cabinet == null ? Center(child: Column(

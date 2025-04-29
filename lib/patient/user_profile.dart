@@ -1,6 +1,8 @@
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
+import 'package:doctors_app/doctor/patient_card.dart';
 import 'package:doctors_app/model/booking.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -21,6 +23,7 @@ class _UserProfileState extends State<UserProfile> {
   String? pdfFileName;
   String? pdfFilePath;
   String? analysisResultsPdfUrl;
+  final UserDataService _userDataService = UserDataService();
 
   final cloudinary = CloudinaryPublic(
     '',  
@@ -136,109 +139,109 @@ class _UserProfileState extends State<UserProfile> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
-          : ListView.builder(
-              itemCount: _bookings.length,
-              itemBuilder: (context, index) {
-                final Booking booking = _bookings[index];
-                return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        booking.description,
-                        style: const TextStyle(
-                          fontSize: 16, 
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today, size: 16),
-                          const SizedBox(width: 4),
-                          Text('Date: ${booking.date}'),
-                          const SizedBox(width: 16),
-                          const Icon(Icons.access_time, size: 16),
-                          const SizedBox(width: 4),
-                          Text('Time: ${booking.time}'),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(booking.status),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              booking.status,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          if (booking.status == "AnalysisPending")
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                _pickPdf();
-                                if (pdfFilePath != null) {
-                                  try {
-                                    CloudinaryResponse response = await cloudinary.uploadFile(
-                                      CloudinaryFile.fromFile(
-                                        pdfFilePath!,
-                                        folder: 'medical_history',
-                                        resourceType: CloudinaryResourceType.Raw,
-                                      ),
-                                    );
-                                    final medicalHistoryRef = FirebaseDatabase.instance.ref('MedicalHistory');
-                                    medicalHistoryRef.orderByChild('bookingId').equalTo(booking.id).once().then((DatabaseEvent event) {
-                                      if (event.snapshot.exists) {
-                                        final key = event.snapshot.children.first.key;
-                                        if (key != null) {
-                                          medicalHistoryRef.child(key).update({
-                                            'analysisResultsPdfUrl': response.secureUrl,
-                                          });
-                                          _bookingRef.child(booking.id).update({
-                                            'status': 'Completed',
-                                          });
-                                        }
-                                      }
-                                    });
-                                    
-                                  } catch (e) {
-                                    _showErrorDialog('Failed to upload PDF file');
-                                    
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
-                                    return;
-                                  }
-                                }
-                              },
-                              icon: const Icon(Icons.add_chart),
-                              label: const Text("Add Test Results"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
+          : Column(
+              children: [
+                PatientCard(patient: _userDataService.patient!),
+                _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
+                : ListView.builder(
+                    itemCount: _bookings.length,
+                    itemBuilder: (context, index) {
+                      final Booking booking = _bookings[index];
+                      return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              booking.description,
+                              style: const TextStyle(
+                                fontSize: 16, 
+                                fontWeight: FontWeight.bold
                               ),
                             ),
-                        ],
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today, size: 16),
+                                const SizedBox(width: 4),
+                                Text('Date: ${booking.date}'),
+                                const SizedBox(width: 16),
+                                const Icon(Icons.access_time, size: 16),
+                                const SizedBox(width: 4),
+                                Text('Time: ${booking.time}'),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: _getStatusColor(booking.status),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    booking.status,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                if (booking.status == "AnalysisPending")
+                                  ElevatedButton.icon(
+                                    onPressed: () async {
+                                      _pickPdf();
+                                      if (pdfFilePath != null) {
+                                        try {
+                                          CloudinaryResponse response = await cloudinary.uploadFile(
+                                            CloudinaryFile.fromFile(
+                                              pdfFilePath!,
+                                              folder: 'medical_history',
+                                              resourceType: CloudinaryResourceType.Raw,
+                                            ),
+                                          );
+                                          final medicalHistoryRef = FirebaseDatabase.instance.ref('MedicalHistory');
+                                          medicalHistoryRef.orderByChild('bookingId').equalTo(booking.id).once().then((DatabaseEvent event) {
+                                            if (event.snapshot.exists) {
+                                              final key = event.snapshot.children.first.key;
+                                              if (key != null) {
+                                                medicalHistoryRef.child(key).update({
+                                                  'analysisResultsPdfUrl': response.secureUrl,
+                                                });
+                                                _bookingRef.child(booking.id).update({
+                                                  'status': 'Completed',
+                                                });
+                                              }
+                                            }
+                                          });
+                                          
+                                        } catch (e) {
+                                          _showErrorDialog('Failed to upload PDF file');
+                                          
+                                          setState(() {
+                                            _isLoading = false;
+                                          });
+                                          return;
+                                        }
+                                      }
+                                    },
+                                    icon: const Icon(Icons.add_chart),
+                                    label: const Text("Add Test Results"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blueAccent,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    );
+                    },
                   ),
-                ),
-              );
-                // return ListTile(
-                //   title: Text(booking.description),
-                //   subtitle: Text('Date: ${booking.date} Time: ${booking.time}'),
-                //   trailing: Text(booking.status),
-                // ); 
-              },
-            ),
+              ],
+          ) 
     );
   }
 }

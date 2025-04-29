@@ -2,12 +2,13 @@ import 'package:doctors_app/booking/book_appointment_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ConsultationCard extends StatelessWidget {
-  const ConsultationCard({
+  ConsultationCard({
     super.key,
     required this.consultation, 
     required this.patient,
@@ -17,62 +18,44 @@ class ConsultationCard extends StatelessWidget {
   final Consultation consultation;
   final Patient patient;
   final DateTime nextConsultationDate;
-
-  Future<Cabinet> _fetchCabinet(String cabinetId) async {
-   try {
-      DatabaseReference cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets').child(cabinetId);
-      DataSnapshot snapshot = await cabinetRef.get();
-      if (snapshot.exists) {
-        final value = snapshot.value as Map<dynamic, dynamic>;
-        final Cabinet cabinet = Cabinet.fromMap(Map<String, dynamic>.from(value), cabinetId);
-        return cabinet;
-      } else {
-        throw Exception('Cabinet not found');
-      }
-    } catch (e) {
-      print('Error fetching cabinet: $e');
-      throw Exception('Error fetching cabinet');
-    }
-  }
+  final UserDataService _userDataService = UserDataService();
 
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('dd/MM/yyyy').format(nextConsultationDate);
-    return FutureBuilder<Cabinet>(
-      future: _fetchCabinet(patient.cabinetId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Error loading cabinet'));
-        } else if (snapshot.hasData) {
-          Cabinet cabinet = snapshot.data!;
-          return Card(
-            child: ListTile(
-              title: Text(consultation.title),
-              subtitle: Text('Next Consultation: ${formattedDate}'),
-              trailing: SizedBox(
-                width: 100,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => BookAppointmentPage(
-                        patient: patient,
-                        cabinet: cabinet,
-                        desiredDate: nextConsultationDate,
-                        description: consultation.title,
-                      ),
-                    ));
-                  },
-                  child: const Text('Book'),
-                ),
-              ),
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color.fromARGB(255, 196, 255, 209)),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Card(
+        child: ListTile(
+          title: Text(consultation.title),
+          subtitle: Text('Next Consultation: ${formattedDate}'),
+          trailing: SizedBox(
+            width: 100,
+            child: _userDataService.cabinet != null ?
+             ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => BookAppointmentPage(
+                    patient: patient,
+                    cabinet: _userDataService.cabinet!,
+                    desiredDate: nextConsultationDate,
+                    description: consultation.title,
+                  ),
+                ));
+              },
+              child: const Text('Book'),
+            )
+            : const Text('Register to cabinet first!',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
             ),
-          );
-        } else {
-          return const Center(child: Text('No data available'));
-        }
-      },
+          ),
+        ),
+      )
     );
   }
 }
