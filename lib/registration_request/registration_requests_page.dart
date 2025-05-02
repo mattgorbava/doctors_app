@@ -1,6 +1,7 @@
 import 'package:doctors_app/registration_request/registration_request_card.dart';
 import 'package:doctors_app/registration_request/registration_request_details_page.dart';
 import 'package:doctors_app/model/registration_request.dart';
+import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class RegistrationRequestsPage extends StatefulWidget {
 }
 
 class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
+  final RegistrationRequestService _registrationRequestService = RegistrationRequestService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _registrationRequestsRef = FirebaseDatabase.instance.ref().child('RegistrationRequests');
 
@@ -22,17 +24,9 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
   Future<void> _fetchRegistrationRequests() async {
     String? doctorId = _auth.currentUser?.uid;
     try {
-      await _registrationRequestsRef.orderByChild('doctorId').equalTo(doctorId).once().then((snapshot) {
-        List<RegistrationRequest> requests = [];
-        if (snapshot.snapshot.exists) {
-          Map<dynamic, dynamic> data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-          data.forEach((key, value) {
-            requests.add(RegistrationRequest.fromMap(Map<String, dynamic>.from(value), key));
-          });
-          setState(() {
-            _registrationRequests = requests;
-          });
-        }
+      List<RegistrationRequest> requests = await _registrationRequestService.getAllRequestsByDoctorId(doctorId!);
+      setState(() {
+        _registrationRequests = requests;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

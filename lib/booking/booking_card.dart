@@ -1,5 +1,7 @@
 import 'package:doctors_app/medical_history/add_medical_history_page.dart';
 import 'package:doctors_app/model/booking.dart';
+import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/patient_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -13,15 +15,15 @@ class BookingCard extends StatelessWidget {
 
   final VoidCallback onStatusUpdated;
 
+  final PatientService _patientService = PatientService();
+
   Future<String> _getPatientName(String patientId) async {
     try {
-      final snapshot = await _patientRef.child(patientId).once();
-      if (snapshot.snapshot.exists) {
-        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-        return '${data['firstName']} ${data['lastName']}';
-      } else {
+      Patient patient = await _patientService.getPatientById(patientId) ?? Patient.empty();
+      if (patient.isEmpty) {
         return 'Unknown Patient';
       }
+      return '${patient.firstName} ${patient.lastName}';
     } catch (e) {
       return 'Error fetching patient name';
     }

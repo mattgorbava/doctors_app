@@ -22,20 +22,34 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
 
   int _selectedIndex = 0;
 
-  late final List<Widget> _children;
+  List<Widget> _children = List.generate(5, (_) => const SizedBox.shrink());
 
   @override
   void initState() {
     super.initState();
-    _userDataService.loadDoctorData();
     WidgetsBinding.instance.addObserver(this);
-    _children = <Widget>[
-      const CabinetPage(),
-      const RegistrationRequestsPage(),
-      const DoctorBookingsPage(),
-      const DoctorChatlistPage(),
-      DoctorProfile(doctorId: _doctorId),
-    ];
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    try {
+      await _userDataService.loadDoctorData();
+            
+      if (!mounted) return;
+
+      setState(() {
+        _children = <Widget>[
+          const CabinetPage(),
+          const RegistrationRequestsPage(),
+          const DoctorBookingsPage(),
+          const DoctorChatlistPage(),
+          DoctorProfile(doctorId: _doctorId),
+        ];
+      });
+    } catch (e) {
+      // Handle any errors that occur during data loading
+      print('Error loading doctor data: $e');
+    }
   }
 
   @override

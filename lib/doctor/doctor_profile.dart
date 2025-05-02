@@ -53,8 +53,10 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
   void getDoctor() async {
     Doctor? doctor = await _doctorService.getDoctorById(widget.doctorId!);
-    _doctor = await _doctorService.getDoctorById(widget.doctorId!);
-    _isLoading = false;
+    setState() {
+      _doctor = doctor;
+      _isLoading = false;
+    }
   }
 
   Future<void> _logout() async {
@@ -77,7 +79,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   @override
   void initState() {
     _doctor = _userDataService.doctor;
-    _isLoading = !_userDataService.isDataLoaded;
+    _isLoading = false;
     super.initState();
   }
 

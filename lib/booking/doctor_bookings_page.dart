@@ -32,6 +32,9 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
   void initState() {
     super.initState();
     getBookings();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override

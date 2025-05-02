@@ -2,6 +2,8 @@ import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
+import 'package:doctors_app/services/cabinet_service.dart';
+import 'package:doctors_app/services/patient_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -19,56 +21,60 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
   Patient? _patient;
   Cabinet? _cabinet;
   bool _isLoading = true;
+  final PatientService _patientService = PatientService();
+  final CabinetService _cabinetService = CabinetService();
 
   Future<void> _fetchPatient() async {
     try {
-      DatabaseReference patientsRef = FirebaseDatabase.instance.ref().child('Patients').child(widget.request.patientId!);
-      await patientsRef.once().then((snapshot) {
-        if (snapshot.snapshot.exists) {
-          Map<dynamic, dynamic> data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-          setState(() {
-            _patient = Patient.fromMap(Map<String, dynamic>.from(data), widget.request.patientId!);
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      });
+      Patient patient = await _patientService.getPatientById(widget.request.patientId) ?? Patient.empty();
+      if (patient.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No patient details available.'),
+          ),
+        );
+      } else {
+        setState(() {
+          _patient = patient;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch patient details. Please try again later.'),
         ),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   Future<void> _fetchCabinet() async {
     try {
-      String? doctorId = widget.request.doctorId;
-      DatabaseReference cabinetsRef = FirebaseDatabase.instance.ref().child('Cabinets');
-      await cabinetsRef.orderByChild('doctorId').equalTo(doctorId).once().then((snapshot) {
-        if (snapshot.snapshot.exists) {
-          Map<dynamic, dynamic> data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-          data.forEach((key, value) {
-            setState(() {
-              _cabinet = Cabinet.fromMap(Map<String, dynamic>.from(value), key);
-              _isLoading = false;
-            });
-          });
-        }
-      });
+      Cabinet cabinet = await _cabinetService.getCabinetById(_patient!.cabinetId) ?? Cabinet.empty();
+      if (cabinet.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No cabinet details available.'),
+          ),
+        );
+      } else {
+        setState(() {
+          _cabinet = cabinet;
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch cabinet details. Please try again later.'),
         ),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 

@@ -72,4 +72,41 @@ class Cabinet {
       'closingTime': closingTime,
     };
   }
+
+  factory Cabinet.empty() {
+    return Cabinet(
+      uid: '',
+      name: '',
+      doctorId: '',
+      image: '',
+      createdAt: DateTime(2003, 09, 30),
+      updatedAt: DateTime(2003, 09, 30),
+      location: const LatLng(0, 0),
+      address: '',
+      rating: 0.0,
+      totalReviews: 0,
+      capacity: 0,
+      numberOfPatients: 0,
+      openingTime: '',
+      closingTime: '',
+    );
+  }
+
+  bool get isEmpty {
+    return 
+      uid.isEmpty &&
+      name.isEmpty &&
+      doctorId.isEmpty &&
+      image.isEmpty &&
+      createdAt == DateTime(2003, 09, 30) &&
+      updatedAt == DateTime(2003, 09, 30) &&
+      location == const LatLng(0, 0) &&
+      address.isEmpty &&
+      rating == 0.0 &&
+      totalReviews == 0 &&
+      capacity == 0 &&
+      numberOfPatients == 0 &&
+      openingTime.isEmpty &&
+      closingTime.isEmpty;
+  }
 }

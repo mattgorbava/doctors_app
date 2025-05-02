@@ -4,6 +4,7 @@ import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/consultation_card.dart';
+import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -19,15 +20,13 @@ class UpcomingMandatoryConsultations extends StatefulWidget {
 }
 
 class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsultations> {
-  late List<Consultation> consultations = [];
-
-  late Patient patient;
-
-  late Future<List<Consultation>> consultationsFuture;
-
-  late List<Booking> bookings = [];
-
   final UserDataService _userDataService = UserDataService();
+  final BookingService _bookingService = BookingService();
+
+  late List<Consultation> consultations = [];
+  late Patient patient;
+  late Future<List<Consultation>> consultationsFuture;
+  late List<Booking> bookings = [];
 
   Future<void> _loadConsultations() async {
     if (patient == null) {
@@ -75,52 +74,13 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         backgroundColor: Colors.red,
       ));
     }
-  }
-
-  Future<void> _fetchBookings() async {
-    try {
-      final snapshot = await FirebaseDatabase.instance.ref()
-        .child('Bookings')
-        .orderByChild('patientId')
-        .equalTo(widget.patientId)
-        .once();
-      if (snapshot.snapshot.value == null) {
-        throw Exception('Bookings data is null');
-      }
-      final value = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      setState() {
-        bookings = value.entries.map((entry) {
-          return Booking.fromMap(Map<String, dynamic>.from(entry.value), entry.key);
-        }).toList();
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get bookings.'),
-        backgroundColor: Colors.red,
-      ));
-    }
   } 
 
-  Future<void> _fetchPatient() async {
-    try {
-      final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(widget.patientId).once();
-      
-      if (snapshot.snapshot.value == null) {
-        throw Exception('Patient data is null');
-      }
-      
-      final value = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      
-      setState(() {
-        patient = Patient.fromMap(Map<String, dynamic>.from(value), snapshot.snapshot.key!);
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get patient details.'),
-        backgroundColor: Colors.red,
-      ));
-      rethrow;
-    }
+  Future<void> _fetchBookings() async {
+    List<Booking> bookings = await _bookingService.getAllBookingsByPatientId(widget.patientId);
+    setState(() {
+      this.bookings = bookings;
+    });
   }
 
   Future<List<Consultation>> _loadPatientAndConsultations() async {

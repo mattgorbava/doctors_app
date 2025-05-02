@@ -52,4 +52,31 @@ class Patient {
       'cnp': cnp,
     };
   }
+
+  factory Patient.empty() {
+    return Patient(
+      uid: '',
+      email: '',
+      profileImageUrl: '',
+      city: '',
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      cabinetId: '',
+      birthDate: DateTime.now(),
+      cnp: '',
+    );
+  }
+
+  bool get isEmpty {
+    return uid.isEmpty &&
+        email.isEmpty &&
+        profileImageUrl.isEmpty &&
+        city.isEmpty &&
+        firstName.isEmpty &&
+        lastName.isEmpty &&
+        phoneNumber.isEmpty &&
+        cabinetId.isEmpty &&
+        cnp.isEmpty;
+  }
 }

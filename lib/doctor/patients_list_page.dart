@@ -1,6 +1,7 @@
 import 'package:doctors_app/doctor/patient_card.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_details_page.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class PatientsListPage extends StatefulWidget {
 }
 
 class _PatientsListPageState extends State<PatientsListPage> {
+  final UserDataService _userDataService = UserDataService();
   FirebaseAuth _auth = FirebaseAuth.instance;
   DatabaseReference _patientsRef = FirebaseDatabase.instance.ref().child('Patients');
   List<Patient> _patients = <Patient>[];
@@ -24,7 +26,13 @@ class _PatientsListPageState extends State<PatientsListPage> {
   void initState() {
     super.initState();
     currentUserId = _auth.currentUser?.uid;
-    _fetchPatients();
+    _patients = _userDataService.doctorPatients ?? <Patient>[];
+    // if (_patients.isEmpty) {
+    //   _fetchPatients();
+    // } 
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _fetchPatients() async {

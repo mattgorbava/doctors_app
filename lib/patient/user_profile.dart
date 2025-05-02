@@ -16,6 +16,7 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
+  final UserDataService _userDataService = UserDataService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _bookingRef = FirebaseDatabase.instance.ref().child('Bookings');
   List<Booking> _bookings = [];
@@ -23,7 +24,6 @@ class _UserProfileState extends State<UserProfile> {
   String? pdfFileName;
   String? pdfFilePath;
   String? analysisResultsPdfUrl;
-  final UserDataService _userDataService = UserDataService();
 
   final cloudinary = CloudinaryPublic(
     '',  
@@ -34,7 +34,7 @@ class _UserProfileState extends State<UserProfile> {
   @override
   void initState() {
     super.initState();
-    _fetchBookings();
+    _bookings = _userDataService.patientBookings ?? <Booking>[];
   }
 
   Future<void> _fetchBookings() async {

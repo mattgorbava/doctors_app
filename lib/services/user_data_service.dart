@@ -117,18 +117,22 @@ class UserDataService {
   }
   
   Future<void> _loadDoctor(String doctorId) async {
-    final snapshot = await FirebaseDatabase.instance
-        .ref()
-        .child('Doctors')
-        .child(doctorId)
-        .once();
-    
-    if (snapshot.snapshot.value != null) {
-      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      _doctor = Doctor.fromMap(
-        Map<String, dynamic>.from(data), 
-        snapshot.snapshot.key!
-      );
+    try {
+      final snapshot = await FirebaseDatabase.instance
+          .ref()
+          .child('Doctors')
+          .child(doctorId)
+          .once();
+      
+      if (snapshot.snapshot.value != null) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        _doctor = Doctor.fromMap(
+          Map<String, dynamic>.from(data), 
+          snapshot.snapshot.key!
+        );
+      }
+    } catch (e) {
+      print('Error loading doctor data: $e');
     }
   }
 

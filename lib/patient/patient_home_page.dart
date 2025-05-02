@@ -30,17 +30,6 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
   int _selectedIndex = 0;
 
   List<Widget> _children = List.generate(4, (_) => const SizedBox.shrink());  
-
-  Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    await _userDataService.loadPatientData();
-    setState(() {
-      _isLoading = false;
-    });
-  }
   
   void _onItemTapped(int index) {
     setState(() {
