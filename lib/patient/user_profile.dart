@@ -142,104 +142,105 @@ class _UserProfileState extends State<UserProfile> {
           : Column(
               children: [
                 PatientCard(patient: _userDataService.patient!),
-                _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
-                : ListView.builder(
-                    itemCount: _bookings.length,
-                    itemBuilder: (context, index) {
-                      final Booking booking = _bookings[index];
-                      return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              booking.description,
-                              style: const TextStyle(
-                                fontSize: 16, 
-                                fontWeight: FontWeight.bold
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.calendar_today, size: 16),
-                                const SizedBox(width: 4),
-                                Text('Date: ${booking.date}'),
-                                const SizedBox(width: 16),
-                                const Icon(Icons.access_time, size: 16),
-                                const SizedBox(width: 4),
-                                Text('Time: ${booking.time}'),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(booking.status),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    booking.status,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
+                Expanded(child: 
+                  _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
+                  : ListView.builder(
+                      itemCount: _bookings.length,
+                      itemBuilder: (context, index) {
+                        final Booking booking = _bookings[index];
+                        return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                booking.description,
+                                style: const TextStyle(
+                                  fontSize: 16, 
+                                  fontWeight: FontWeight.bold
                                 ),
-                                if (booking.status == "AnalysisPending")
-                                  ElevatedButton.icon(
-                                    onPressed: () async {
-                                      _pickPdf();
-                                      if (pdfFilePath != null) {
-                                        try {
-                                          CloudinaryResponse response = await cloudinary.uploadFile(
-                                            CloudinaryFile.fromFile(
-                                              pdfFilePath!,
-                                              folder: 'medical_history',
-                                              resourceType: CloudinaryResourceType.Raw,
-                                            ),
-                                          );
-                                          final medicalHistoryRef = FirebaseDatabase.instance.ref('MedicalHistory');
-                                          medicalHistoryRef.orderByChild('bookingId').equalTo(booking.id).once().then((DatabaseEvent event) {
-                                            if (event.snapshot.exists) {
-                                              final key = event.snapshot.children.first.key;
-                                              if (key != null) {
-                                                medicalHistoryRef.child(key).update({
-                                                  'analysisResultsPdfUrl': response.secureUrl,
-                                                });
-                                                _bookingRef.child(booking.id).update({
-                                                  'status': 'Completed',
-                                                });
-                                              }
-                                            }
-                                          });
-                                          
-                                        } catch (e) {
-                                          _showErrorDialog('Failed to upload PDF file');
-                                          
-                                          setState(() {
-                                            _isLoading = false;
-                                          });
-                                          return;
-                                        }
-                                      }
-                                    },
-                                    icon: const Icon(Icons.add_chart),
-                                    label: const Text("Add Test Results"),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blueAccent,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.calendar_today, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text('Date: ${booking.date}'),
+                                  const SizedBox(width: 16),
+                                  const Icon(Icons.access_time, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text('Time: ${booking.time}'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColor(booking.status),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      booking.status,
+                                      style: const TextStyle(color: Colors.white),
                                     ),
                                   ),
-                              ],
-                            ),
-                          ],
+                                  if (booking.status == "AnalysisPending")
+                                    ElevatedButton.icon(
+                                      onPressed: () async {
+                                        _pickPdf();
+                                        if (pdfFilePath != null) {
+                                          try {
+                                            CloudinaryResponse response = await cloudinary.uploadFile(
+                                              CloudinaryFile.fromFile(
+                                                pdfFilePath!,
+                                                folder: 'medical_history',
+                                                resourceType: CloudinaryResourceType.Raw,
+                                              ),
+                                            );
+                                            final medicalHistoryRef = FirebaseDatabase.instance.ref('MedicalHistory');
+                                            medicalHistoryRef.orderByChild('bookingId').equalTo(booking.id).once().then((DatabaseEvent event) {
+                                              if (event.snapshot.exists) {
+                                                final key = event.snapshot.children.first.key;
+                                                if (key != null) {
+                                                  medicalHistoryRef.child(key).update({
+                                                    'analysisResultsPdfUrl': response.secureUrl,
+                                                  });
+                                                  _bookingRef.child(booking.id).update({
+                                                    'status': 'Completed',
+                                                  });
+                                                }
+                                              }
+                                            });
+                                            
+                                          } catch (e) {
+                                            _showErrorDialog('Failed to upload PDF file');
+                                            
+                                            setState(() {
+                                              _isLoading = false;
+                                            });
+                                            return;
+                                          }
+                                        }
+                                      },
+                                      icon: const Icon(Icons.add_chart),
+                                      label: const Text("Add Test Results"),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blueAccent,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                    },
-                  ),
+                      );
+                      },
+                    ),)
               ],
           ) 
     );

@@ -26,6 +26,19 @@ class UserDataService {
   List<Patient>? get doctorPatients => _doctorPatients;
   bool get isDataLoaded => _isDataLoaded;
 
+  set patient(Patient? value) {
+    _patient = value;
+  }
+  set cabinet(Cabinet? value) {
+    _cabinet = value;
+  }
+  set doctor(Doctor? value) {
+    _doctor = value;
+  }
+  set doctorPatients(List<Patient>? value) {
+    _doctorPatients = value;
+  }
+
   Future<void> loadPatientData() async {
     if (_isDataLoaded) return;
     

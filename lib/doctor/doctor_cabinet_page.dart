@@ -1,5 +1,6 @@
 import 'package:doctors_app/cabinet/register_cabinet_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/services/cabinet_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ class CabinetPage extends StatefulWidget {
 }
 
 class _CabinetPageState extends State<CabinetPage> {
+  final CabinetService _cabinetService = CabinetService();
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
 
@@ -22,7 +25,15 @@ class _CabinetPageState extends State<CabinetPage> {
   @override
   void initState() {
     super.initState();
-    _fetchCabinet();
+    getCabinet();
+  }
+
+  void getCabinet() async {
+    Cabinet cabinet = await _cabinetService.getCabinetByDoctorId(_auth.currentUser!.uid);
+    setState(() {
+      _cabinet = cabinet;
+      _isLoading = false;
+    });
   }
 
   Future<void> _fetchCabinet() async {

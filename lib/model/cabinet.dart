@@ -36,8 +36,8 @@ class Cabinet {
   factory Cabinet.fromMap(Map<String, dynamic> map, [String id = '']) {
     return Cabinet(
       uid: id,
-      name: map['name'],
       doctorId: map['doctorId'],
+      name: map['name'],
       image: map['image'],
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),

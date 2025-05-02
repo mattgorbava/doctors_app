@@ -1,6 +1,7 @@
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/booking_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -18,6 +19,8 @@ class BookAppointmentPage extends StatefulWidget {
 }
 
 class _BookAppointmentPageState extends State<BookAppointmentPage> {
+  final BookingService _bookingService = BookingService();
+
   final _formKey = GlobalKey<FormState>();
 
   DateTime? selectedDate;
@@ -35,13 +38,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   final _descriptionController = TextEditingController();
   bool _prefillDescription = false;
   bool _mandatoryConsultation = false;
+
+  void initAvailability() async {
+    _bookings = await _bookingService.getAllBookingsByPatientId(widget.patient.uid);
+    _precomputeAvailability(widget.desiredDate);
+  }
   
   @override
   void initState() {
     super.initState();
-    _fetchBookings().then((_) {
-      _precomputeAvailability(widget.desiredDate);
-    });
+    initAvailability();
     if (widget.description != null) {
       _descriptionController.text = widget.description!;
       _prefillDescription = true;
@@ -57,33 +63,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
   DateTime _lastOfTheMonth(DateTime date) {
     return DateTime(date.year, date.month + 1, 0);
-  }
-  
-  Future<void> _fetchBookings() async {
-    DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
-
-    try {
-        await _bookingsRef.orderByChild('doctorId').equalTo(widget.cabinet.doctorId).once().then((DatabaseEvent event) {
-        DataSnapshot snapshot = event.snapshot;
-        List<Booking> bookings = [];
-
-        if (snapshot.value != null) {
-          Map<dynamic, dynamic> bookingMap = snapshot.value as Map<dynamic, dynamic>;
-          bookingMap.forEach((key, value) {
-            bookings.add(Booking.fromMap(Map<String, dynamic>.from(value)));
-          });
-        }
-
-        setState(() {
-          _bookings = bookings;
-        });
-      });
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get bookings.'),
-        backgroundColor: Colors.red,
-      ));
-    }
   }
 
   Future<bool> _dayHasAvailableSlots(DateTime date) {
@@ -144,16 +123,16 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     DateTime now = DateTime.now();
     if (desiredDate.isBefore(now)) {
       desiredDate = now;
-      firstDay = _firstOfTheMonth(now.subtract(const Duration(days: 30)));
+      firstDay = now;
       lastDay = _lastOfTheMonth(now.add(const Duration(days: 30)));
     } else {
-      firstDay = _firstOfTheMonth(desiredDate.subtract(const Duration(days: 30)));
+      firstDay = now;
       lastDay = _lastOfTheMonth(desiredDate.add(const Duration(days: 30)));
     }
 
     _availabilityCache.clear();
     DateTime date = firstDay!;
-    for (int i = 1; i < 90 && date.isBefore(lastDay!); i++) {
+    for (int i = 0; i < 90 && date.isBefore(lastDay!); i++) {
       date = firstDay!.add(Duration(days: i));
       DateTime normalizedDate = DateTime(date.year, date.month, date.day);
       bool hasSlots = await _dayHasAvailableSlots(date);
@@ -233,49 +212,73 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       setState(() {
         _isLoading = true;
       });
-      try{
-        DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
+      
+      Map<String, dynamic> bookingData = {
+        'patientId': widget.patient.uid,
+        'doctorId': widget.cabinet.doctorId,
+        'date': "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}",
+        'time': "${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}",
+        'description': _descriptionController.text,
+        'status': 'Pending',
+        'isMandatory': _mandatoryConsultation,
+      };
 
-        if (selectedDate == null || selectedTime == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a date and time')),
-          );
-          return;
-        }
-        
-        String dateStr = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-        String timeStr = "${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}";
-        
-        Map<String, dynamic> bookingData = {
-          'patientId': widget.patient.uid,
-          'doctorId': widget.cabinet.doctorId,
-          'date': dateStr,
-          'time': timeStr,
-          'description': _descriptionController.text,
-          'status': 'Pending',
-          'isMandatory': _mandatoryConsultation,
-        };
-
-        String bookingId = _bookingsRef.push().key!;
-        await _bookingsRef.child(bookingId).set(bookingData).then((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Appointment booked successfully')),
-          );
-          Navigator.pop(context);
-        }).catchError((error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to book appointment')),
-          );
-        });
-      } catch (error) {
+      _bookingService.addBooking(bookingData).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Appointment booked successfully')),
+        );
+        Navigator.pop(context);
+      }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to book appointment')),
         );
-      } finally {
+      }).whenComplete(() {
         setState(() {
           _isLoading = false;
         });
-      }
+      });
+
+      //   DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
+
+      //   if (selectedDate == null || selectedTime == null) {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(content: Text('Please select a date and time')),
+      //     );
+      //     return;
+      //   }
+        
+      //   String dateStr = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+      //   String timeStr = "${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}";
+        
+      //   Map<String, dynamic> bookingData = {
+      //     'patientId': widget.patient.uid,
+      //     'doctorId': widget.cabinet.doctorId,
+      //     'date': dateStr,
+      //     'time': timeStr,
+      //     'description': _descriptionController.text,
+      //     'status': 'Pending',
+      //     'isMandatory': _mandatoryConsultation,
+      //   };
+
+      //   String bookingId = _bookingsRef.push().key!;
+      //   await _bookingsRef.child(bookingId).set(bookingData).then((_) {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(content: Text('Appointment booked successfully')),
+      //     );
+      //     Navigator.pop(context);
+      //   }).catchError((error) {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(content: Text('Failed to book appointment')),
+      //     );
+      //   });
+      // } catch (error) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     const SnackBar(content: Text('Failed to book appointment')),
+      //   );
+      // } finally {
+      //   setState(() {
+      //     _isLoading = false;
+      //   });
     }
   }
 

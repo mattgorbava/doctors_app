@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/booking/booking_card.dart';
 import 'package:doctors_app/model/booking.dart';
+import 'package:doctors_app/services/booking_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class DoctorBookingsPage extends StatefulWidget {
 }
 
 class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
+  final BookingService _bookingService = BookingService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
   List<Booking> _bookings = <Booking>[];
@@ -22,41 +24,14 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
   List<String> statuses = ['Pending', 'Confirmed', 'Cancelled'];
   String? currentStatus = 'Pending';
 
+  void getBookings() async {
+    _bookings = await _bookingService.getAllBookingsByDoctorId(_auth.currentUser!.uid);
+  }
+
   @override
   void initState() {
     super.initState();
-    _fetchBookings();
-  }
-
-  Future<void> _fetchBookings() async {
-    String? currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
-      await _bookingsRef.orderByChild('doctorId').equalTo(currentUserId).once().then((DatabaseEvent event) {
-        DataSnapshot snapshot = event.snapshot;
-        List<Booking> bookings = [];
-
-        if (snapshot.value != null) {
-          Map<dynamic, dynamic> bookingMap = snapshot.value as Map<dynamic, dynamic>;
-          bookingMap.forEach((key, value) {
-            bookings.add(Booking.fromMap(Map<String, dynamic>.from(value), key));
-          });
-        }
-
-        setState(() {
-          _bookings = bookings;
-          _isLoading = false;
-        });
-      }).catchError((error) {
-        print('Error: $error');
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Could not get bookings.'),
-          backgroundColor: Colors.red,
-        ));
-        setState(() {
-          _isLoading = false;
-        });
-      });
-    }
+    getBookings();
   }
 
   @override
@@ -77,7 +52,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
                     return BookingCard(
                       booking: booking,
                       onStatusUpdated: () {
-                        _fetchBookings();
+                        getBookings();
                       }
                     );
                   },

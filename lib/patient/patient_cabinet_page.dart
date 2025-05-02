@@ -41,8 +41,8 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
         await FirebaseDatabase.instance.ref().child('Cabinets').child(_cabinet!.uid).update({
           'numberOfPatients': ServerValue.increment(-1) 
         });
-        _cabinet = null;
-        _doctor = null;
+        _userDataService.cabinet = null;
+        _userDataService.doctor = null;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

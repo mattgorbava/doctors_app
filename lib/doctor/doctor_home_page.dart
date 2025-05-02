@@ -3,6 +3,7 @@ import 'package:doctors_app/booking/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
 import 'package:doctors_app/registration_request/registration_requests_page.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,8 @@ class DoctorHomePage extends StatefulWidget {
 }
 
 class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObserver {
+  final UserDataService _userDataService = UserDataService();
+
   final String _doctorId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   int _selectedIndex = 0;
@@ -24,6 +27,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
   @override
   void initState() {
     super.initState();
+    _userDataService.loadDoctorData();
     WidgetsBinding.instance.addObserver(this);
     _children = <Widget>[
       const CabinetPage(),

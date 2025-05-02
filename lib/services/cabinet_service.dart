@@ -23,7 +23,7 @@ class CabinetService {
     final snapshot = await _cabinetRef.orderByChild('doctorId').equalTo(doctorId).once();
     if (snapshot.snapshot.exists) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      return Cabinet.fromMap(Map<String, dynamic>.from(data), snapshot.snapshot.key!);
+      return Cabinet.fromMap(Map<String, dynamic>.from(data.entries.first.value), data.keys.first);
     }
     throw Exception('Cabinet not found for this doctor');
   }

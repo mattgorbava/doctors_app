@@ -1,8 +1,13 @@
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
+import 'package:doctors_app/doctor/patients_list_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/model/registration_request.dart';
+import 'package:doctors_app/services/doctor_service.dart';
+import 'package:doctors_app/services/patient_service.dart';
+import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +24,20 @@ class CabinetDetailsPage extends StatefulWidget {
 }
 
 class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
+  final DoctorService _doctorService = DoctorService();
+  final PatientService _patientService = PatientService();
+  final RegistrationRequestService _registrationRequestService = RegistrationRequestService();
+
   Doctor? _doctor;
+
+  void getDoctor() async {
+    _doctor = await _doctorService.getDoctorById(widget.cabinet.doctorId);
+  }
 
   @override
   void initState() {
     super.initState();
-    _fetchDoctor();
+    getDoctor();
   }
   
   Future<void> _fetchDoctor() async {
@@ -43,7 +56,6 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
   }
 
   Future<void> _sendRegistrationRequest() async {
-    _fetchDoctor();
     Map<String, dynamic> data = {
       'patientId': FirebaseAuth.instance.currentUser!.uid,
       'doctorId': widget.cabinet.doctorId,
@@ -53,18 +65,17 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
     };
 
     try {
-      await FirebaseDatabase.instance.ref().child('RegistrationRequests').push().set(data);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration request sent successfully.'),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to send registration request. Please try again later.'),
-        ),
-      );
+      RegistrationRequest request = RegistrationRequest.fromMap(data, FirebaseAuth.instance.currentUser!.uid);
+      await _registrationRequestService.addRequest(request);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Registration request sent successfully.'),
+        backgroundColor: Colors.green,
+      ));
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to send registration request: $error'),
+        backgroundColor: Colors.red,
+      ));
     }
   }
 
@@ -210,14 +221,16 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                       ),
                     ),
                     onPressed: () async {
-                      Patient patient = await _fetchPatient(FirebaseAuth.instance.currentUser!.uid);
-                      String currentUserName = '${patient.firstName} ${patient.lastName}';
-                      String doctorName = '${_doctor!.firstName} ${_doctor!.lastName}';
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ChatScreen(
-                          patientName: currentUserName, patientId: patient.uid, doctorName: doctorName, doctorId:_doctor!.uid,)),
-                      );
+                      Patient? patient = await _patientService.getPatientById(FirebaseAuth.instance.currentUser!.uid);
+                      if (patient != null) {
+                        String currentUserName = '${patient.firstName} ${patient.lastName}';
+                        String doctorName = '${_doctor!.firstName} ${_doctor!.lastName}';
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChatScreen(
+                            patientName: currentUserName, patientId: patient.uid, doctorName: doctorName, doctorId:_doctor!.uid,)),
+                        );
+                      }
                     }, 
                     child: Row(
                       children: [

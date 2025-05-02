@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/model/doctor.dart';
+import 'package:doctors_app/services/doctor_service.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -18,34 +20,41 @@ class DoctorProfile extends StatefulWidget {
 
 class _DoctorProfileState extends State<DoctorProfile> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
+  final DoctorService _doctorService = DoctorService();
+  final UserDataService _userDataService = UserDataService();
   Doctor? _doctor;
   bool _isLoading = true;
 
-  Future<void> _fetchDoctorDetails() async {
-    if (widget.doctorId != null) {
-      try {
-      DatabaseEvent event = await _doctorRef.child(widget.doctorId!).once();
-      DataSnapshot snapshot = event.snapshot;
-      Doctor? doctor;
+  // Future<void> _fetchDoctorDetails() async {
+  //   if (widget.doctorId != null) {
+  //     try {
+  //     DatabaseEvent event = await _doctorRef.child(widget.doctorId!).once();
+  //     DataSnapshot snapshot = event.snapshot;
+  //     Doctor? doctor;
 
-      if (snapshot.value != null) {
-        doctor = Doctor.fromMap(snapshot.value as Map<dynamic, dynamic>, widget.doctorId!);
-      }
+  //     if (snapshot.value != null) {
+  //       doctor = Doctor.fromMap(snapshot.value as Map<dynamic, dynamic>, widget.doctorId!);
+  //     }
 
-      setState(() {
-        _doctor = doctor;
-        _isLoading = false;
-      });
+  //     setState(() {
+  //       _doctor = doctor;
+  //       _isLoading = false;
+  //     });
 
-    } catch (e) {
-      print('Error fetching doctor by ID: $e');
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get doctor details.'),
-        backgroundColor: Colors.red,
-      ));
-    }
-    }
+  //   } catch (e) {
+  //     print('Error fetching doctor by ID: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //       content: Text('Could not get doctor details.'),
+  //       backgroundColor: Colors.red,
+  //     ));
+  //   }
+  //   }
+  // }
+
+  void getDoctor() async {
+    Doctor? doctor = await _doctorService.getDoctorById(widget.doctorId!);
+    _doctor = await _doctorService.getDoctorById(widget.doctorId!);
+    _isLoading = false;
   }
 
   Future<void> _logout() async {
@@ -67,7 +76,8 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
   @override
   void initState() {
-    _fetchDoctorDetails();
+    _doctor = _userDataService.doctor;
+    _isLoading = !_userDataService.isDataLoaded;
     super.initState();
   }
 

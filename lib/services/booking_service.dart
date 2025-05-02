@@ -42,9 +42,10 @@ class BookingService {
     return bookings;
   }
 
-  Future<void> addBooking(Booking booking) async {
+  Future<void> addBooking(Map<String, dynamic> bookingData) async {
     try {
-      await _bookingRef.push().set(booking.toMap());
+      String bookingId = _bookingRef.push().key!;
+      await _bookingRef.child(bookingId).set(bookingData);
     } catch (e) {
       print('Error adding booking: $e');
     }
