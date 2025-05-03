@@ -26,11 +26,18 @@ class ChildrenService {
     return children;
   }
 
-  Future<void> addChild(Child child) async {
+  Future<bool> addChild(Map<String, dynamic> child) async {
     try {
-      await _childrenRef.push().set(child.toMap());
+      await _childrenRef.orderByChild('uid').equalTo(child['cnp']).once().then((snapshot) {
+        if (snapshot.snapshot.exists) {
+          return false; 
+        }
+      });
+      await _childrenRef.push().set(child);
+      return true;
     } catch (e) {
       print('Error adding child: $e');
+      return false;
     }
   }
 

@@ -15,7 +15,10 @@ class DoctorBookingsPage extends StatefulWidget {
   State<DoctorBookingsPage> createState() => _DoctorBookingsPageState();
 }
 
-class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
+class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticKeepAliveClientMixin<DoctorBookingsPage> {
+  @override
+  bool get wantKeepAlive => true;
+
   final BookingService _bookingService = BookingService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
@@ -39,6 +42,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Bookings'),

@@ -3,6 +3,7 @@ import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_cabinet_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
+import 'package:doctors_app/patient/patient_children_page.dart';
 import 'package:doctors_app/patient/upcoming_mandatory_consultations.dart';
 import 'package:doctors_app/patient/user_profile.dart';
 import 'package:doctors_app/services/user_data_service.dart';
@@ -26,6 +27,8 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
   final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
   List<Cabinet> _cabinets = [];
   bool _isLoading = true;
+
+  final PageStorageBucket _bucket = PageStorageBucket();
 
   int _selectedIndex = 0;
 
@@ -108,14 +111,17 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
     try {
       await _userDataService.loadPatientData();
 
-      final DatabaseEvent event = await _cabinetRef.once();
-      DataSnapshot snapshot = event.snapshot;
       List<Cabinet> cabinets = [];
-      if (snapshot.value != null) {
-        Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
-        values.forEach((key, value) {
-          cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
-        });
+
+      if (_userDataService.cabinet == null) {
+        final DatabaseEvent event = await _cabinetRef.once();
+        DataSnapshot snapshot = event.snapshot;
+        if (snapshot.value != null) {
+          Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+          values.forEach((key, value) {
+            cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
+          });
+        }
       }
 
       if (!mounted) return;
@@ -123,10 +129,11 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
       setState(() {
         _cabinets = cabinets;
         _children = <Widget>[
-          PatientCabinetPage(cabinets: _cabinets),
-          const ChatListPage(),
-          UpcomingMandatoryConsultations(patientId: _auth.currentUser!.uid),
-          const UserProfile(),
+          PatientCabinetPage(key: PageStorageKey('patientCabinetPage'), cabinets: _cabinets),
+          const ChatListPage(key: PageStorageKey('patientChatlistPage'),),
+          UpcomingMandatoryConsultations(key: PageStorageKey('patientMandatoryConsultationsPage'), patientId: _auth.currentUser!.uid),
+          const PatientChildrenPage(key: PageStorageKey('patientChildrenPage'),),
+          const UserProfile(key:PageStorageKey('patientProfilePage')),
         ];
         _isLoading = false;
       });
@@ -159,40 +166,11 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
   @override
   Widget build(BuildContext context) {
     return _isLoading ? const Center(child: CircularProgressIndicator(),)
-      : PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) async {
-        if (didPop) {
-          return;
-        }
-        
-        final result = await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: const Text('Are you sure?'),
-            content: const Text('Do you want to exit the app?'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('No'),
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-              ),
-              TextButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                  SystemNavigator.pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-      child: Scaffold(
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _children,
+      : Scaffold(
+        body: PageStorage(
+          bucket: _bucket,
+          child: _isLoading ? const Center(child: CircularProgressIndicator(),)
+          : _children[_selectedIndex],
         ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -209,6 +187,10 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
               label: 'Consultations',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.child_care),
+              label: 'Children',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Profile',
             ),
@@ -217,9 +199,10 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
           selectedItemColor: Colors.green,
           unselectedItemColor: Colors.grey,
           onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
         ),
-      ),
-    );
+      );
   }
 
 }

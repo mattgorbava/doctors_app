@@ -15,7 +15,10 @@ class UserProfile extends StatefulWidget {
   State<UserProfile> createState() => _UserProfileState();
 }
 
-class _UserProfileState extends State<UserProfile> {
+class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClientMixin<UserProfile> {
+  @override
+  bool get wantKeepAlive => true;
+
   final UserDataService _userDataService = UserDataService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _bookingRef = FirebaseDatabase.instance.ref().child('Bookings');
@@ -35,6 +38,7 @@ class _UserProfileState extends State<UserProfile> {
   void initState() {
     super.initState();
     _bookings = _userDataService.patientBookings ?? <Booking>[];
+    _isLoading = false;
   }
 
   Future<void> _fetchBookings() async {
@@ -122,6 +126,7 @@ class _UserProfileState extends State<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -131,6 +136,7 @@ class _UserProfileState extends State<UserProfile> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await _auth.signOut();
+              _userDataService.clearUserData();
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
                     (Route<dynamic> route) => false);
             },

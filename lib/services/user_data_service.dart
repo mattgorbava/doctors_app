@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,6 +15,7 @@ class UserDataService {
 
   Patient? _patient;
   List<Booking>? _patientBookings;
+  List<Child> _children = [];
   Cabinet? _cabinet;
   Doctor? _doctor;
   List<Patient>? _doctorPatients;
@@ -25,6 +27,7 @@ class UserDataService {
   Doctor? get doctor => _doctor;
   List<Patient>? get doctorPatients => _doctorPatients;
   bool get isDataLoaded => _isDataLoaded;
+  List<Child> get children => _children;
 
   set patient(Patient? value) {
     _patient = value;
@@ -38,6 +41,13 @@ class UserDataService {
   set doctorPatients(List<Patient>? value) {
     _doctorPatients = value;
   }
+  set patientBookings(List<Booking>? value) {
+    _patientBookings = value;
+  }
+  set children(List<Child> value) {
+    _children = value;
+  }
+  
 
   Future<void> loadPatientData() async {
     if (_isDataLoaded) return;
@@ -54,6 +64,7 @@ class UserDataService {
           await _loadDoctor(_cabinet!.doctorId);
         }
         await _loadBookings(userId);
+        await loadChildren(userId);
       }
       
       _isDataLoaded = true;
@@ -81,6 +92,27 @@ class UserDataService {
       _isDataLoaded = true;
     } catch (e) {
       print('Error loading doctor data: $e');
+    }
+  }
+
+  Future<void> loadChildren(String userId) async {
+    final snapshot = await FirebaseDatabase.instance
+        .ref()
+        .child('Children')
+        .orderByChild('parentId')
+        .equalTo(userId)
+        .once();
+    
+    if (snapshot.snapshot.value != null) {
+      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      List<Child> children = [];
+      data.forEach((key, value) {
+        children.add(Child.fromMap(
+          Map<String, dynamic>.from(value), 
+          key
+        ));
+      });
+      _children = children;
     }
   }
 
@@ -178,10 +210,13 @@ class UserDataService {
     }
   }
   
-  void clearData() {
+  void clearUserData() {
     _patient = null;
     _cabinet = null;
     _doctor = null;
+    _doctorPatients = null;
+    _patientBookings = null;
+    _children = [];
     _isDataLoaded = false;
   }
 }

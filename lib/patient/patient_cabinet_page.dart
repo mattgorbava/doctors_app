@@ -20,7 +20,10 @@ class PatientCabinetPage extends StatefulWidget {
   State<PatientCabinetPage> createState() => _PatientCabinetPageState();
 }
 
-class _PatientCabinetPageState extends State<PatientCabinetPage> {
+class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticKeepAliveClientMixin<PatientCabinetPage> {
+  @override
+  bool get wantKeepAlive => true;
+
   Cabinet? _cabinet;
   Patient? _patient;
   Doctor? _doctor;
@@ -91,6 +94,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),

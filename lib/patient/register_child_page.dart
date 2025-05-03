@@ -1,5 +1,7 @@
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/children_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +17,7 @@ class RegisterChildPage extends StatefulWidget {
 class _RegisterChildPageState extends State<RegisterChildPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final DatabaseReference _childrenRef = FirebaseDatabase.instance.ref('Children');
+  final ChildrenService _childrenService = ChildrenService();
 
   final UserDataService _userDataService = UserDataService();
   late Patient parent;
@@ -46,53 +48,44 @@ class _RegisterChildPageState extends State<RegisterChildPage> {
         _isLoading = true;
       });
   
-      if (_childrenRef != null) {
-        final snapshot = await _childrenRef
-          .orderByChild('cnp')
-          .equalTo(_cnpController.text)
-          .once();
-        
-        if (snapshot.snapshot.value != null) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('A child with this CNP already exists.'),
-            backgroundColor: Colors.red,
-          ));
-          setState(() {
-            _isLoading = false;
-          });
-          return;
+      Map<String, dynamic> childData = {
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
+        'cnp': _cnpController.text,
+        'birthDate': _birthDate.toIso8601String(),
+        'parentId': parent.uid,
+      };
+
+      bool added = false; 
+      
+      try {
+        added = await _childrenService.addChild(childData);
+
+        if (!mounted) return;
+
+        if (added) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Child registered successfully!')),
+          );
+          _userDataService.loadChildren(_userDataService.patient!.uid);
         } else {
-          
-          
-          _childrenRef.push().set({
-            'firstName': _firstNameController.text,
-            'lastName': _lastNameController.text,
-            'cnp': _cnpController.text,
-            'birthDate': _birthDate.toIso8601String(),
-            'parentId': parent.uid,
-            'cabinetId': '',
-          }).then((_) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Child registered successfully.'),
-              backgroundColor: Colors.green,
-            ));
-          }).catchError((error) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Error: $error'),
-              backgroundColor: Colors.red,
-            ));
-          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to register child.')),
+          );
         }
+      } catch (e) {
+        print('Error registering child: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to register child.')),
+        );
       }
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
 
       Navigator.pop(context);
-    } else
-    {
-      setState(() {
-        _isLoading = true;
-      });
     }
-
   }
 
   @override

@@ -13,7 +13,10 @@ class RegistrationRequestsPage extends StatefulWidget {
   State<RegistrationRequestsPage> createState() => _RegistrationRequestsPageState();
 }
 
-class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
+class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> with AutomaticKeepAliveClientMixin<RegistrationRequestsPage> {
+  @override
+  bool get wantKeepAlive => true;
+
   final RegistrationRequestService _registrationRequestService = RegistrationRequestService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _registrationRequestsRef = FirebaseDatabase.instance.ref().child('RegistrationRequests');
@@ -48,6 +51,7 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registration Requests'),

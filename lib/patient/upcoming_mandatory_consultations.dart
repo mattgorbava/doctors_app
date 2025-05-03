@@ -19,7 +19,9 @@ class UpcomingMandatoryConsultations extends StatefulWidget {
   State<UpcomingMandatoryConsultations> createState() => _UpcomingMandatoryConsultationsState();
 }
 
-class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsultations> {
+class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsultations> with AutomaticKeepAliveClientMixin<UpcomingMandatoryConsultations> {
+  @override
+  bool get wantKeepAlive => true;
   final UserDataService _userDataService = UserDataService();
   final BookingService _bookingService = BookingService();
 
@@ -168,6 +170,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
   
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upcoming Mandatory Consultations'),

@@ -20,9 +20,13 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
 
   final String _doctorId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
+  bool _isLoading = true;
+
   int _selectedIndex = 0;
 
   List<Widget> _children = List.generate(5, (_) => const SizedBox.shrink());
+
+  final PageStorageBucket _bucket = PageStorageBucket();
 
   @override
   void initState() {
@@ -32,23 +36,47 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
   }
 
   Future<void> initializeData() async {
+    if (!_isLoading) {
+       setState(() { _isLoading = true; });
+    }
+
     try {
       await _userDataService.loadDoctorData();
-            
+
       if (!mounted) return;
+
+      if (_userDataService.doctor == null) {
+        print("Error: Doctor data could not be loaded in DoctorHomePage.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load doctor details.'), backgroundColor: Colors.red),
+        );
+        setState(() {
+           _isLoading = false;
+           _children = List.generate(5, (_) => const Center(child: Text('Error loading page.')));
+        });
+        return;
+      }
 
       setState(() {
         _children = <Widget>[
-          const CabinetPage(),
-          const RegistrationRequestsPage(),
-          const DoctorBookingsPage(),
-          const DoctorChatlistPage(),
-          DoctorProfile(doctorId: _doctorId),
+          const CabinetPage(key: PageStorageKey('doctorCabinetPage')),
+          const RegistrationRequestsPage(key: PageStorageKey('doctorRequestsPage')),
+          const DoctorBookingsPage(key: PageStorageKey('doctorBookingsPage')),
+          const DoctorChatlistPage(key: PageStorageKey('doctorChatlistPage')),
+          const DoctorProfile(key: const PageStorageKey('doctorProfilePage')),
         ];
+        _isLoading = false; // Stop loading
       });
     } catch (e) {
-      // Handle any errors that occur during data loading
-      print('Error loading doctor data: $e');
+      print('Error initializing doctor home page data: $e');
+      if (!mounted) return;
+      setState(() {
+         _isLoading = false;
+         _children = List.generate(5, (_) => Center(child: Text('Error: ${e.toString()}')));
+      });
+       ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text('Error initializing data: ${e.toString()}'), backgroundColor: Colors.red),
+       );
     }
   }
 
@@ -64,69 +92,43 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
     });
   }
 
-  Future<bool> _onWillPop() async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Are you sure?'),
-        content: const Text('Do you want to exit the app?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('No'),
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-          ),
-          TextButton(
-            child: const Text('Yes'),
-            onPressed: () {
-              Navigator.of(context).pop(true);
-              SystemNavigator.pop();
-            },
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _children,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Cabinet'
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_add),
-              label: 'Requests',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Bookings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat),
-              label: 'Chat',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.green,
-          unselectedItemColor: Colors.grey,
-          onTap: _onItemTapped,
-        ),
+    return Scaffold(
+      body: PageStorage(
+        bucket: _bucket, 
+        child: _isLoading ? const Center(child: CircularProgressIndicator()) 
+        : _children[_selectedIndex],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Cabinet'
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_add),
+            label: 'Requests',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Bookings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: true,
       ),
     );
   }

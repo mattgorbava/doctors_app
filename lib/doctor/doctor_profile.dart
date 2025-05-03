@@ -5,20 +5,22 @@ import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/services/doctor_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoctorProfile extends StatefulWidget {
-  const DoctorProfile({super.key, required this.doctorId});
-
+  const DoctorProfile({super.key, this.doctorId});
+  
   final String? doctorId;
 
   @override
   State<DoctorProfile> createState() => _DoctorProfileState();
 }
 
-class _DoctorProfileState extends State<DoctorProfile> {
+class _DoctorProfileState extends State<DoctorProfile> with AutomaticKeepAliveClientMixin<DoctorProfile> {
+  @override
+  bool get wantKeepAlive => true;
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DoctorService _doctorService = DoctorService();
   final UserDataService _userDataService = UserDataService();
@@ -51,11 +53,21 @@ class _DoctorProfileState extends State<DoctorProfile> {
   //   }
   // }
 
-  void getDoctor() async {
-    Doctor? doctor = await _doctorService.getDoctorById(widget.doctorId!);
-    setState() {
-      _doctor = doctor;
-      _isLoading = false;
+  Future<void> _fetchDoctorDetails() async {
+    if (widget.doctorId != null) {
+      try {
+        Doctor? doctor = await _doctorService.getDoctorById(widget.doctorId!);
+        setState(() {
+          _doctor = doctor;
+          _isLoading = false;
+        });
+      } catch (e) {
+        print('Error fetching doctor by ID: $e');
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Could not get doctor details.'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
@@ -78,7 +90,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
   @override
   void initState() {
-    _doctor = _userDataService.doctor;
+    if (widget.doctorId != null) {
+      _fetchDoctorDetails();
+    } else {
+      _doctor = _userDataService.doctor;
+    }
     _isLoading = false;
     super.initState();
   }
@@ -90,6 +106,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return _isLoading == true ? const Center(child: CircularProgressIndicator(),) 
     : Scaffold(
       appBar: AppBar(
@@ -99,7 +116,12 @@ class _DoctorProfileState extends State<DoctorProfile> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await _logout();
+              _auth.signOut();
+              _userDataService.clearUserData();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                (Route<dynamic> route) => false,
+              );
             },
           ),
         ],

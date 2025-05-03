@@ -13,7 +13,10 @@ class CabinetPage extends StatefulWidget {
   State<CabinetPage> createState() => _CabinetPageState();
 }
 
-class _CabinetPageState extends State<CabinetPage> {
+class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClientMixin<CabinetPage> {
+  @override
+  bool get wantKeepAlive => true;
+
   final CabinetService _cabinetService = CabinetService();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -68,6 +71,7 @@ class _CabinetPageState extends State<CabinetPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return _isLoading ? const Center(child: CircularProgressIndicator(),)
       : Scaffold(
           appBar: AppBar(

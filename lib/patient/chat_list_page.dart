@@ -11,7 +11,10 @@ class ChatListPage extends StatefulWidget {
   State<ChatListPage> createState() => _ChatListPageState();
 }
 
-class _ChatListPageState extends State<ChatListPage> {
+class _ChatListPageState extends State<ChatListPage> with AutomaticKeepAliveClientMixin<ChatListPage> {
+  @override
+  bool get wantKeepAlive => true;
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _chatListRef = FirebaseDatabase.instance.ref().child('ChatList');
   final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
@@ -61,6 +64,7 @@ class _ChatListPageState extends State<ChatListPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat List'),
