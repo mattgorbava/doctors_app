@@ -35,6 +35,16 @@ class PatientService {
     return null;
   }
 
+  Future<bool> checkUniqueCnp(String cnp) async {
+    try {
+      final snapshot = await _patientRef.orderByChild('cnp').equalTo(cnp).once();
+      return !snapshot.snapshot.exists;
+    } catch (e) {
+      print('Error checking unique CNP: $e');
+      return false;
+    }
+  }
+
   Future<List<Patient>> getPatientsByCabinetId(String cabinetId) async {
     List<Patient> patients = [];
     try {
@@ -51,9 +61,26 @@ class PatientService {
     return patients;
   }
 
-  Future<void> addPatient(Patient patient) async {
+  Future<List<Patient>> getChildrenByParentId(String parentId) async {
+    List<Patient> patients = [];
     try {
-      await _patientRef.push().set(patient.toMap());
+      final snapshot = await _patientRef.orderByChild('parentId').equalTo(parentId).once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        data.forEach((key, value) {
+          patients.add(Patient.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+    } catch (e) {
+      print('Error fetching patients by parent ID: $e');
+    }
+    return patients;
+  }
+
+  Future<void> addPatient(Map<String, dynamic> patientData) async {
+    try {
+      String patientId = _patientRef.push().key!;
+      await _patientRef.child(patientId).set(patientData);
     } catch (e) {
       print('Error adding patient: $e');
     }

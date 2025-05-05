@@ -1,14 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabinetCard extends StatelessWidget {
-  CabinetCard({super.key, required this.cabinet});
+  const CabinetCard({super.key, required this.cabinet});
 
   final Cabinet cabinet;
-  late Doctor? doctor;
 
   @override
   Widget build(BuildContext context) {

@@ -1,14 +1,14 @@
 class Doctor {
-  final String uid;
-  final String email;
-  final String profileImageUrl;
-  final String city;
-  final String firstName;
-  final String lastName;
-  final String phoneNumber;
-  final String cvUrl;
-  final String legitimationNumber;
-  final String? cabinetId;
+  String uid;
+  String email;
+  String profileImageUrl;
+  String city;
+  String firstName;
+  String lastName;
+  String phoneNumber;
+  String cvUrl;
+  String legitimationNumber;
+  String? cabinetId;
 
   Doctor({
     required this.uid,

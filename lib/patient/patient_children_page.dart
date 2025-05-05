@@ -1,11 +1,13 @@
+import 'package:doctors_app/auth/register_screen.dart';
+import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/patient/register_child_page.dart';
 import 'package:doctors_app/services/children_service.dart';
+import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
+import 'package:doctors_app/widgets/child_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class PatientChildrenPage extends StatefulWidget {
   const PatientChildrenPage({super.key});
@@ -21,9 +23,7 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
   List<Child> _children = [];
   String patientId = FirebaseAuth.instance.currentUser?.uid ?? '';
   final UserDataService _userDataService = UserDataService();
-  final ChildrenService _childrenService = ChildrenService();
-
-  DatabaseReference _childrenRef = FirebaseDatabase.instance.ref().child('Children');
+  final PatientService _patientService = PatientService();
 
   @override
   void initState() {
@@ -32,16 +32,14 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
   }
 
   void _navigateAndRegisterChild() async {
-    final result = await Navigator.push<bool>(
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const RegisterChildPage()),
+      MaterialPageRoute(builder: (context) => const RegisterPage(isChild: true,)),
     );
 
-    if (mounted && result == true) {
-      setState(() {
-        _children = _userDataService.children;
-      });
-    }
+    setState(() {
+      _children = _userDataService.children;
+    });
   }
 
   @override
@@ -74,10 +72,7 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
                   child: ListView.builder(
                     itemCount: _children.length,
                     itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text('${_children[index].firstName} ${_children[index].lastName}'),
-                        subtitle: Text('Birth date: ${DateFormat('dd-MM-yyyy').format(_children[index].birthDate)}'),
-                      );
+                      return ChildCard(child: _children[index]);
                     },
                   ),
                 ),

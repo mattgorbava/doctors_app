@@ -1,11 +1,11 @@
 class Child {
-  final String uid;
-  final String firstName;
-  final String lastName;
-  final String parentId;
-  final String cabinetId;
-  final String cnp;
-  final DateTime birthDate;
+  String uid;
+  String firstName;
+  String lastName;
+  String parentId;
+  String cabinetId;
+  String cnp;
+  DateTime birthDate;
 
   Child({
     required this.uid,
@@ -39,5 +39,27 @@ class Child {
       'cnp': cnp,
       'birthDate': birthDate.toIso8601String(),
     };
+  }
+
+  bool get isEmpty {
+    return 
+    uid.isEmpty &&
+    firstName.isEmpty && 
+    lastName.isEmpty && 
+    parentId.isEmpty && 
+    cnp.isEmpty && 
+    cabinetId.isEmpty;
+  }
+
+  factory Child.empty() {
+    return Child(
+      uid: '',
+      firstName: '',
+      lastName: '',
+      parentId: '',
+      cabinetId: '',
+      cnp: '',
+      birthDate: DateTime.now(),
+    );
   }
 }

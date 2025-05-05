@@ -1,26 +1,30 @@
 class Patient {
-  final String uid;
-  final String email;
-  final String profileImageUrl;
-  final String city;
-  final String firstName;
-  final String lastName;
-  final String phoneNumber;
-  final String cabinetId;
-  final DateTime birthDate;
-  final String cnp;
+  String uid;
+  String email;
+  String profileImageUrl;
+  String city;
+  String firstName;
+  String lastName;
+  String phoneNumber;
+  String cabinetId;
+  DateTime birthDate;
+  String cnp;
+  bool isChild;
+  String parentId;
 
   Patient({
     required this.uid,
-    required this.email,
-    required this.profileImageUrl,
-    required this.city,
+    this.email = '',
+    this.profileImageUrl = '',
+    this.city = '',
     required this.firstName,
     required this.lastName,
-    required this.phoneNumber,
+    this.phoneNumber = '',
     required this.cabinetId,
     required this.birthDate,
     required this.cnp,
+    required this.isChild,
+    this.parentId = '',
   });
 
   factory Patient.fromMap(Map<String, dynamic> data, [String id = '']) {
@@ -35,6 +39,8 @@ class Patient {
       cabinetId: data['cabinetId'] ?? '',
       birthDate: DateTime.parse(data['birthDate']),
       cnp: data['cnp'] ?? '',
+      isChild: data['isChild'] ?? false,
+      parentId: data['parentId'] ?? '',
     );
   }
 
@@ -50,6 +56,8 @@ class Patient {
       'cabinetId': cabinetId,
       'birthDate': birthDate.toIso8601String(),
       'cnp': cnp,
+      'isChild': isChild,
+      'parentId': parentId,
     };
   }
 
@@ -65,6 +73,8 @@ class Patient {
       cabinetId: '',
       birthDate: DateTime.now(),
       cnp: '',
+      isChild: false,
+      parentId: '',
     );
   }
 
@@ -77,6 +87,7 @@ class Patient {
         lastName.isEmpty &&
         phoneNumber.isEmpty &&
         cabinetId.isEmpty &&
-        cnp.isEmpty;
+        cnp.isEmpty &&
+        parentId.isEmpty;
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:doctors_app/auth/login_page.dart';
-import 'package:doctors_app/booking/booking_card.dart';
+import 'package:doctors_app/widgets/booking_card.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -8,9 +8,6 @@ class PatientCard extends StatelessWidget {
 
   final Patient patient;
 
-  // ai putea crea user in firebase, sa fie entitate de baza pentru patient si doctor
-  // si reciclezi cardu asta
-
   @override
   Widget build(BuildContext context) {
     return Container(

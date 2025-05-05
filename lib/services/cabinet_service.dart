@@ -11,6 +11,9 @@ class CabinetService {
   final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
 
   Future<Cabinet> getCabinetById(String id) async {
+    if (id.isEmpty) {
+      return Cabinet.empty();
+    }
     final snapshot = await _cabinetRef.child(id).once();
     if (snapshot.snapshot.exists) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
@@ -26,6 +29,22 @@ class CabinetService {
       return Cabinet.fromMap(Map<String, dynamic>.from(data.entries.first.value), data.keys.first);
     }
     throw Exception('Cabinet not found for this doctor');
+  }
+
+  Future<List<Cabinet>> getAllCabinets() async {
+    List<Cabinet> cabinets = [];
+    try {
+      final snapshot = await _cabinetRef.once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        data.forEach((key, value) {
+          cabinets.add(Cabinet.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+    } catch (e) {
+      print('Error fetching cabinets: $e');
+    }
+    return cabinets;
   }
 
   Future<void> addCabinet(Cabinet cabinet) async {

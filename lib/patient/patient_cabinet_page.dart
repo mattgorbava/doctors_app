@@ -12,9 +12,7 @@ import 'package:doctors_app/doctor/doctor_profile.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PatientCabinetPage extends StatefulWidget {
-  const PatientCabinetPage({Key? key, required this.cabinets}) : super(key: key);
-
-  final List<Cabinet> cabinets;
+  const PatientCabinetPage({Key? key}) : super(key: key);
 
   @override
   State<PatientCabinetPage> createState() => _PatientCabinetPageState();
@@ -114,7 +112,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
               height: 50,
               child: ElevatedButton(
                 onPressed: () { 
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => FindCabinetPage(cabinets: widget.cabinets)));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => FindCabinetPage()));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2B962B),

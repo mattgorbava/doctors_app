@@ -1,12 +1,12 @@
 class Booking {
-  final String date;
-  final String description;
-  final String id;
-  final String doctorId;
-  final String patientId;
-  final String status;
-  final String time;
-  final bool isMandatory;
+  String date;
+  String description;
+  String id;
+  String doctorId;
+  String patientId;
+  String status;
+  String time;
+  bool isMandatory;
 
   Booking({
     required this.date,

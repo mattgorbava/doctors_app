@@ -1,6 +1,6 @@
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
-import 'package:doctors_app/doctor/patient_card.dart';
+import 'package:doctors_app/widgets/patient_card.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:file_picker/file_picker.dart';

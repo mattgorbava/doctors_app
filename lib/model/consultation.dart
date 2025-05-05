@@ -1,8 +1,8 @@
 class Consultation {
-  final String title;
-  final int periodInMonths;
-  final int ageInMonthsStart;
-  final int ageInMonthsEnd;
+  String title;
+  int periodInMonths;
+  int ageInMonthsStart;
+  int ageInMonthsEnd;
 
   Consultation({
     required this.title,

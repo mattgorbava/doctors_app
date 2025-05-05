@@ -1,9 +1,13 @@
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:doctors_app/services/cabinet_service.dart';
+import 'package:doctors_app/services/children_service.dart';
 import 'package:doctors_app/services/patient_service.dart';
+import 'package:doctors_app/services/registration_request_service.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -20,9 +24,13 @@ class RegistrationRequestDetailsPage extends StatefulWidget {
 class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDetailsPage> {
   Patient? _patient;
   Cabinet? _cabinet;
+  Child? _child;
   bool _isLoading = true;
   final PatientService _patientService = PatientService();
   final CabinetService _cabinetService = CabinetService();
+  final ChildrenService _childrenService = ChildrenService();
+  final RegistrationRequestService _registrationRequestService = RegistrationRequestService();
+  final UserDataService _userDataService = UserDataService();
 
   Future<void> _fetchPatient() async {
     try {
@@ -51,10 +59,37 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
     }
   }
 
+  Future<void> _fetchChild() async {
+    try {
+      Child child = await _childrenService.getChildById(widget.request.childId!) ?? Child.empty();
+      if (child.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No child details available.'),
+          ),
+        );
+      } else {
+        setState(() {
+          _child = child;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to fetch child details. Please try again later.'),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   Future<void> _fetchCabinet() async {
     try {
-      Cabinet cabinet = await _cabinetService.getCabinetById(_patient!.cabinetId) ?? Cabinet.empty();
-      if (cabinet.isEmpty) {
+      Cabinet? cabinet = _userDataService.cabinet;
+      if (cabinet!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('No cabinet details available.'),
@@ -79,21 +114,31 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
   }
 
   Future<void> _acceptRequest() async {
-    DatabaseReference registrationRequestRef = FirebaseDatabase.instance.ref().child('RegistrationRequests').child(widget.request.uid!);
-    DatabaseReference patientsRef = FirebaseDatabase.instance.ref().child('Patients').child(widget.request.patientId!);
-    DatabaseReference cabinetsRef = FirebaseDatabase.instance.ref().child('Cabinets').child(_cabinet!.uid!);
     try {
-      await registrationRequestRef.update({
-        'status': 'confirmed',
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
-      await patientsRef.update({
-        'cabinetId': _cabinet!.uid,
-      });
-      await cabinetsRef.update({
-        'numberOfPatients': _cabinet!.numberOfPatients + 1,
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      widget.request.status = 'confirmed';
+      widget.request.updatedAt = DateTime.now();
+      await _registrationRequestService.updateRequest(widget.request);
+      // await registrationRequestRef.update({
+      //   'status': 'confirmed',
+      //   'updatedAt': DateTime.now().toIso8601String(),
+      // });
+      if (_child != null) {
+        _child!.cabinetId = _cabinet!.uid;
+        await _childrenService.updateChild(_child!);
+      } else {
+        _patient!.cabinetId = _cabinet!.uid;
+        _patientService.updatePatient(_patient!);
+      }
+      // await patientsRef.update({
+      //   'cabinetId': _cabinet!.uid,
+      // });
+      _cabinet!.numberOfPatients = _cabinet!.numberOfPatients + 1;
+      _cabinet!.updatedAt = DateTime.now();
+      _cabinetService.updateCabinet(_cabinet!);
+      // await cabinetsRef.update({
+      //   'numberOfPatients': _cabinet!.numberOfPatients + 1,
+      //   'updatedAt': DateTime.now().toIso8601String(),
+      // });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration request accepted successfully.'),
@@ -129,11 +174,16 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
     }
   }
 
+  Future<void> _getData() async {
+    await _fetchPatient();
+    await _fetchChild();
+    await _fetchCabinet();
+  }
+
   @override
   void initState() {
     super.initState();
-    _fetchPatient();
-    _fetchCabinet();
+    _getData();
   }
 
   @override

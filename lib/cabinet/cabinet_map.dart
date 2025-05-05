@@ -1,5 +1,6 @@
 import 'package:doctors_app/cabinet/cabinet_details_page.dart';
 import 'package:doctors_app/model/directions_model.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:geocoding/geocoding.dart';
@@ -7,9 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CabinetMap extends StatefulWidget {
-  const CabinetMap({super.key, required this.cabinets});
-
-  final List<Cabinet> cabinets;
+  const CabinetMap({super.key});
 
   @override
   State<CabinetMap> createState() => _CabinetMapState();
@@ -22,6 +21,7 @@ class _CabinetMapState extends State<CabinetMap> {
   LatLng? _currentPosition;
   bool _isLoading = false;
   final Set<Marker> _markers = {};
+  final UserDataService _userDataService = UserDataService();
 
   @override
   void initState() {
@@ -89,7 +89,7 @@ class _CabinetMapState extends State<CabinetMap> {
   }
 
   void _addCabinetMarkers() async {
-    for (var cabinet in widget.cabinets) {
+    for (var cabinet in _userDataService.cabinets) {
       LatLng cabinetPosition = LatLng(cabinet.location.latitude, cabinet.location.longitude);
 
       _markers.add(

@@ -1,12 +1,11 @@
 import 'dart:io';
-import 'dart:math';
-
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
+import 'package:doctors_app/services/patient_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -17,10 +16,11 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key, this.doctor, this.patient});
+  const RegisterPage({super.key, this.doctor, this.patient, this.isChild = false});
 
   final Doctor? doctor;
   final Patient? patient;
+  final bool isChild;
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -62,6 +62,8 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _rememberMe = false;
 
   var logger = Logger();
+
+  final PatientService _patientService = PatientService();
 
   final cloudinary = CloudinaryPublic(
     '',  
@@ -194,84 +196,107 @@ class _RegisterPageState extends State<RegisterPage> {
             }
           }
         }
-
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-          email: _emailController.text, password: _passwordController.text,
-        );
-        User? user = userCredential.user;
-         if (user != null) {
-          String userTypePath = userType == 'Doctor' ? 'Doctors' : 'Patients';
-
-          if (_imageFile != null) {
-            try {
-              CloudinaryResponse response = await cloudinary.uploadFile(
-                CloudinaryFile.fromFile(
-                  _imageFile!.path,
-                  folder: userTypePath.toLowerCase(), 
-                ),
-              );
-              profileImageUrl = response.secureUrl;
-            } catch (e) {
-              _showErrorDialog('Failed to upload profile image');
-              logger.d(e);
-              userCredential.user!.delete();
+        
+        if (userType == 'Patient' || widget.isChild) {
+          _patientService.checkUniqueCnp(_cnpController.text).then((isUnique) {
+            if (!isUnique) {
+              _showErrorDialog('CNP already exists. Please use a unique CNP.');
               setState(() {
                 _isLoading = false;
               });
-              return;
             }
-          }
+          });
+        }
 
-          if (userType == 'Doctor' && pdfFilePath != null) {
-            try {
-              CloudinaryResponse response = await cloudinary.uploadFile(
-                CloudinaryFile.fromFile(
-                  pdfFilePath!,
-                  folder: 'cvs',
-                  resourceType: CloudinaryResourceType.Raw,
-                ),
-              );
-              cvUrl = response.secureUrl;
-            } catch (e) {
-              _showErrorDialog('Failed to upload PDF file');
-              
-              setState(() {
-                _isLoading = false;
-              });
-              return;
-            }
-          }
-
-          Map<String, dynamic> userData = {
-            'uid': user.uid,
-            'email': _emailController.text,
-            'phoneNumber': _phoneNumberController.text,
-            'firstName': _firstNameController.text,
-            'lastName': _lastNameController.text,
-            'city': city,
-            'profileImageUrl': profileImageUrl,
-          };
-
-          if (userType == 'Patient') {
-            userData['cabinetId'] = '';
-            userData['birthDate'] = DateTime.now().toIso8601String();
-            userData['cnp'] = _cnpController.text;
-          }
-
-          if (userType == 'Doctor') {
-            userData['legitimationNumber'] = _legitimationNumberController.text;
-            userData['cvUrl'] = cvUrl;
-            userData['cabinetId'] = '';
-          }
-
-          await _db.child(userTypePath).child(user.uid).set(userData);
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  userType == 'Doctor' ? const DoctorHomePage() : const PatientHomePage(),
-            ),
+        if (!widget.isChild) {
+          UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+            email: _emailController.text, password: _passwordController.text,
           );
+          User? user = userCredential.user;
+          if (user != null) {
+            String userTypePath = userType == 'Doctor' ? 'Doctors' : 'Patients';
+
+            if (_imageFile != null) {
+              try {
+                CloudinaryResponse response = await cloudinary.uploadFile(
+                  CloudinaryFile.fromFile(
+                    _imageFile!.path,
+                    folder: userTypePath.toLowerCase(), 
+                  ),
+                );
+                profileImageUrl = response.secureUrl;
+              } catch (e) {
+                _showErrorDialog('Failed to upload profile image');
+                logger.d(e);
+                userCredential.user!.delete();
+                setState(() {
+                  _isLoading = false;
+                });
+                return;
+              }
+            }
+
+            if (userType == 'Doctor' && pdfFilePath != null) {
+              try {
+                CloudinaryResponse response = await cloudinary.uploadFile(
+                  CloudinaryFile.fromFile(
+                    pdfFilePath!,
+                    folder: 'cvs',
+                    resourceType: CloudinaryResourceType.Raw,
+                  ),
+                );
+                cvUrl = response.secureUrl;
+              } catch (e) {
+                _showErrorDialog('Failed to upload PDF file');
+                
+                setState(() {
+                  _isLoading = false;
+                });
+                return;
+              }
+            }
+
+            Map<String, dynamic> userData = {
+              'uid': user.uid,
+              'email': _emailController.text,
+              'phoneNumber': _phoneNumberController.text,
+              'firstName': _firstNameController.text,
+              'lastName': _lastNameController.text,
+              'city': city,
+              'profileImageUrl': profileImageUrl,
+            };
+
+            if (userType == 'Patient') {
+              userData['cabinetId'] = '';
+              userData['birthDate'] = DateTime.now().toIso8601String();
+              userData['cnp'] = _cnpController.text;
+            }
+
+            if (userType == 'Doctor') {
+              userData['legitimationNumber'] = _legitimationNumberController.text;
+              userData['cvUrl'] = cvUrl;
+              userData['cabinetId'] = '';
+            }
+
+            await _db.child(userTypePath).child(user.uid).set(userData);
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    userType == 'Doctor' ? const DoctorHomePage() : const PatientHomePage(),
+              ),
+            );
+          }
+        } else {
+            Map<String, dynamic> childData = {
+              'firstName': _firstNameController.text,
+              'lastName': _lastNameController.text,
+              'cnp': _cnpController.text,
+              'birthDate': birthDate.toIso8601String(),
+              'parentId': widget.patient!.uid,
+            };
+            _patientService.addPatient(childData);
+            Navigator.pop(context);
         }
       } catch (e) {
         _showErrorDialog('Failed to register user');
@@ -429,92 +454,51 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 spacing: 10,
                 children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Select user type', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black,)),
-                      Wrap(
-                        spacing: 10,
-                        children: ['Patient', 'Doctor'].map((String type) {
-                          final isSelected = userType == type;
-                          return ChoiceChip(
-                            checkmarkColor: Colors.black,
-                            label: Text(type, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black),),
-                            selected: isSelected,
-                            selectedColor: const Color.fromARGB(255, 41, 148, 41),
-                            backgroundColor: const Color.fromARGB(255, 191, 230, 191),
-                            labelStyle: GoogleFonts.poppins(color: isSelected ? Colors.white : const Color(0xFF58ab58)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(
-                                color: isSelected ? const Color(0xFF58ab58) : const Color(0xFF84c384),
-                                width: 2,
+                if (!widget.isChild) ... [
+                  SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Select user type', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black,)),
+                        Wrap(
+                          spacing: 10,
+                          children: ['Patient', 'Doctor'].map((String type) {
+                            final isSelected = userType == type;
+                            return ChoiceChip(
+                              checkmarkColor: Colors.black,
+                              label: Text(type, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black),),
+                              selected: isSelected,
+                              selectedColor: const Color.fromARGB(255, 41, 148, 41),
+                              backgroundColor: const Color.fromARGB(255, 191, 230, 191),
+                              labelStyle: GoogleFonts.poppins(color: isSelected ? Colors.white : const Color(0xFF58ab58)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide(
+                                  color: isSelected ? const Color(0xFF58ab58) : const Color(0xFF84c384),
+                                  width: 2,
+                                ),
                               ),
-                            ),
-                            onSelected: (bool selected) {
-                              setState(() {
-                                userType = (selected ? type : userType);
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 44,
-                  child: TextFormField(
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 191, 230, 191),
-                      labelText: 'Email',
-                      labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  userType = (selected ? type : userType);
+                                });
+                              },
+                            );
+                          }).toList(),
                         ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF58ab58),
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
-                        ),
-                      ),
+                      ],
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter email';
-                      }
-                      return null;
-                    },
                   ),
-                ),
-                if (!isEditting)
                   SizedBox(
                     height: 44,
                     child: TextFormField(
                       style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-                      controller: _passwordController,
+                      controller: _emailController,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color.fromARGB(255, 191, 230, 191),
-                        labelText: 'Password',
+                        labelText: 'Email',
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -537,66 +521,175 @@ class _RegisterPageState extends State<RegisterPage> {
                             width: 1,
                           ),
                         ),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off, color: Colors.grey.shade400,),
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                            });
-                          },
-                        ),
                       ),
-                      obscureText: _obscureText,
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value!= null && value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter email';
                         }
                         return null;
                       },
                     ),
                   ),
-                SizedBox(
-                  height: 44,
-                  child: TextFormField(
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
-                    controller: _phoneNumberController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color.fromARGB(255, 191, 230, 191),
-                      labelText: 'Phone number',
-                      labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
+                  if (!isEditting)
+                    SizedBox(
+                      height: 44,
+                      child: TextFormField(
+                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: const Color.fromARGB(255, 191, 230, 191),
+                          labelText: 'Password',
+                          labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF84c384),
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF58ab58),
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF84c384),
+                              width: 1,
+                            ),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off, color: Colors.grey.shade400,),
+                            onPressed: () {
+                              setState(() {
+                                _obscureText = !_obscureText;
+                              });
+                            },
+                          ),
                         ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF58ab58),
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF84c384),
-                          width: 1,
-                        ),
+                        obscureText: _obscureText,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value!= null && value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
                       ),
                     ),
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value == null || value.length < 6) {
-                        return 'Please enter phone number';
-                      }
-                      return null;
-                    },
+                  SizedBox(
+                    height: 44,
+                    child: TextFormField(
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      controller: _phoneNumberController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 191, 230, 191),
+                        labelText: 'Phone number',
+                        labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF58ab58),
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF84c384),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      validator: (value) {
+                        if (value == null || value.length < 6) {
+                          return 'Please enter phone number';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
+                  SizedBox(
+                  height: 44,
+                  child: DropdownButtonFormField<String>(
+                    value: city,
+                    items: ['Alba Iulia', 'Alexandria', 'Arad', 'Bacău', 'Baia Mare', 'Bistrița', 'Botoșani', 'Brașov', 'Brăila', 'București', 'Buzău', 'Călărași', 'Cluj-Napoca', 'Constanța', 'Craiova', 'Deva', 'Focșani', 'Galați', 'Giurgiu', 'Iași', 'Miercurea Ciuc', 'Oradea', 'Piatra Neamț', 'Pitești', 'Ploiești', 'Râmnicu Vâlcea', 'Reșița', 'Satu Mare', 'Sfântu Gheorghe', 'Sibiu', 'Slatina', 'Slobozia', 'Suceava', 'Târgu Jiu', 'Târgu Mureș', 'Târgoviște', 'Timișoara', 'Tulcea', 'Vaslui', 'Zalău'].map((String city) {
+                    return DropdownMenuItem(value: city, child: Text(city, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
+                  }).toList(), 
+                  onChanged: (val){
+                    setState (() {
+                      city = val as String;
+                    });
+                  }, 
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color.fromARGB(255, 191, 230, 191),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                    labelText: 'City',
+                    labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF84c384),
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF58ab58),
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF84c384),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  validator: (val) => val == null ? 'Please select a city' : null,),
                 ),
+                GestureDetector(
+                  onTap: _pickImage, 
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100), 
+                    child: _imageFile != null ? Image.file(
+                      File(_imageFile!.path),
+                      width: 100, 
+                      height: 100,
+                      fit: BoxFit.cover,)
+                    : profileImageUrl.isNotEmpty ? Image.network(
+                      profileImageUrl,
+                      width: 100, 
+                      height: 100,
+                      fit: BoxFit.cover,) 
+                    : Container(
+                        color: const Color(0xffF0EFFF), 
+                        width: 100, 
+                        height: 100,
+                        child: Center(
+                          child: Icon(Icons.add_a_photo, color: Colors.grey.shade600, size: 30,),
+                            ),
+                          ),
+                        ),
+                      ),
+                ],
                 SizedBox(
                   height: 44,
                   child: TextFormField(
@@ -679,72 +772,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                   ),
                 ),
-                SizedBox(
-                  height: 44,
-                  child: DropdownButtonFormField<String>(
-                    value: city,
-                    items: ['Alba Iulia', 'Alexandria', 'Arad', 'Bacău', 'Baia Mare', 'Bistrița', 'Botoșani', 'Brașov', 'Brăila', 'București', 'Buzău', 'Călărași', 'Cluj-Napoca', 'Constanța', 'Craiova', 'Deva', 'Focșani', 'Galați', 'Giurgiu', 'Iași', 'Miercurea Ciuc', 'Oradea', 'Piatra Neamț', 'Pitești', 'Ploiești', 'Râmnicu Vâlcea', 'Reșița', 'Satu Mare', 'Sfântu Gheorghe', 'Sibiu', 'Slatina', 'Slobozia', 'Suceava', 'Târgu Jiu', 'Târgu Mureș', 'Târgoviște', 'Timișoara', 'Tulcea', 'Vaslui', 'Zalău'].map((String city) {
-                    return DropdownMenuItem(value: city, child: Text(city, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
-                  }).toList(), 
-                  onChanged: (val){
-                    setState (() {
-                      city = val as String;
-                    });
-                  }, 
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 191, 230, 191),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    labelText: 'City',
-                    labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF84c384),
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF58ab58),
-                        width: 1,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF84c384),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  validator: (val) => val == null ? 'Please select a city' : null,),
-                ),
-                GestureDetector(
-                  onTap: _pickImage, 
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100), 
-                    child: _imageFile != null ? Image.file(
-                      File(_imageFile!.path),
-                      width: 100, 
-                      height: 100,
-                      fit: BoxFit.cover,)
-                    : profileImageUrl.isNotEmpty ? Image.network(
-                      profileImageUrl,
-                      width: 100, 
-                      height: 100,
-                      fit: BoxFit.cover,) 
-                    : Container(
-                        color: const Color(0xffF0EFFF), 
-                        width: 100, 
-                        height: 100,
-                        child: Center(
-                          child: Icon(Icons.add_a_photo, color: Colors.grey.shade600, size: 30,),
-                            ),
-                          ),
-                        ),
-                      ),
+                const SizedBox(height: 10,),
+
                 if(userType == 'Doctor') ... [
                   SizedBox(
                     height: 44,
@@ -813,7 +842,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ],
-                if (userType == 'Patient') ... [
+                if (userType == 'Patient' || widget.isChild) ... [
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 44,

@@ -1,20 +1,20 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Cabinet {
-  final String uid;
-  final String name;
-  final String doctorId;
-  final String image;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final LatLng location;
-  final String address;
-  final double rating;
-  final int totalReviews;
-  final int capacity;
-  final int numberOfPatients;
-  final String openingTime;
-  final String closingTime;
+  String uid;
+  String name;
+  String doctorId;
+  String image;
+  DateTime createdAt;
+  DateTime updatedAt;
+  LatLng location;
+  String address;
+  double rating;
+  int totalReviews;
+  int capacity;
+  int numberOfPatients;
+  String openingTime;
+  String closingTime;
 
   Cabinet({
     required this.uid,

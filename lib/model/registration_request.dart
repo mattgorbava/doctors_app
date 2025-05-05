@@ -1,3 +1,5 @@
+import 'package:doctors_app/model/child.dart';
+
 class RegistrationRequest {
   String uid;
   String doctorId;
@@ -5,6 +7,7 @@ class RegistrationRequest {
   DateTime createdAt;
   DateTime updatedAt;
   String status;
+  String? childId;
 
   RegistrationRequest({
     required this.uid,
@@ -13,6 +16,7 @@ class RegistrationRequest {
     required this.createdAt,
     required this.updatedAt,
     required this.status,
+    this.childId,
   });
 
   factory RegistrationRequest.fromMap(Map<dynamic, dynamic> map, [String id = '']) {
@@ -23,6 +27,7 @@ class RegistrationRequest {
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
       status: map['status'],
+      childId: map['childId'],
     );
   }
 
@@ -33,6 +38,7 @@ class RegistrationRequest {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'status': status,
+      'childId': childId,
     };
   }
 }

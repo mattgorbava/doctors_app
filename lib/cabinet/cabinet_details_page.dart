@@ -2,6 +2,7 @@ import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
 import 'package:doctors_app/doctor/patients_list_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
@@ -15,9 +16,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CabinetDetailsPage extends StatefulWidget {
-  const CabinetDetailsPage({super.key, required this.cabinet});
+  const CabinetDetailsPage({super.key, required this.cabinet, this.child});
 
   final Cabinet cabinet;
+
+  final Child? child;
 
   @override
   State<CabinetDetailsPage> createState() => _CabinetDetailsPageState();
@@ -58,6 +61,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
   Future<void> _sendRegistrationRequest() async {
     Map<String, dynamic> data = {
       'patientId': FirebaseAuth.instance.currentUser!.uid,
+      'childId': widget.child?.uid,
       'doctorId': widget.cabinet.doctorId,
       'status': 'pending',
       'createdAt': DateTime.now().toIso8601String(),

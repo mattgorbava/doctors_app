@@ -10,9 +10,6 @@ class BookingCard extends StatelessWidget {
   
   final Booking booking;
 
-  final DatabaseReference _patientRef = FirebaseDatabase.instance.ref().child('Patients');
-  final DatabaseReference _medicalHistoryRef = FirebaseDatabase.instance.ref().child('MedicalHistory');
-
   final VoidCallback onStatusUpdated;
 
   final PatientService _patientService = PatientService();

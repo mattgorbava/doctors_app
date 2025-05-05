@@ -1,4 +1,4 @@
-import 'package:doctors_app/doctor/patient_card.dart';
+import 'package:doctors_app/widgets/patient_card.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_details_page.dart';
 import 'package:doctors_app/services/user_data_service.dart';

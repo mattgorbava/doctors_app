@@ -26,6 +26,15 @@ class ChildrenService {
     return children;
   }
 
+  Future<Child?> getChildById(String id) async {
+    final snapshot = await _childrenRef.child(id).once();
+    if (snapshot.snapshot.exists) {
+      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      return Child.fromMap(Map<String, dynamic>.from(data), id);
+    }
+    return null;
+  }
+
   Future<bool> addChild(Map<String, dynamic> child) async {
     try {
       await _childrenRef.orderByChild('uid').equalTo(child['cnp']).once().then((snapshot) {

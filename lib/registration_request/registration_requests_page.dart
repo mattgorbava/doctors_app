@@ -1,4 +1,4 @@
-import 'package:doctors_app/registration_request/registration_request_card.dart';
+import 'package:doctors_app/widgets/registration_request_card.dart';
 import 'package:doctors_app/registration_request/registration_request_details_page.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:doctors_app/services/registration_request_service.dart';

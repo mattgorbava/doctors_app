@@ -1,21 +1,22 @@
-import 'package:doctors_app/cabinet/cabinet_card.dart';
+import 'package:doctors_app/model/child.dart';
+import 'package:doctors_app/services/user_data_service.dart';
+import 'package:doctors_app/widgets/cabinet_card.dart';
 import 'package:doctors_app/cabinet/cabinet_details_page.dart';
 import 'package:doctors_app/cabinet/cabinet_map.dart';
-import 'package:doctors_app/model/cabinet.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class FindCabinetPage extends StatefulWidget {
-  const FindCabinetPage({super.key, required this.cabinets});
+  const FindCabinetPage({super.key, this.child});
 
-  final List<Cabinet> cabinets;
+  final Child? child;
 
   @override
   State<FindCabinetPage> createState() => _FindCabinetPageState();
 }
 
 class _FindCabinetPageState extends State<FindCabinetPage> {
-  
+  final UserDataService _userDataService = UserDataService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +29,7 @@ class _FindCabinetPageState extends State<FindCabinetPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CabinetMap(cabinets: widget.cabinets)),
+                  MaterialPageRoute(builder: (context) => const CabinetMap()),
                 );
               },
               style: TextButton.styleFrom(
@@ -46,21 +47,26 @@ class _FindCabinetPageState extends State<FindCabinetPage> {
           ),
         ],
       ),
-      body: Expanded(
-        child: ListView.builder(
-          itemCount: widget.cabinets.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: (){
+      body: ListView.builder(
+        itemCount: _userDataService.cabinets.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: (){
+              if (widget.child != null) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: widget.cabinets[index]),),
+                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: _userDataService.cabinets[index], child: widget.child),),
                 );
-              },
-              child: CabinetCard(cabinet: widget.cabinets[index])
-            );
-          },
-        )
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: _userDataService.cabinets[index]),),
+                );
+              }
+            },
+            child: CabinetCard(cabinet: _userDataService.cabinets[index])
+          );
+        },
       )
     );
   }

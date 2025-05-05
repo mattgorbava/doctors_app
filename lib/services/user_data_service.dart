@@ -17,6 +17,7 @@ class UserDataService {
   List<Booking>? _patientBookings;
   List<Child> _children = [];
   Cabinet? _cabinet;
+  List<Cabinet> _cabinets = [];
   Doctor? _doctor;
   List<Patient>? _doctorPatients;
   bool _isDataLoaded = false;
@@ -28,6 +29,7 @@ class UserDataService {
   List<Patient>? get doctorPatients => _doctorPatients;
   bool get isDataLoaded => _isDataLoaded;
   List<Child> get children => _children;
+  List<Cabinet> get cabinets => _cabinets;
 
   set patient(Patient? value) {
     _patient = value;
@@ -47,6 +49,9 @@ class UserDataService {
   set children(List<Child> value) {
     _children = value;
   }
+  set cabinets(List<Cabinet> value) {
+    _cabinets = value;
+  }
   
 
   Future<void> loadPatientData() async {
@@ -63,9 +68,10 @@ class UserDataService {
         if (_cabinet != null && _cabinet!.doctorId.isNotEmpty) {
           await _loadDoctor(_cabinet!.doctorId);
         }
-        await _loadBookings(userId);
-        await loadChildren(userId);
       }
+      await _loadBookings(userId);
+      await loadChildren(userId);
+      await loadCabinets();
       
       _isDataLoaded = true;
     } catch (e) {
@@ -113,6 +119,25 @@ class UserDataService {
         ));
       });
       _children = children;
+    }
+  }
+
+  Future<void> loadCabinets() async {
+    final snapshot = await FirebaseDatabase.instance
+        .ref()
+        .child('Cabinets')
+        .once();
+    
+    if (snapshot.snapshot.value != null) {
+      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      List<Cabinet> cabinets = [];
+      data.forEach((key, value) {
+        cabinets.add(Cabinet.fromMap(
+          Map<String, dynamic>.from(value), 
+          key
+        ));
+      });
+      _cabinets = cabinets;
     }
   }
 
