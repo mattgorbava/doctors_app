@@ -96,7 +96,7 @@ class BookingCard extends StatelessWidget {
                         onPressed: () {
                           _updateBookingStatus(context, booking.id, 'Confirmed');
                         },
-                        child: const Text('Confirm'),
+                        child: const Text('Confirm', style: TextStyle(color: Colors.white),),
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -105,7 +105,7 @@ class BookingCard extends StatelessWidget {
                         onPressed: () {
                           _updateBookingStatus(context, booking.id, 'Cancelled');
                         },
-                        child: const Text('Cancel'),
+                        child: const Text('Cancel', style: TextStyle(color: Colors.white),),
                       ),
                     ] else if (booking.status == 'Confirmed') ... [
                       _isBookingDateAndTimeBeforeNow(booking.date, booking.time) ?
@@ -127,7 +127,7 @@ class BookingCard extends StatelessWidget {
                               _updateBookingStatus(context, booking.id, newStatus);
                             }
                           },
-                          child: const Text('Complete'),
+                          child: const Text('Complete', style: TextStyle(color: Colors.white),),
                         )
                       : ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -136,12 +136,30 @@ class BookingCard extends StatelessWidget {
                           onPressed: () {
                             _updateBookingStatus(context, booking.id, 'Cancelled');
                           },
-                          child: const Text('Cancel'),
+                          child: const Text('Cancel', style: TextStyle(color: Colors.white),),
                       ),
                     ],
                     
                   ],
-                )
+                ),
+                const SizedBox(height: 5),
+                SizedBox(
+                  width: 0.5 * MediaQuery.of(context).size.width,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2B962B),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text('View Details', style: TextStyle(fontSize: 16, color: Colors.white),),
+                  ),
+                ),
+                const SizedBox(height: 10),
               ],
             );
           }

@@ -1,32 +1,39 @@
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
+import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/widgets/patient_card.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class UserProfile extends StatefulWidget {
-  const UserProfile({super.key});
+class PatientUserProfile extends StatefulWidget {
+  const PatientUserProfile({super.key, this.patient});
+
+  final Patient? patient;
 
   @override
-  State<UserProfile> createState() => _UserProfileState();
+  State<PatientUserProfile> createState() => _PatientUserProfileState();
 }
 
-class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClientMixin<UserProfile> {
+class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticKeepAliveClientMixin<PatientUserProfile> {
   @override
   bool get wantKeepAlive => true;
 
   final UserDataService _userDataService = UserDataService();
+  final BookingService _bookingService = BookingService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _bookingRef = FirebaseDatabase.instance.ref().child('Bookings');
   List<Booking> _bookings = [];
   bool _isLoading = true;
   String? pdfFileName;
   String? pdfFilePath;
   String? analysisResultsPdfUrl;
+  bool _isPatient = true;
+  Patient? _patient;
 
   final cloudinary = CloudinaryPublic(
     '',  
@@ -37,35 +44,28 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
   @override
   void initState() {
     super.initState();
-    _bookings = _userDataService.patientBookings ?? <Booking>[];
+    _isPatient = _userDataService.isPatient ?? true;
+    _patient = widget.patient ?? _userDataService.patient;
+    if (_isPatient) {
+      _bookings = _userDataService.patientBookings ?? <Booking>[];
+    } else {
+      _fetchBookings();
+    }
     _isLoading = false;
   }
 
   Future<void> _fetchBookings() async {
-    String? currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
-      await _bookingRef.orderByChild('patientId').equalTo(currentUserId).once().then((DatabaseEvent event) {
-        DataSnapshot snapshot = event.snapshot;
-        List<Booking> bookings = [];
-
-        if (snapshot.value != null) {
-          Map<dynamic, dynamic> bookingMap = snapshot.value as Map<dynamic, dynamic>;
-          bookingMap.forEach((key, value) {
-            bookings.add(Booking.fromMap(Map<String, dynamic>.from(value), key));
-          });
-        }
-
-        setState(() {
-          _bookings = bookings;
-          _isLoading = false;
-        });
-      }).catchError((error) {
-        print('Error: $error');
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Could not get bookings.'),
-          backgroundColor: Colors.red,
-        ));
+    try {
+      List<Booking> bookings = await _bookingService.getAllBookingsByPatientId(_patient!.uid);
+      setState(() {
+        _bookings = bookings;
       });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to fetch bookings. Please try again later.'),
+        ),
+      );
     }
   }
 
@@ -124,6 +124,22 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
     );
   }
 
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri phoneCall = Uri(scheme: 'tel', path: phoneNumber);
+    try {
+      if (await canLaunchUrl(phoneCall)) {
+        await launchUrl(phoneCall);
+      } else {
+        throw 'Could not call $phoneCall';
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Could not call $phoneNumber'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -132,7 +148,8 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
         automaticallyImplyLeading: false,
         title: const Text('User Profile'),
         actions: [
-          IconButton(
+          _isPatient 
+          ? IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await _auth.signOut();
@@ -140,14 +157,66 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
                     (Route<dynamic> route) => false);
             },
-          ),
+          )
+          : const SizedBox.shrink(),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                PatientCard(patient: _userDataService.patient!),
+                PatientCard(patient: _patient!),
+                if (!_isPatient) ... [
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: 0.5 * MediaQuery.of(context).size.width,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _makePhoneCall(_patient!.phoneNumber);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.phone),
+                          SizedBox(width: 8),
+                          Text('Call Patient', style: TextStyle(fontSize: 16, color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 0.5 * MediaQuery.of(context).size.width,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            patientId: _patient!.uid,
+                            patientName: '${_patient!.firstName} ${_patient!.lastName}',
+                            doctorId: _userDataService.doctor!.uid,
+                            doctorName: '${_userDataService.doctor!.firstName} ${_userDataService.doctor!.lastName}',
+                          ),
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.message),
+                          SizedBox(width: 8),
+                          Text('Message', style: TextStyle(fontSize: 16, color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 Expanded(child: 
                   _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
                   : ListView.builder(
@@ -195,7 +264,7 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
                                       style: const TextStyle(color: Colors.white),
                                     ),
                                   ),
-                                  if (booking.status == "AnalysisPending")
+                                  if (booking.status == "AnalysisPending" && _isPatient)
                                     ElevatedButton.icon(
                                       onPressed: () async {
                                         _pickPdf();
@@ -208,21 +277,13 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
                                                 resourceType: CloudinaryResourceType.Raw,
                                               ),
                                             );
-                                            final medicalHistoryRef = FirebaseDatabase.instance.ref('MedicalHistory');
-                                            medicalHistoryRef.orderByChild('bookingId').equalTo(booking.id).once().then((DatabaseEvent event) {
-                                              if (event.snapshot.exists) {
-                                                final key = event.snapshot.children.first.key;
-                                                if (key != null) {
-                                                  medicalHistoryRef.child(key).update({
-                                                    'analysisResultsPdfUrl': response.secureUrl,
-                                                  });
-                                                  _bookingRef.child(booking.id).update({
-                                                    'status': 'Completed',
-                                                  });
-                                                }
-                                              }
+                                            booking.analysisResultsPdf = response.secureUrl;
+                                            _bookingService.updateBooking(booking);
+                                            setState(() {
+                                              analysisResultsPdfUrl = response.secureUrl;
+                                              pdfFileName = null;
+                                              pdfFilePath = null;
                                             });
-                                            
                                           } catch (e) {
                                             _showErrorDialog('Failed to upload PDF file');
                                             
@@ -241,6 +302,35 @@ class _UserProfileState extends State<UserProfile> with AutomaticKeepAliveClient
                                     ),
                                 ],
                               ),
+                              if (booking.status != null && booking.status == 'Completed') ... [
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Results: ${booking.results}',
+                                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Recommendations: ${booking.recommendations}',
+                                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                )
+                              ],
+                              if (booking.analysisResultsPdf != null && booking.analysisResultsPdf!.isNotEmpty) ... [
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    final url = booking.analysisResultsPdf!;
+                                    if (await canLaunchUrl(Uri.parse(url))) {
+                                      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                                    } else {
+                                      _showErrorDialog('Could not open PDF file.');
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                  ),
+                                  child: const Text('View Test Results'),
+                                ),
+                              ],
                             ],
                           ),
                         ),

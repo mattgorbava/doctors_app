@@ -28,7 +28,8 @@ class PatientCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(60),
               border: Border.all(color: const Color(0xff0064FA)),
             ),
-            child: ClipRRect(
+            child: patient.profileImageUrl != null && patient.profileImageUrl.isNotEmpty 
+            ? ClipRRect(
               borderRadius: BorderRadius.circular(60),
               child: CachedNetworkImage(
                 imageUrl: patient.profileImageUrl,
@@ -36,7 +37,8 @@ class PatientCard extends StatelessWidget {
                 placeholder: (context, url) => const CircularProgressIndicator(),
                 errorWidget: (context, url, error) => const Icon(Icons.person),
               ),
-            ),
+            )
+            : null,
           ),
           title: Text(
             '${patient.firstName} ${patient.lastName}',

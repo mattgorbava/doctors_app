@@ -6,12 +6,14 @@ import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
 import 'package:doctors_app/services/patient_service.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,6 +29,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final UserDataService _userDataService = UserDataService();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -197,7 +200,7 @@ class _RegisterPageState extends State<RegisterPage> {
           }
         }
         
-        if (userType == 'Patient' || widget.isChild) {
+        if (userType == 'Patient') {
           _patientService.checkUniqueCnp(_cnpController.text).then((isUnique) {
             if (!isUnique) {
               _showErrorDialog('CNP already exists. Please use a unique CNP.');
@@ -208,7 +211,6 @@ class _RegisterPageState extends State<RegisterPage> {
           });
         }
 
-        if (!widget.isChild) {
           UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
             email: _emailController.text, password: _passwordController.text,
           );
@@ -287,22 +289,36 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           }
-        } else {
-            Map<String, dynamic> childData = {
-              'firstName': _firstNameController.text,
-              'lastName': _lastNameController.text,
-              'cnp': _cnpController.text,
-              'birthDate': birthDate.toIso8601String(),
-              'parentId': widget.patient!.uid,
-            };
-            _patientService.addPatient(childData);
-            Navigator.pop(context);
-        }
       } catch (e) {
         _showErrorDialog('Failed to register user');
         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
         logger.d(e);
       }
+    }
+  }
+
+  Future<void> _registerChild() async {
+    Map<String, dynamic> childData = {
+      'firstName': _firstNameController.text,
+      'lastName': _lastNameController.text,
+      'cnp': _cnpController.text,
+      'birthDate': birthDate.toIso8601String(),
+      'parentId': _userDataService.patient!.uid,
+      'cabinetId': '',
+    };
+    try {
+      _patientService.addPatient(childData);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Child registered successfully!')),
+      );
+      await _userDataService.loadChildren(_userDataService.patient!.uid);
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error registering child: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to register child.')),
+      );
     }
   }
 
@@ -876,7 +892,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ),
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your CNP';
@@ -905,11 +921,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   if (birthDate != null && birthDate != DateTime(1900, 1, 1)) ... [
                     const SizedBox(height: 10,),
-                    Text('Selected date: ${birthDate.toLocal()}'.split(' ')[0], style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
+                    Text('Selected date: ${DateFormat('dd-MM-yyyy').format(birthDate)}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
                   ],
                 ],
                 const SizedBox(height: 10,),
-                if (!isEditting) 
+                if (!isEditting && !widget.isChild) 
                   CheckboxListTile(
                       title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
                       value: _rememberMe,
@@ -924,6 +940,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: MediaQuery.of(context).size.width,
                   child: ElevatedButton(
                     onPressed: isEditting ? _editUser 
+                    : widget.isChild ? _registerChild
                     : _registerUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2B962B),
@@ -936,7 +953,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     : const Text('Register', style: TextStyle(fontSize: 16, color: Colors.white),),
                   ),
                 ),
-                if (!isEditting)
+                if (!isEditting && !widget.isChild)
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: TextButton(

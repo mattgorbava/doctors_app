@@ -1,4 +1,5 @@
 import 'package:doctors_app/cabinet/register_cabinet_page.dart';
+import 'package:doctors_app/doctor/patients_list_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/services/cabinet_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -117,6 +118,24 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
               ),
               ListTile(
                 title: Text('Number of Patients: ${_cabinet!.numberOfPatients}'),
+              ),
+              const SizedBox(height: 20,),
+              SizedBox(
+                width: 0.5 * MediaQuery.of(context).size.width,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () { 
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientsListPage()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B962B),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('See Patient List', style: TextStyle(fontSize: 16, color: Colors.white),),
+                ),
               ),
               const SizedBox(height: 20,),
               SizedBox(

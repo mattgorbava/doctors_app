@@ -70,4 +70,20 @@ class CabinetService {
       print('Error deleting cabinet: $e');
     }
   }
+
+  Future<void> incrementPatientsCount(String cabinetId, int newAmount) async {
+    try {
+      await _cabinetRef.child(cabinetId).child('numberOfPatients').set(newAmount);
+    } catch (e) {
+      print('Error incrementing patients count: $e');
+    }
+  }
+
+  Future<void> decrementPatientsCount(String cabinetId, int newAmount) async {
+    try {
+      await _cabinetRef.child(cabinetId).child('numberOfPatients').set(newAmount);
+    } catch (e) {
+      print('Error decrementing patients count: $e');
+    }
+  }
 }

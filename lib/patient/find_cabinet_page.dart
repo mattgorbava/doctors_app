@@ -1,4 +1,4 @@
-import 'package:doctors_app/model/child.dart';
+import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:doctors_app/widgets/cabinet_card.dart';
 import 'package:doctors_app/cabinet/cabinet_details_page.dart';
@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class FindCabinetPage extends StatefulWidget {
   const FindCabinetPage({super.key, this.child});
 
-  final Child? child;
+  final Patient? child;
 
   @override
   State<FindCabinetPage> createState() => _FindCabinetPageState();

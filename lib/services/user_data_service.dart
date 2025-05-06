@@ -15,12 +15,13 @@ class UserDataService {
 
   Patient? _patient;
   List<Booking>? _patientBookings;
-  List<Child> _children = [];
+  List<Patient> _children = [];
   Cabinet? _cabinet;
   List<Cabinet> _cabinets = [];
   Doctor? _doctor;
   List<Patient>? _doctorPatients;
   bool _isDataLoaded = false;
+  bool isPatient = false;
 
   Patient? get patient => _patient;
   List<Booking>? get patientBookings => _patientBookings;
@@ -28,8 +29,9 @@ class UserDataService {
   Doctor? get doctor => _doctor;
   List<Patient>? get doctorPatients => _doctorPatients;
   bool get isDataLoaded => _isDataLoaded;
-  List<Child> get children => _children;
+  List<Patient> get children => _children;
   List<Cabinet> get cabinets => _cabinets;
+  bool get isPatientUser => isPatient;
 
   set patient(Patient? value) {
     _patient = value;
@@ -46,11 +48,14 @@ class UserDataService {
   set patientBookings(List<Booking>? value) {
     _patientBookings = value;
   }
-  set children(List<Child> value) {
+  set children(List<Patient> value) {
     _children = value;
   }
   set cabinets(List<Cabinet> value) {
     _cabinets = value;
+  }
+  set isPatientUser(bool value) {
+    isPatient = value;
   }
   
 
@@ -63,17 +68,20 @@ class UserDataService {
 
       await _loadPatient(userId);
       
-      if (_patient != null && _patient!.cabinetId != null && _patient!.cabinetId!.isNotEmpty) {
-        await _loadCabinet(_patient!.cabinetId!);
+      if (_patient != null) {
+        if (_patient!.cabinetId != null && _patient!.cabinetId!.isNotEmpty) {
+          await _loadCabinet(_patient!.cabinetId!);
+        }
         if (_cabinet != null && _cabinet!.doctorId.isNotEmpty) {
           await _loadDoctor(_cabinet!.doctorId);
         }
+        await _loadBookings(userId);
+        await loadChildren(userId);
+        await loadCabinets();
       }
-      await _loadBookings(userId);
-      await loadChildren(userId);
-      await loadCabinets();
-      
+
       _isDataLoaded = true;
+      isPatient = true;
     } catch (e) {
       print('Error loading patient data: $e');
     }
@@ -91,7 +99,7 @@ class UserDataService {
       if (_doctor != null && _doctor!.cabinetId != null && _doctor!.cabinetId!.isNotEmpty) {
         await _loadCabinet(_doctor!.cabinetId!);
         if (_cabinet != null) {
-          await _loadPatients(_cabinet!.uid);
+          await loadPatients(_cabinet!.uid);
         }
       }
       
@@ -104,16 +112,16 @@ class UserDataService {
   Future<void> loadChildren(String userId) async {
     final snapshot = await FirebaseDatabase.instance
         .ref()
-        .child('Children')
+        .child('Patients')
         .orderByChild('parentId')
         .equalTo(userId)
         .once();
     
     if (snapshot.snapshot.value != null) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      List<Child> children = [];
+      List<Patient> children = [];
       data.forEach((key, value) {
-        children.add(Child.fromMap(
+        children.add(Patient.fromMap(
           Map<String, dynamic>.from(value), 
           key
         ));
@@ -193,7 +201,7 @@ class UserDataService {
     }
   }
 
-  Future<void> _loadPatients(String cabinetId) async {
+  Future<void> loadPatients(String cabinetId) async {
     final snapshot = await FirebaseDatabase.instance
         .ref()
         .child('Patients')

@@ -1,5 +1,4 @@
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/find_cabinet_page.dart';
 import 'package:doctors_app/services/cabinet_service.dart';
@@ -9,7 +8,7 @@ import 'package:intl/intl.dart';
 class ChildCard extends StatefulWidget {
   const ChildCard({super.key, required this.child});
 
-  final Child child;
+  final Patient child;
 
   @override
   State<ChildCard> createState() => _ChildCardState();
@@ -94,7 +93,7 @@ class _ChildCardState extends State<ChildCard> {
                   'Cabinet: ${_cabinet == null ? 'No cabinet assigned' : _cabinet!.name}\nCNP: ${widget.child.cnp}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                trailing: _cabinet == null ?
+                trailing: _cabinet == null || _cabinet!.isEmpty ?
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(

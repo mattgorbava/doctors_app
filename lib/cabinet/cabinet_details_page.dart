@@ -20,7 +20,7 @@ class CabinetDetailsPage extends StatefulWidget {
 
   final Cabinet cabinet;
 
-  final Child? child;
+  final Patient? child;
 
   @override
   State<CabinetDetailsPage> createState() => _CabinetDetailsPageState();
@@ -60,13 +60,17 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
 
   Future<void> _sendRegistrationRequest() async {
     Map<String, dynamic> data = {
-      'patientId': FirebaseAuth.instance.currentUser!.uid,
-      'childId': widget.child?.uid,
       'doctorId': widget.cabinet.doctorId,
       'status': 'pending',
       'createdAt': DateTime.now().toIso8601String(),
       'updatedAt': DateTime.now().toIso8601String(),
     };
+
+    if (widget.child != null) {
+      data['patientId'] = widget.child!.uid;
+    } else {
+      data['patientId'] = FirebaseAuth.instance.currentUser!.uid;
+    }
 
     try {
       RegistrationRequest request = RegistrationRequest.fromMap(data, FirebaseAuth.instance.currentUser!.uid);

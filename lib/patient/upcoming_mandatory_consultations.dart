@@ -6,7 +6,6 @@ import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/consultation_card.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 

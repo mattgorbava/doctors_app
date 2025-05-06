@@ -4,6 +4,7 @@ class MedicalHistory {
   String results;
   String recommendations;
   String analysisResultsPdfUrl;
+  DateTime? dateAdded;
 
   MedicalHistory({
     required this.id,
@@ -11,6 +12,7 @@ class MedicalHistory {
     required this.results,
     required this.recommendations,
     required this.analysisResultsPdfUrl,
+    required this.dateAdded,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class MedicalHistory {
       'results': results,
       'recommendations': recommendations,
       'analysisResultsPdfUrl': analysisResultsPdfUrl,
+      'dateAdded': dateAdded?.toIso8601String(),
     };
   }
 
@@ -30,6 +33,7 @@ class MedicalHistory {
       results: json['results'],
       recommendations: json['recommendations'],
       analysisResultsPdfUrl: json['analysisResultsPdfUrl'] ?? '',
+      dateAdded: json['dateAdded'] != null ? DateTime.parse(json['dateAdded']) : null,
     );
   }
 }

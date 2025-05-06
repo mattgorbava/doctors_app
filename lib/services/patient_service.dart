@@ -101,4 +101,22 @@ class PatientService {
       print('Error deleting patient: $e');
     }
   }
+
+  Future<void> updateCabinet(String patientId, String cabinetId) async {
+    try {
+      await _patientRef.child(patientId).update({'cabinetId': cabinetId});
+    } catch (e) {
+      print('Error updating cabinet: $e');
+    }
+  }
+
+  Future<bool> isPatient(String id) async {
+    try {
+      final snapshot = await _patientRef.child(id).once();
+      return snapshot.snapshot.exists;
+    } catch (e) {
+      print('Error checking if patient exists: $e');
+      return false;
+    }
+  }
 }

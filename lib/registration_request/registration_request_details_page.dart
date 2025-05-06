@@ -24,7 +24,6 @@ class RegistrationRequestDetailsPage extends StatefulWidget {
 class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDetailsPage> {
   Patient? _patient;
   Cabinet? _cabinet;
-  Child? _child;
   bool _isLoading = true;
   final PatientService _patientService = PatientService();
   final CabinetService _cabinetService = CabinetService();
@@ -50,33 +49,6 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch patient details. Please try again later.'),
-        ),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _fetchChild() async {
-    try {
-      Child child = await _childrenService.getChildById(widget.request.childId!) ?? Child.empty();
-      if (child.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No child details available.'),
-          ),
-        );
-      } else {
-        setState(() {
-          _child = child;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch child details. Please try again later.'),
         ),
       );
     } finally {
@@ -115,30 +87,10 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
 
   Future<void> _acceptRequest() async {
     try {
-      widget.request.status = 'confirmed';
-      widget.request.updatedAt = DateTime.now();
-      await _registrationRequestService.updateRequest(widget.request);
-      // await registrationRequestRef.update({
-      //   'status': 'confirmed',
-      //   'updatedAt': DateTime.now().toIso8601String(),
-      // });
-      if (_child != null) {
-        _child!.cabinetId = _cabinet!.uid;
-        await _childrenService.updateChild(_child!);
-      } else {
-        _patient!.cabinetId = _cabinet!.uid;
-        _patientService.updatePatient(_patient!);
-      }
-      // await patientsRef.update({
-      //   'cabinetId': _cabinet!.uid,
-      // });
-      _cabinet!.numberOfPatients = _cabinet!.numberOfPatients + 1;
-      _cabinet!.updatedAt = DateTime.now();
-      _cabinetService.updateCabinet(_cabinet!);
-      // await cabinetsRef.update({
-      //   'numberOfPatients': _cabinet!.numberOfPatients + 1,
-      //   'updatedAt': DateTime.now().toIso8601String(),
-      // });
+      await _patientService.updateCabinet(_patient!.uid, _cabinet!.uid);
+      await _cabinetService.incrementPatientsCount(_cabinet!.uid, _cabinet!.numberOfPatients + 1);
+      await _registrationRequestService.acceptRequest(widget.request.uid);
+      await _userDataService.loadPatients(_userDataService.cabinet!.uid);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration request accepted successfully.'),
@@ -176,7 +128,6 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
 
   Future<void> _getData() async {
     await _fetchPatient();
-    await _fetchChild();
     await _fetchCabinet();
   }
 
@@ -202,7 +153,8 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                     children: [
                       Text('Patient Name: ${_patient!.firstName} ${_patient!.lastName}'),
                       const SizedBox(height: 8),
-                      ClipRRect(
+                      _patient!.profileImageUrl.isNotEmpty 
+                      ? ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.network(
                           _patient!.profileImageUrl,
@@ -210,9 +162,12 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                           width: 100,
                           fit: BoxFit.cover,
                         ),
-                      ),
+                      )
+                      : const Icon(Icons.person, size: 100),
                       const SizedBox(height: 8),
-                      Text('Patient Phone: ${_patient!.phoneNumber}'),
+                      _patient!.phoneNumber.isNotEmpty 
+                      ? Text('Patient Phone: ${_patient!.phoneNumber}')
+                      : const Text('No phone number available'),
                       const SizedBox(height: 8),
                       Text('Request Status: ${widget.request.status}'),
                       const SizedBox(height: 8),

@@ -29,15 +29,15 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
 
   void getBookings() async {
     _bookings = await _bookingService.getAllBookingsByDoctorId(_auth.currentUser!.uid);
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   void initState() {
     super.initState();
     getBookings();
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override

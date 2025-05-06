@@ -7,6 +7,9 @@ class Booking {
   String status;
   String time;
   bool isMandatory;
+  String analysisResultsPdf;
+  String recommendations;
+  String results;
 
   Booking({
     required this.date,
@@ -17,6 +20,9 @@ class Booking {
     required this.status,
     required this.time,
     required this.isMandatory,
+    this.analysisResultsPdf = '',
+    this.recommendations = '',
+    this.results = '',
   });
 
   factory Booking.fromMap(Map<String, dynamic> data, [String id = '']) {
@@ -29,6 +35,9 @@ class Booking {
       status: data['status'] ?? 'pending',
       time: data['time'] ?? '',
       isMandatory: data['isMandatory'] ?? false,
+      analysisResultsPdf: data['analysisResultsPdf'] ?? '',
+      recommendations: data['recommendations'] ?? '',
+      results: data['results'] ?? '',
     );
   }
 
@@ -42,6 +51,9 @@ class Booking {
       'status': status,
       'time': time,
       'isMandatory': isMandatory,
+      'analysisResultsPdf': analysisResultsPdf,
+      'recommendations': recommendations,
+      'results': results,
     };
   }
 }

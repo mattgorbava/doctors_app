@@ -9,7 +9,6 @@ class Patient {
   String cabinetId;
   DateTime birthDate;
   String cnp;
-  bool isChild;
   String parentId;
 
   Patient({
@@ -23,7 +22,6 @@ class Patient {
     required this.cabinetId,
     required this.birthDate,
     required this.cnp,
-    required this.isChild,
     this.parentId = '',
   });
 
@@ -39,7 +37,6 @@ class Patient {
       cabinetId: data['cabinetId'] ?? '',
       birthDate: DateTime.parse(data['birthDate']),
       cnp: data['cnp'] ?? '',
-      isChild: data['isChild'] ?? false,
       parentId: data['parentId'] ?? '',
     );
   }
@@ -56,7 +53,6 @@ class Patient {
       'cabinetId': cabinetId,
       'birthDate': birthDate.toIso8601String(),
       'cnp': cnp,
-      'isChild': isChild,
       'parentId': parentId,
     };
   }
@@ -73,7 +69,6 @@ class Patient {
       cabinetId: '',
       birthDate: DateTime.now(),
       cnp: '',
-      isChild: false,
       parentId: '',
     );
   }

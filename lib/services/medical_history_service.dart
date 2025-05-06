@@ -26,6 +26,22 @@ class MedicalHistoryService {
     return medicalHistories;
   }
 
+  Future<List<MedicalHistory>> getBookingHistory(String bookingId) async {
+    List<MedicalHistory> medicalHistories = [];
+    try {
+      final snapshot = await _medicalHistoryRef.orderByChild('bookingId').equalTo(bookingId).once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        data.forEach((key, value) {
+          medicalHistories.add(MedicalHistory.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+    } catch (e) {
+      print('Error fetching booking histories: $e');
+    }
+    return medicalHistories;
+  }
+
   Future<void> addMedicalHistory(MedicalHistory medicalHistory) async {
     try {
       await _medicalHistoryRef.push().set(medicalHistory.toMap());

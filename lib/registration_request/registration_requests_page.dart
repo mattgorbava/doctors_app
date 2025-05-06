@@ -19,7 +19,6 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> wit
 
   final RegistrationRequestService _registrationRequestService = RegistrationRequestService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _registrationRequestsRef = FirebaseDatabase.instance.ref().child('RegistrationRequests');
 
   List<RegistrationRequest> _registrationRequests = [];
   bool _isLoading = true;

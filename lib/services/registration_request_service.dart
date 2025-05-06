@@ -49,4 +49,12 @@ class RegistrationRequestService {
       print('Error deleting registration request: $e');
     }
   }
+
+  Future<void> acceptRequest(String id) async {
+    try {
+      await _registrationRequestRef.child(id).update({'status': 'confirmed', 'updatedAt': DateTime.now().toIso8601String()});
+    } catch (e) {
+      print('Error accepting registration request: $e');
+    }
+  }
 }

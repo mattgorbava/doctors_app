@@ -3,7 +3,7 @@ import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
 import 'package:doctors_app/patient/patient_children_page.dart';
 import 'package:doctors_app/patient/upcoming_mandatory_consultations.dart';
-import 'package:doctors_app/patient/user_profile.dart';
+import 'package:doctors_app/patient/patient_user_profile.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +54,7 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
           const ChatListPage(key: PageStorageKey('patientChatlistPage'),),
           UpcomingMandatoryConsultations(key: const PageStorageKey('patientMandatoryConsultationsPage'), patientId: _auth.currentUser!.uid),
           PatientChildrenPage(key: const PageStorageKey('patientChildrenPage')),
-          const UserProfile(key: PageStorageKey('patientProfilePage')),
+          const PatientUserProfile(key: PageStorageKey('patientProfilePage')),
         ];
         _isLoading = false;
       });

@@ -1,8 +1,5 @@
 import 'package:doctors_app/auth/register_screen.dart';
-import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/child.dart';
-import 'package:doctors_app/patient/register_child_page.dart';
-import 'package:doctors_app/services/children_service.dart';
+import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:doctors_app/widgets/child_card.dart';
@@ -20,7 +17,7 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
   @override
   bool get wantKeepAlive => true;
 
-  List<Child> _children = [];
+  List<Patient> _children = [];
   String patientId = FirebaseAuth.instance.currentUser?.uid ?? '';
   final UserDataService _userDataService = UserDataService();
   final PatientService _patientService = PatientService();

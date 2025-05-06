@@ -17,10 +17,8 @@ class RegistrationRequestCard extends StatefulWidget {
 
 class _RegistrationRequestCardState extends State<RegistrationRequestCard> {
   final PatientService _patientService = PatientService();
-  final ChildrenService _childrenService = ChildrenService();
 
   Patient? patient;
-  Child? child;
 
   late Future<void> _dataFuture;
 
@@ -28,19 +26,10 @@ class _RegistrationRequestCardState extends State<RegistrationRequestCard> {
     patient = await _patientService.getPatientById(widget.request.patientId!);
   }
 
-  Future<void> _getChild() async {
-    child = await _childrenService.getChildById(widget.request.childId!);
-  }
-
-  Future<void> _getData() async {
-    await _getPatient();
-    await _getChild();
-  }
-
   @override
   void initState() {
     super.initState();
-    _dataFuture = _getData();
+    _dataFuture = _getPatient();
   }
 
   @override
@@ -71,7 +60,7 @@ class _RegistrationRequestCardState extends State<RegistrationRequestCard> {
           } else {
              content = ListTile(
                 title: Text(
-                  '${patient!.firstName} ${patient!.lastName} ${child != null ? '\nfor ${child!.firstName} ${child!.lastName}' : ''}',
+                  '${patient!.firstName} ${patient!.lastName}',
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
