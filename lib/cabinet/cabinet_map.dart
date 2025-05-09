@@ -89,7 +89,10 @@ class _CabinetMapState extends State<CabinetMap> {
   }
 
   void _addCabinetMarkers() async {
-    for (var cabinet in _userDataService.cabinets) {
+    if (_userDataService.cabinets == null || _userDataService.cabinets!.isEmpty) {
+      return;
+    }
+    for (var cabinet in _userDataService.cabinets!) {
       LatLng cabinetPosition = LatLng(cabinet.location.latitude, cabinet.location.longitude);
 
       _markers.add(

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
-import 'package:doctors_app/patient/consultation_card.dart';
+import 'package:doctors_app/widgets/consultation_card.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,8 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
   late List<Consultation> consultations = [];
   late Patient patient;
   late Future<List<Consultation>> consultationsFuture;
-  late List<Booking> bookings = [];
+  late List<List<Booking>> bookings = [];
+  List<Patient> children = [];
 
   Future<void> _loadConsultations() async {
     if (patient == null) {
@@ -40,28 +41,28 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
       
       if (jsonData.containsKey('consultations')) {
         List<dynamic> consultationsJson = jsonData['consultations'];
-        DateTime now = DateTime.now();
-        DateTime date = patient.birthDate;
-        int patientAgeInMonths = ((now.year - date.year) * 12 + now.month - date.month).toInt();
-        consultationsJson = consultationsJson.where((consultation) {
-          int ageInMonthsStart = int.parse(consultation['ageInMonthsStart']);
-          int ageInMonthsEnd = int.parse(consultation['ageInMonthsEnd']);
-          return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
-        }).toList();
+        // DateTime now = DateTime.now();
+        // DateTime date = patient.birthDate;
+        // int patientAgeInMonths = ((now.year - date.year) * 12 + now.month - date.month).toInt();
+        // consultationsJson = consultationsJson.where((consultation) {
+        //   int ageInMonthsStart = int.parse(consultation['ageInMonthsStart']);
+        //   int ageInMonthsEnd = int.parse(consultation['ageInMonthsEnd']);
+        //   return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
+        // }).toList();
         setState(() {
           consultations = consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
         });
       } else {
         try {
           List<dynamic> consultationsJson = jsonData as List<dynamic>;
-          DateTime now = DateTime.now();
-          DateTime date = patient.birthDate;
-          int patientAgeInMonths = ((now.year - date.year) * 12 + now.month - date.month).toInt();
-          consultationsJson = consultationsJson.where((consultation) {
-            int ageInMonthsStart = consultation['ageInMonthsStart'] as int;
-            int ageInMonthsEnd = consultation['ageInMonthsEnd'] as int;
-            return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
-          }).toList();
+          // DateTime now = DateTime.now();
+          // DateTime date = patient.birthDate;
+          // int patientAgeInMonths = ((now.year - date.year) * 12 + now.month - date.month).toInt();
+          // consultationsJson = consultationsJson.where((consultation) {
+          //   int ageInMonthsStart = consultation['ageInMonthsStart'] as int;
+          //   int ageInMonthsEnd = consultation['ageInMonthsEnd'] as int;
+          //   return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
+          // }).toList();
           setState(() {
             consultations = consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
           });
@@ -77,22 +78,35 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     }
   } 
 
-  Future<void> _fetchBookings() async {
-    List<Booking> bookings = await _bookingService.getAllBookingsByPatientId(widget.patientId);
+  Future<void> _fetchBookings(String id, int patientIndex) async {
+    List<Booking> bookings = await _bookingService.getAllBookingsByPatientId(id);
     setState(() {
-      this.bookings = bookings;
+      this.bookings.add(bookings);
     });
   }
 
   Future<List<Consultation>> _loadPatientAndConsultations() async {
     patient = _userDataService.patient!;
+    if (_userDataService.children != null && _userDataService.children!.isNotEmpty) {
+      children = _userDataService.children!;
+    }
     await _loadConsultations();
-    await _fetchBookings();
-    _filterConsultations();
+    await _fetchBookings(widget.patientId, 0);
+    if (children.isNotEmpty) {
+      int patientIndex = 1;
+      for (var child in children) {
+        await _fetchBookings(child.uid, patientIndex);
+        patientIndex++;
+      }
+    }
+    _filterConsultations(0);
+    for (int i = 1; i < bookings.length; i++) {
+      _filterConsultations(i);
+    }
     return consultations;
   }
 
-  void _filterConsultations() {
+  void _filterConsultations(int patientIndex) {
     if (consultations.isEmpty || bookings.isEmpty) {
       return;
     }
@@ -101,7 +115,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     
     setState(() {
       consultations = consultations.where((consultation) {
-        bool hasMatchingBooking = bookings.any((booking) {
+        bool hasMatchingBooking = bookings[patientIndex].any((booking) {
           bool titleMatches = booking.description.toLowerCase().contains(consultation.title.toLowerCase());
           
           DateTime bookingDate = DateTime.parse(booking.date);
@@ -128,37 +142,46 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     return ageInMonths;
   }
 
-  DateTime _nextConsultationDate(Consultation consultation) {
+  (DateTime, Consultation?) _nextConsultationDate(int patientIndex) {
     DateTime nextConsultationDate = DateTime.now();
+    Patient patient = patientIndex == 0 ? this.patient : children[patientIndex - 1];
+    int patientAgeInMonths = _ageInMonths(patient);
+    DateTime now = DateTime.now();
+    Consultation fittingConsultation = Consultation.empty();
 
-    if (bookings.any((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
+    for (var consultation in consultations) {
+      if (consultation.periodInMonths > 0 &&
+          patientAgeInMonths >= consultation.ageInMonthsStart &&
+          patientAgeInMonths <= consultation.ageInMonthsEnd) {
+        if (bookings[patientIndex].any((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
                               && booking.isMandatory == true)) {
-      DateTime bookingDate = DateTime.parse(
-        bookings.firstWhere((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
-        && booking.isMandatory == true
-        && booking.status == 'Completed')
-        .date
-      );
-      bookingDate.add(Duration(days: (consultation.periodInMonths * 30.44).floor()));
-    }
-    else {
-      int patientAgeInMonths = _ageInMonths(patient);
-      int consultationPeriod = consultation.periodInMonths;
-      int monthsUntilNextConsultation = consultationPeriod - (patientAgeInMonths % consultationPeriod);
-
-      DateTime now = DateTime.now();
-      nextConsultationDate = DateTime(now.year, now.month + monthsUntilNextConsultation, patient.birthDate.day);
-    }
-
-    // if (nextConsultationDate.isBefore(DateTime.now().add(const Duration(days: 60)))) {
-    //   nextConsultationDate = DateTime.now().subtract(const Duration(days: 1));
-    // }
-
-    if (nextConsultationDate.isBefore(DateTime.now())) {
-      nextConsultationDate = DateTime.now().add(const Duration(days: 7));
+          DateTime bookingDate = DateTime.parse(
+            bookings[patientIndex].firstWhere((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
+            && booking.isMandatory == true
+            && booking.status == 'Completed')
+            .date
+          );
+          bookingDate.add(Duration(days: (consultation.periodInMonths * 30.44).floor()));
+          nextConsultationDate = bookingDate;
+          fittingConsultation = consultation;
+        } else {
+          if (patient.parentId.isNotEmpty) {
+            nextConsultationDate = now.add(const Duration(days: 7));
+            fittingConsultation = consultation;
+          } else {
+            int consultationPeriod = consultation.periodInMonths;
+            int monthsUntilNextConsultation = consultationPeriod - (patientAgeInMonths % consultationPeriod);
+            nextConsultationDate = DateTime(now.year, now.month + monthsUntilNextConsultation, patient.birthDate.day);
+            fittingConsultation = consultation;
+          }
+        }
+      }
     }
 
-    return nextConsultationDate;
+    if (nextConsultationDate.isBefore(now)) {
+      nextConsultationDate = now.add(const Duration(days: 7));
+    }
+    return (nextConsultationDate, fittingConsultation);
   }
 
   @override
@@ -185,18 +208,73 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No consultations available'));
           } else {
-            List<Consultation> consultations = snapshot.data!;
+            // List<Widget> displayItems = [];
+
+            // if (patient != null && bookings.isNotEmpty && bookings[0] != null) {
+            //   final (nextDate, consultation) = _nextConsultationDate(0); 
+            //     displayItems.add(
+            //       Padding(
+            //         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            //         child: Text(
+            //           'Your consultations',
+            //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+            //         ),
+            //       ),
+            //     );
+            //     displayItems.add(
+            //       ConsultationCard(
+            //         consultation: consultation!,
+            //         patient: patient,
+            //         nextConsultationDate: nextDate,
+            //       ),
+            //     );
+            // }
+
+            // bool childrenHeaderAdded = false;
+            // if (children.isNotEmpty) {
+            //   for (int i = 0; i < children.length; i++) {
+            //     int bookingListIndex = i + 1;
+            //     if (bookingListIndex < bookings.length && bookings[bookingListIndex] != null) {
+            //       final (nextDate, consultation) = _nextConsultationDate(bookingListIndex);
+            //         if (!childrenHeaderAdded) {
+            //           displayItems.add(
+            //             Padding(
+            //               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            //               child: Text(
+            //                 "Your children's consultations",
+            //                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+            //               ),
+            //             ),
+            //           );
+            //           childrenHeaderAdded = true;
+            //         }
+            //         displayItems.add(
+            //           ConsultationCard(
+            //             consultation: consultation!,
+            //             patient: children[i],
+            //             nextConsultationDate: nextDate,
+            //           ),
+            //         );
+            //     }
+            //   }
+            // }
+
+            // return ListView.builder(
+            //   itemCount: displayItems.length,
+            //   itemBuilder: (context, index) {
+            //     return displayItems[index];
+            //   },
+            // );
             return ListView.builder(
-              itemCount: consultations.length,
+              itemCount: children.isNotEmpty ? children.length + 1 : 1,
               itemBuilder: (context, index) {
-                Consultation consultation = consultations[index];
-                DateTime nextConsultationDate = _nextConsultationDate(consultation);
+                final (nextConsultationDate, consultation) = _nextConsultationDate(index);
                 if (nextConsultationDate.isBefore(DateTime.now())) {
                   return const SizedBox.shrink();
                 }
                 return ConsultationCard(
-                  consultation: consultation,
-                  patient: patient,
+                  consultation: consultation!,
+                  patient: index == 0 ? patient : children[index - 1],
                   nextConsultationDate: nextConsultationDate,
                 );
               },

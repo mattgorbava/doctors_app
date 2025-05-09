@@ -47,24 +47,28 @@ class _FindCabinetPageState extends State<FindCabinetPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _userDataService.cabinets.length,
+      body: _userDataService.cabinets == null || _userDataService.cabinets!.isEmpty ? 
+        const Center(
+          child: Text('No cabinets available'),
+        ) 
+      : ListView.builder(
+        itemCount: _userDataService.cabinets!.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: (){
               if (widget.child != null) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: _userDataService.cabinets[index], child: widget.child),),
+                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: _userDataService.cabinets![index], child: widget.child),),
                 );
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: _userDataService.cabinets[index]),),
+                  MaterialPageRoute(builder: (context) => CabinetDetailsPage(cabinet: _userDataService.cabinets![index]),),
                 );
               }
             },
-            child: CabinetCard(cabinet: _userDataService.cabinets[index])
+            child: CabinetCard(cabinet: _userDataService.cabinets![index])
           );
         },
       )

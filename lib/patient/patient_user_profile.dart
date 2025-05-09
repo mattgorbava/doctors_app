@@ -28,6 +28,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
   final BookingService _bookingService = BookingService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Booking> _bookings = [];
+  List<Patient> _children = [];
   bool _isLoading = true;
   String? pdfFileName;
   String? pdfFilePath;
@@ -48,10 +49,29 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
     _patient = widget.patient ?? _userDataService.patient;
     if (_isPatient) {
       _bookings = _userDataService.patientBookings ?? <Booking>[];
+      _children = _userDataService.children ?? <Patient>[];
+      _fetchChildrenBookings();
     } else {
       _fetchBookings();
     }
     _isLoading = false;
+  }
+
+  Future<void> _fetchChildrenBookings() async {
+    try {
+      for (var child in _children) {
+        List<Booking> bookings = await _bookingService.getAllBookingsByPatientId(child.uid);
+        setState(() {
+          _bookings.addAll(bookings);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to fetch bookings. Please try again later.'),
+        ),
+      );
+    }
   }
 
   Future<void> _fetchBookings() async {

@@ -28,4 +28,21 @@ class Consultation {
       'ageInMonthsEnd': ageInMonthsEnd,
     };
   }
+
+  factory Consultation.empty() {
+    return Consultation(
+      title: '',
+      periodInMonths: 0,
+      ageInMonthsStart: 0,
+      ageInMonthsEnd: 0,
+    );
+  }
+
+  bool get isEmpty {
+    return title.isEmpty && periodInMonths == 0 && ageInMonthsStart == 0 && ageInMonthsEnd == 0;
+  }
+
+  bool get isNotEmpty {
+    return !isEmpty;
+  }
 }

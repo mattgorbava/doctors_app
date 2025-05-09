@@ -15,9 +15,9 @@ class UserDataService {
 
   Patient? _patient;
   List<Booking>? _patientBookings;
-  List<Patient> _children = [];
+  List<Patient>? _children;
   Cabinet? _cabinet;
-  List<Cabinet> _cabinets = [];
+  List<Cabinet>? _cabinets;
   Doctor? _doctor;
   List<Patient>? _doctorPatients;
   bool _isDataLoaded = false;
@@ -29,8 +29,8 @@ class UserDataService {
   Doctor? get doctor => _doctor;
   List<Patient>? get doctorPatients => _doctorPatients;
   bool get isDataLoaded => _isDataLoaded;
-  List<Patient> get children => _children;
-  List<Cabinet> get cabinets => _cabinets;
+  List<Patient>? get children => _children;
+  List<Cabinet>? get cabinets => _cabinets;
   bool get isPatientUser => isPatient;
 
   set patient(Patient? value) {
@@ -48,10 +48,10 @@ class UserDataService {
   set patientBookings(List<Booking>? value) {
     _patientBookings = value;
   }
-  set children(List<Patient> value) {
+  set children(List<Patient>? value) {
     _children = value;
   }
-  set cabinets(List<Cabinet> value) {
+  set cabinets(List<Cabinet>? value) {
     _cabinets = value;
   }
   set isPatientUser(bool value) {
@@ -126,7 +126,9 @@ class UserDataService {
           key
         ));
       });
-      _children = children;
+      if (children.isNotEmpty) {
+        _children = children;
+      }
     }
   }
 

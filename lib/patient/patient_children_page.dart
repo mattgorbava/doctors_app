@@ -25,7 +25,9 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
   @override
   void initState() {
     super.initState();
-    _children = _userDataService.children;
+    if (_userDataService.children != null && _userDataService.children!.isNotEmpty) {
+      _children = _userDataService.children!;
+    }
   }
 
   void _navigateAndRegisterChild() async {
@@ -35,7 +37,9 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
     );
 
     setState(() {
-      _children = _userDataService.children;
+      if (_userDataService.children != null && _userDataService.children!.isNotEmpty) {
+        _children = _userDataService.children!;
+      }
     });
   }
 

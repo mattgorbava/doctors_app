@@ -84,28 +84,70 @@ class _ChildCardState extends State<ChildCard> {
                 ),
               );
             } else {
-              listTileContent = ListTile(
-                title: Text(
-                  '${widget.child.firstName} ${widget.child.lastName}\n${DateFormat('dd-MM-yyyy').format(widget.child.birthDate)}',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                ),
-                subtitle: Text(
-                  'Cabinet: ${_cabinet == null ? 'No cabinet assigned' : _cabinet!.name}\nCNP: ${widget.child.cnp}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                trailing: _cabinet == null || _cabinet!.isEmpty ?
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FindCabinetPage(child: widget.child),
+              listTileContent = Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      '${widget.child.firstName} ${widget.child.lastName}\n${DateFormat('dd-MM-yyyy').format(widget.child.birthDate)}',
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    ),
+                    subtitle: Text(
+                      'Cabinet: ${_cabinet == null ? 'No cabinet assigned' : _cabinet!.name}\nCNP: ${widget.child.cnp}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    trailing: _cabinet == null || _cabinet!.isEmpty ?
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FindCabinetPage(child: widget.child),
+                          ),
+                        );
+                      },
+                      child: const Text('Register to cabinet'),
+                    )
+                    : null,
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2B962B),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            // Add your action here
+                          },
+                          child: const Text('Book Appointment'),
+                        ),
                       ),
-                    );
-                  },
-                  child: const Text('Register to cabinet'),
-                )
-                : null,
+                      SizedBox(
+                        width: 150,
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            // Add your action here
+                          },
+                          child: const Text('Emergency'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               );
             }
             return listTileContent;
