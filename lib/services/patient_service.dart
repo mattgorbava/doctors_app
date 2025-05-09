@@ -119,4 +119,12 @@ class PatientService {
       return false;
     }
   }
+
+  Future<void> updatePatientEmergencyStatus(String patientId, bool hasEmergency) async {
+    try {
+      await _patientRef.child(patientId).update({'hasEmergency': hasEmergency});
+    } catch (e) {
+      print('Error updating patient emergency status: $e');
+    }
+  }
 }

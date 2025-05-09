@@ -1,7 +1,9 @@
+import 'package:doctors_app/booking/book_appointment_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/find_cabinet_page.dart';
 import 'package:doctors_app/services/cabinet_service.dart';
+import 'package:doctors_app/services/patient_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -16,6 +18,7 @@ class ChildCard extends StatefulWidget {
 
 class _ChildCardState extends State<ChildCard> {
   final CabinetService _cabinetService = CabinetService();
+  final PatientService _patientService = PatientService();
 
   Cabinet? _cabinet;
 
@@ -29,6 +32,13 @@ class _ChildCardState extends State<ChildCard> {
   void initState() {
     super.initState();
     _cabinetFuture = _getCabinet();
+  }
+
+  void _makeEmergency() {
+    setState(() {
+      widget.child.hasEmergency = true;
+    });
+    _patientService.updatePatientEmergencyStatus(widget.child.uid, true);
   }
 
   @override
@@ -109,44 +119,62 @@ class _ChildCardState extends State<ChildCard> {
                     )
                     : null,
                   ),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      SizedBox(
-                        width: 150,
-                        height: 40,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2B962B),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                  if (widget.child.cabinetId != null && widget.child.cabinetId.isNotEmpty) ... [
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SizedBox(
+                          width: 150,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2B962B),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => (BookAppointmentPage(
+                                    patient: widget.child,
+                                    cabinet: _cabinet!,
+                                    desiredDate: DateTime.now(),
+                                  )),
+                                ),
+                              );
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                              child: Text('Book Appointment', style: TextStyle(color: Colors.white),),
                             ),
                           ),
-                          onPressed: () {
-                            // Add your action here
-                          },
-                          child: const Text('Book Appointment'),
                         ),
-                      ),
-                      SizedBox(
-                        width: 150,
-                        height: 40,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        SizedBox(
+                          width: 150,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: () {
+                              _makeEmergency();
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                              child: Text('Emergency', style: TextStyle(color: Colors.white)),
                             ),
                           ),
-                          onPressed: () {
-                            // Add your action here
-                          },
-                          child: const Text('Emergency'),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    
+                  ]
                 ],
               );
             }

@@ -1,12 +1,13 @@
 import 'package:doctors_app/patient/patient_user_profile.dart';
 import 'package:doctors_app/widgets/patient_card.dart';
 import 'package:doctors_app/model/patient.dart';
-import 'package:doctors_app/patient/patient_details_page.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 
 class PatientsListPage extends StatefulWidget {
-  const PatientsListPage({super.key});
+  const PatientsListPage({super.key, this.emergencies = false});
+
+  final bool emergencies;
 
   @override
   State<PatientsListPage> createState() => _PatientsListPageState();
@@ -23,6 +24,9 @@ class _PatientsListPageState extends State<PatientsListPage> {
   void initState() {
     super.initState();
     _patients = _userDataService.doctorPatients ?? <Patient>[];
+    if (widget.emergencies) {
+      _patients = _patients.where((patient) => patient.hasEmergency).toList();
+    }
     setState(() {
       _isLoading = false;
     });

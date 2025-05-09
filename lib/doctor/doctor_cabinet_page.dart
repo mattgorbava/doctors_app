@@ -143,6 +143,24 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () { 
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientsListPage(emergencies: true,)));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2B962B),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('See Emergencies List', style: TextStyle(fontSize: 16, color: Colors.white),),
+                ),
+              ),
+              const SizedBox(height: 20,),
+              SizedBox(
+                width: 0.5 * MediaQuery.of(context).size.width,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () { 
                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterCabinetPage(
                       cabinet: _cabinet,
                     )));
@@ -154,7 +172,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Edit', style: TextStyle(fontSize: 16, color: Colors.white),),
+                  child: const Text('Edit Cabinet', style: TextStyle(fontSize: 16, color: Colors.white),),
                 ),
               )
             ],

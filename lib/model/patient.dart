@@ -10,6 +10,7 @@ class Patient {
   DateTime birthDate;
   String cnp;
   String parentId;
+  bool hasEmergency;
 
   Patient({
     required this.uid,
@@ -23,6 +24,7 @@ class Patient {
     required this.birthDate,
     required this.cnp,
     this.parentId = '',
+    this.hasEmergency = false,
   });
 
   factory Patient.fromMap(Map<String, dynamic> data, [String id = '']) {
@@ -38,6 +40,7 @@ class Patient {
       birthDate: DateTime.parse(data['birthDate']),
       cnp: data['cnp'] ?? '',
       parentId: data['parentId'] ?? '',
+      hasEmergency: data['hasEmergency'] ?? false,
     );
   }
 
@@ -54,6 +57,7 @@ class Patient {
       'birthDate': birthDate.toIso8601String(),
       'cnp': cnp,
       'parentId': parentId,
+      'hasEmergency': hasEmergency,
     };
   }
 
@@ -70,6 +74,7 @@ class Patient {
       birthDate: DateTime.now(),
       cnp: '',
       parentId: '',
+      hasEmergency: false,
     );
   }
 
@@ -83,6 +88,11 @@ class Patient {
         phoneNumber.isEmpty &&
         cabinetId.isEmpty &&
         cnp.isEmpty &&
-        parentId.isEmpty;
+        parentId.isEmpty &&
+        !hasEmergency;
+  }
+
+  bool get isNotEmpty {
+    return !isEmpty;
   }
 }
