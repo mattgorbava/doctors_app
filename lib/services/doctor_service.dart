@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class DoctorService {
   static final DoctorService _instance = DoctorService._internal();
@@ -7,6 +8,8 @@ class DoctorService {
     return _instance;
   }
   DoctorService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
 
@@ -21,7 +24,7 @@ class DoctorService {
         });
       }
     } catch (e) {
-      print('Error fetching doctors: $e');
+      logger.e('Error fetching doctors: $e');
     }
     return doctors;
   }
@@ -39,7 +42,7 @@ class DoctorService {
     try {
       await _doctorRef.push().set(doctor.toMap());
     } catch (e) {
-      print('Error adding doctor: $e');
+      logger.e('Error adding doctor: $e');
     }
   }
 
@@ -47,7 +50,7 @@ class DoctorService {
     try {
       await _doctorRef.child(doctor.uid).update(doctor.toMap());
     } catch (e) {
-      print('Error updating doctor: $e');
+      logger.e('Error updating doctor: $e');
     }
   }
 
@@ -55,7 +58,7 @@ class DoctorService {
     try {
       await _doctorRef.child(id).remove();
     } catch (e) {
-      print('Error deleting doctor: $e');
+      logger.e('Error deleting doctor: $e');
     }
   }
 }

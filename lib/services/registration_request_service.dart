@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class RegistrationRequestService {
   static final RegistrationRequestService _instance = RegistrationRequestService._internal();
@@ -7,6 +8,8 @@ class RegistrationRequestService {
     return _instance;
   }
   RegistrationRequestService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _registrationRequestRef = FirebaseDatabase.instance.ref().child('RegistrationRequests');
 
@@ -21,7 +24,7 @@ class RegistrationRequestService {
         });
       }
     } catch (e) {
-      print('Error fetching registration requests: $e');
+      logger.e('Error fetching registration requests: $e');
     }
     return requests;
   }
@@ -30,7 +33,7 @@ class RegistrationRequestService {
     try {
       await _registrationRequestRef.push().set(request.toMap());
     } catch (e) {
-      print('Error adding registration request: $e');
+      logger.e('Error adding registration request: $e');
     }
   }
 
@@ -38,7 +41,7 @@ class RegistrationRequestService {
     try {
       await _registrationRequestRef.child(request.uid).update(request.toMap());
     } catch (e) {
-      print('Error updating registration request: $e');
+      logger.e('Error updating registration request: $e');
     }
   }
 
@@ -46,7 +49,7 @@ class RegistrationRequestService {
     try {
       await _registrationRequestRef.child(id).remove();
     } catch (e) {
-      print('Error deleting registration request: $e');
+      logger.e('Error deleting registration request: $e');
     }
   }
 
@@ -54,7 +57,7 @@ class RegistrationRequestService {
     try {
       await _registrationRequestRef.child(id).update({'status': 'confirmed', 'updatedAt': DateTime.now().toIso8601String()});
     } catch (e) {
-      print('Error accepting registration request: $e');
+      logger.e('Error accepting registration request: $e');
     }
   }
 }

@@ -1,5 +1,3 @@
-import 'package:doctors_app/model/child.dart';
-
 class RegistrationRequest {
   String uid;
   String doctorId;

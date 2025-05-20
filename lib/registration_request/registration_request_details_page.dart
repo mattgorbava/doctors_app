@@ -1,10 +1,7 @@
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/child.dart';
-import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:doctors_app/services/cabinet_service.dart';
-import 'package:doctors_app/services/children_service.dart';
 import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
@@ -27,7 +24,6 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
   bool _isLoading = true;
   final PatientService _patientService = PatientService();
   final CabinetService _cabinetService = CabinetService();
-  final ChildrenService _childrenService = ChildrenService();
   final RegistrationRequestService _registrationRequestService = RegistrationRequestService();
   final UserDataService _userDataService = UserDataService();
 
@@ -35,6 +31,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
     try {
       Patient patient = await _patientService.getPatientById(widget.request.patientId) ?? Patient.empty();
       if (patient.isEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('No patient details available.'),
@@ -46,6 +43,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch patient details. Please try again later.'),
@@ -91,6 +89,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       await _cabinetService.incrementPatientsCount(_cabinet!.uid, _cabinet!.numberOfPatients + 1);
       await _registrationRequestService.acceptRequest(widget.request.uid);
       await _userDataService.loadPatients(_userDataService.cabinet!.uid);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration request accepted successfully.'),
@@ -106,12 +105,13 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
   }
 
   Future<void> _rejectRequest() async {
-    DatabaseReference registrationRequestRef = FirebaseDatabase.instance.ref().child('RegistrationRequests').child(widget.request.uid!);
+    DatabaseReference registrationRequestRef = FirebaseDatabase.instance.ref().child('RegistrationRequests').child(widget.request.uid);
     try {
       await registrationRequestRef.update({
         'status': 'rejected',
         'updatedAt': DateTime.now().toIso8601String(),
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registration request rejected successfully.'),
@@ -171,7 +171,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                       const SizedBox(height: 8),
                       Text('Request Status: ${widget.request.status}'),
                       const SizedBox(height: 8),
-                      Text('Request Date: ${DateFormat('dd.MM.yyyy').format(widget.request.createdAt!)}'),
+                      Text('Request Date: ${DateFormat('dd.MM.yyyy').format(widget.request.createdAt)}'),
                       const SizedBox(height: 8),
                       Row(
                         children: [

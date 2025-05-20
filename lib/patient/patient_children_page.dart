@@ -1,6 +1,5 @@
 import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/model/patient.dart';
-import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:doctors_app/widgets/child_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +19,6 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
   List<Patient> _children = [];
   String patientId = FirebaseAuth.instance.currentUser?.uid ?? '';
   final UserDataService _userDataService = UserDataService();
-  final PatientService _patientService = PatientService();
 
   @override
   void initState() {

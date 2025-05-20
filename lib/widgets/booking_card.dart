@@ -35,12 +35,9 @@ class BookingCard extends StatelessWidget {
   Future<void> _updateBookingStatus(BuildContext context, String bookingId, String status) async {
     try {
       await FirebaseDatabase.instance.ref().child('Bookings').child(bookingId).update({'status': status});
-      onStatusUpdated?.call();
+      onStatusUpdated.call();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not update booking status.'),
-        backgroundColor: Colors.red,
-      ));
+      return Future.error('Error updating booking status: $e');
     }
   }
 
@@ -66,7 +63,7 @@ class BookingCard extends StatelessWidget {
               children: [
                 ListTile(
                   title: Text(
-                    '${booking.description}\nPatient: ${patientName}',
+                    '${booking.description}\nPatient: $patientName',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
@@ -124,6 +121,7 @@ class BookingCard extends StatelessWidget {
                             );
                             
                             if (newStatus != null) {
+                              // ignore: use_build_context_synchronously
                               _updateBookingStatus(context, booking.id, newStatus);
                             }
                           },

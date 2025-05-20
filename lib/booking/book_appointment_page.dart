@@ -2,7 +2,6 @@ import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/booking_service.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -28,9 +27,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
 
   late List<Booking> _bookings;
 
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime? _focusedDay;
-  Map<DateTime, bool> _availabilityCache = {};
+  final Map<DateTime, bool> _availabilityCache = {};
   bool _isLoading = true;
   DateTime? firstDay;
   DateTime? lastDay;
@@ -55,10 +54,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     }
     selectedDate = widget.desiredDate;
     _focusedDay = widget.desiredDate;
-  }
-
-  DateTime _firstOfTheMonth(DateTime date) {
-    return DateTime(date.year, date.month, 1);
   }
 
   DateTime _lastOfTheMonth(DateTime date) {
@@ -224,11 +219,13 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       };
 
       _bookingService.addBooking(bookingData).then((_) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Appointment booked successfully')),
         );
         Navigator.pop(context);
       }).catchError((error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to book appointment')),
         );
@@ -237,48 +234,6 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
           _isLoading = false;
         });
       });
-
-      //   DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
-
-      //   if (selectedDate == null || selectedTime == null) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       const SnackBar(content: Text('Please select a date and time')),
-      //     );
-      //     return;
-      //   }
-        
-      //   String dateStr = "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-      //   String timeStr = "${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}";
-        
-      //   Map<String, dynamic> bookingData = {
-      //     'patientId': widget.patient.uid,
-      //     'doctorId': widget.cabinet.doctorId,
-      //     'date': dateStr,
-      //     'time': timeStr,
-      //     'description': _descriptionController.text,
-      //     'status': 'Pending',
-      //     'isMandatory': _mandatoryConsultation,
-      //   };
-
-      //   String bookingId = _bookingsRef.push().key!;
-      //   await _bookingsRef.child(bookingId).set(bookingData).then((_) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       const SnackBar(content: Text('Appointment booked successfully')),
-      //     );
-      //     Navigator.pop(context);
-      //   }).catchError((error) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       const SnackBar(content: Text('Failed to book appointment')),
-      //     );
-      //   });
-      // } catch (error) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(content: Text('Failed to book appointment')),
-      //   );
-      // } finally {
-      //   setState(() {
-      //     _isLoading = false;
-      //   });
     }
   }
 
@@ -314,7 +269,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha: 0.3),
                               spreadRadius: 1,
                               blurRadius: 5,
                             ),
@@ -359,7 +314,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                               shape: BoxShape.circle,
                             ),
                             todayDecoration: BoxDecoration(
-                              color: Color(0xFF2B962B).withOpacity(0.5),
+                              color: const Color(0xFF2B962B).withValues(alpha: 0.5),
                               shape: BoxShape.circle,
                             ),
                             weekendTextStyle: const TextStyle(

@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class CabinetService {
   static final CabinetService _instance = CabinetService._internal();
@@ -7,6 +8,8 @@ class CabinetService {
     return _instance;
   }
   CabinetService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
 
@@ -42,7 +45,7 @@ class CabinetService {
         });
       }
     } catch (e) {
-      print('Error fetching cabinets: $e');
+      logger.e('Error fetching cabinets: $e');
     }
     return cabinets;
   }
@@ -51,7 +54,7 @@ class CabinetService {
     try {
       await _cabinetRef.push().set(cabinet.toMap());
     } catch (e) {
-      print('Error adding cabinet: $e');
+      logger.e('Error adding cabinet: $e');
     }
   }
 
@@ -59,7 +62,7 @@ class CabinetService {
     try {
       await _cabinetRef.child(cabinet.uid).update(cabinet.toMap());
     } catch (e) {
-      print('Error updating cabinet: $e');
+      logger.e('Error updating cabinet: $e');
     }
   }
 
@@ -67,7 +70,7 @@ class CabinetService {
     try {
       await _cabinetRef.child(id).remove();
     } catch (e) {
-      print('Error deleting cabinet: $e');
+      logger.e('Error deleting cabinet: $e');
     }
   }
 
@@ -75,7 +78,7 @@ class CabinetService {
     try {
       await _cabinetRef.child(cabinetId).child('numberOfPatients').set(newAmount);
     } catch (e) {
-      print('Error incrementing patients count: $e');
+      logger.e('Error incrementing patients count: $e');
     }
   }
 
@@ -83,7 +86,7 @@ class CabinetService {
     try {
       await _cabinetRef.child(cabinetId).child('numberOfPatients').set(newAmount);
     } catch (e) {
-      print('Error decrementing patients count: $e');
+      logger.e('Error decrementing patients count: $e');
     }
   }
 }

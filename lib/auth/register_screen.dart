@@ -168,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     return filenameWithExtension.substring(0, lastDotIndex);
   } catch (e) {
-    print("Error parsing Cloudinary URL '$url': $e");
+    logger.d('Error parsing Cloudinary URL: $e');
     return null;
   }
 }
@@ -282,6 +282,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             await _db.child(userTypePath).child(user.uid).set(userData);
 
+            if (!mounted) return;
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) =>
@@ -291,6 +292,7 @@ class _RegisterPageState extends State<RegisterPage> {
           }
       } catch (e) {
         _showErrorDialog('Failed to register user');
+        if (!mounted) return;
         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
         logger.d(e);
       }
@@ -313,9 +315,11 @@ class _RegisterPageState extends State<RegisterPage> {
         const SnackBar(content: Text('Child registered successfully!')),
       );
       await _userDataService.loadChildren(_userDataService.patient!.uid);
+      if (!mounted) return;
       Navigator.pop(context);
     } catch (e) {
-      print('Error registering child: $e');
+      logger.d('Error registering child: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to register child.')),
       );
@@ -414,6 +418,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           await _db.child(userTypePath).child(user.uid).update(userData);
 
+          if (!mounted) return;
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
@@ -423,6 +428,7 @@ class _RegisterPageState extends State<RegisterPage> {
         }
       } catch (e) {
         _showErrorDialog('Failed to edit user');
+        if (!mounted) return;
         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
         logger.d(e);
       }
@@ -919,7 +925,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: Text('Select date of birth', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
                     ),
                   ),
-                  if (birthDate != null && birthDate != DateTime(1900, 1, 1)) ... [
+                  if (birthDate != DateTime(1900, 1, 1)) ... [
                     const SizedBox(height: 10,),
                     Text('Selected date: ${DateFormat('dd-MM-yyyy').format(birthDate)}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
                   ],

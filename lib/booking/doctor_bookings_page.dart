@@ -1,11 +1,7 @@
-import 'dart:async';
-
-import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/widgets/booking_card.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class DoctorBookingsPage extends StatefulWidget {
@@ -21,7 +17,6 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
 
   final BookingService _bookingService = BookingService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _bookingsRef = FirebaseDatabase.instance.ref().child('Bookings');
   List<Booking> _bookings = <Booking>[];
   bool _isLoading = true;
   List<String> statuses = ['Pending', 'Confirmed', 'Cancelled'];

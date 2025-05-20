@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/medical_history.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class MedicalHistoryService {
   static final MedicalHistoryService _instance = MedicalHistoryService._internal();
@@ -7,6 +8,8 @@ class MedicalHistoryService {
     return _instance;
   }
   MedicalHistoryService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _medicalHistoryRef = FirebaseDatabase.instance.ref().child('MedicalHistory');
 
@@ -21,7 +24,7 @@ class MedicalHistoryService {
         });
       }
     } catch (e) {
-      print('Error fetching medical histories: $e');
+      logger.e('Error fetching medical histories: $e');
     }
     return medicalHistories;
   }
@@ -37,7 +40,7 @@ class MedicalHistoryService {
         });
       }
     } catch (e) {
-      print('Error fetching booking histories: $e');
+      logger.e('Error fetching booking histories: $e');
     }
     return medicalHistories;
   }
@@ -46,7 +49,7 @@ class MedicalHistoryService {
     try {
       await _medicalHistoryRef.push().set(medicalHistory.toMap());
     } catch (e) {
-      print('Error adding medical history: $e');
+      logger.e('Error adding medical history: $e');
     }
   }
 
@@ -54,7 +57,7 @@ class MedicalHistoryService {
     try {
       await _medicalHistoryRef.child(medicalHistory.id).update(medicalHistory.toMap());
     } catch (e) {
-      print('Error updating medical history: $e');
+      logger.e('Error updating medical history: $e');
     }
   }
 
@@ -62,7 +65,7 @@ class MedicalHistoryService {
     try {
       await _medicalHistoryRef.child(id).remove();
     } catch (e) {
-      print('Error deleting medical history: $e');
+      logger.e('Error deleting medical history: $e');
     }
   }
 }

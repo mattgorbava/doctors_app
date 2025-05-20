@@ -1,12 +1,10 @@
-import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/children_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 class RegisterChildPage extends StatefulWidget {
   const RegisterChildPage({super.key});
@@ -29,6 +27,8 @@ class _RegisterChildPageState extends State<RegisterChildPage> {
   bool _isDateSelected = false;
 
   bool _isLoading = false;
+
+  var logger = Logger();
 
   Future<void> _getDateOfBirth() async {
     DateTime? selectedDate = await showDatePicker(
@@ -86,7 +86,8 @@ class _RegisterChildPageState extends State<RegisterChildPage> {
           );
         }
       } catch (e) {
-        print('Error registering child: $e');
+        logger.e('Error registering child: $e');
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to register child.')),
         );

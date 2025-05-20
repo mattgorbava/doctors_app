@@ -32,7 +32,7 @@ class Booking {
       description: data['description'] ?? '',
       doctorId: data['doctorId'] ?? '',
       patientId: data['patientId'] ?? '',
-      status: data['status'] ?? 'pending',
+      status: data['status'] ?? '',
       time: data['time'] ?? '',
       isMandatory: data['isMandatory'] ?? false,
       analysisResultsPdf: data['analysisResultsPdf'] ?? '',

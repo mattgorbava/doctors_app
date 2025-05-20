@@ -89,7 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   Map<dynamic, dynamic> messagesMap = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
                   List<Map<String, dynamic>> messages = [];
 
-                  messagesMap.entries.forEach((entry) {
+                  for (var entry in messagesMap.entries) {
                     var value = entry.value;
                     String otherUserId = isDoctor ? widget.patientId! : widget.doctorId!;
   
@@ -101,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         'timeStamp': value['timeStamp']
                       });
                     }
-                  });
+                  }
                   messages.sort((a, b) => a['timeStamp'].compareTo(b['timeStamp']));
 
                   return ListView.builder(

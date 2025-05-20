@@ -1,8 +1,6 @@
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
-import 'package:doctors_app/doctor/patients_list_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
@@ -10,7 +8,6 @@ import 'package:doctors_app/services/doctor_service.dart';
 import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,21 +39,6 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
     super.initState();
     getDoctor();
   }
-  
-  Future<void> _fetchDoctor() async {
-    final snapshot = await FirebaseDatabase.instance.ref().child('Doctors').child(widget.cabinet.doctorId).once();
-    final value = snapshot.snapshot.value as Map<dynamic, dynamic>;
-    final doctor = Doctor.fromMap(value, widget.cabinet.doctorId);
-    setState(() {
-      _doctor = doctor;
-    });
-  }
-
-  Future<Patient> _fetchPatient(String patientId) async {
-    final snapshot = await FirebaseDatabase.instance.ref().child('Patients').child(patientId).once();
-    final value = snapshot.snapshot.value as Map<dynamic, dynamic>;
-    return Patient.fromMap(Map<String, dynamic>.from(value), patientId);
-  }
 
   Future<void> _sendRegistrationRequest() async {
     Map<String, dynamic> data = {
@@ -75,6 +57,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
     try {
       RegistrationRequest request = RegistrationRequest.fromMap(data, FirebaseAuth.instance.currentUser!.uid);
       await _registrationRequestService.addRequest(request);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registration request sent successfully.'),
         backgroundColor: Colors.green,
@@ -96,6 +79,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
         throw 'Could not call $phoneCall';
       }
     } catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Could not call $phoneNumber'),
         backgroundColor: Colors.red,
@@ -233,6 +217,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                       if (patient != null) {
                         String currentUserName = '${patient.firstName} ${patient.lastName}';
                         String doctorName = '${_doctor!.firstName} ${_doctor!.lastName}';
+                        if (!mounted) return;
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => ChatScreen(
@@ -267,7 +252,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => DoctorProfile(doctorId: _doctor!.uid,)),
+                    MaterialPageRoute(builder: (context) => const DoctorProfile(patientSideRequest: false,)),
                   );
                 }, 
                 child: Text(

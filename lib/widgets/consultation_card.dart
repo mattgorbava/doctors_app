@@ -3,7 +3,6 @@ import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 class ConsultationCard extends StatelessWidget {
@@ -47,7 +46,7 @@ class ConsultationCard extends StatelessWidget {
             ),
             ListTile(
               title: Text(consultation.title),
-              subtitle: Text('Next Consultation: ${formattedDate}'),
+              subtitle: Text('Next Consultation: $formattedDate'),
               trailing: SizedBox(
                 width: 100,
                 child: _userDataService.cabinet != null && patient.cabinetId.isNotEmpty ?

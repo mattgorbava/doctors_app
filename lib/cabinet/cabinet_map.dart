@@ -1,9 +1,7 @@
 import 'package:doctors_app/cabinet/cabinet_details_page.dart';
-import 'package:doctors_app/model/directions_model.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -17,7 +15,6 @@ class CabinetMap extends StatefulWidget {
 class _CabinetMapState extends State<CabinetMap> {
   dynamic _initialCameraPosition;
   GoogleMapController? _googleMapController;
-  Directions? _info;
   LatLng? _currentPosition;
   bool _isLoading = false;
   final Set<Marker> _markers = {};

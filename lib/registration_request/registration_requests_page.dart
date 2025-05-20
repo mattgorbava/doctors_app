@@ -3,7 +3,6 @@ import 'package:doctors_app/registration_request/registration_request_details_pa
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class RegistrationRequestsPage extends StatefulWidget {
@@ -31,6 +30,7 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> wit
         _registrationRequests = requests;
       });
     } catch (e) {
+      if (!mounted) return; 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch registration requests. Please try again later.'),

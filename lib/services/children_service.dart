@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/child.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class ChildrenService {
   static final ChildrenService _instance = ChildrenService._internal();
@@ -7,6 +8,8 @@ class ChildrenService {
     return _instance;
   }
   ChildrenService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _childrenRef = FirebaseDatabase.instance.ref().child('Children');
 
@@ -21,7 +24,7 @@ class ChildrenService {
         });
       }
     } catch (e) {
-      print('Error fetching children: $e');
+      logger.e('Error fetching children: $e');
     }
     return children;
   }
@@ -45,7 +48,7 @@ class ChildrenService {
       await _childrenRef.push().set(child);
       return true;
     } catch (e) {
-      print('Error adding child: $e');
+      logger.e('Error adding child: $e');
       return false;
     }
   }
@@ -54,7 +57,7 @@ class ChildrenService {
     try {
       await _childrenRef.child(child.uid).update(child.toMap());
     } catch (e) {
-      print('Error updating child: $e');
+      logger.e('Error updating child: $e');
     }
   }
 
@@ -62,7 +65,7 @@ class ChildrenService {
     try {
       await _childrenRef.child(id).remove();
     } catch (e) {
-      print('Error deleting child: $e');
+      logger.e('Error deleting child: $e');
     }
   }
 }

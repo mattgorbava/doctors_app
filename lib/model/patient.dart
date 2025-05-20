@@ -11,6 +11,7 @@ class Patient {
   String cnp;
   String parentId;
   bool hasEmergency;
+  String? emergencySymptoms;
 
   Patient({
     required this.uid,
@@ -25,6 +26,7 @@ class Patient {
     required this.cnp,
     this.parentId = '',
     this.hasEmergency = false,
+    this.emergencySymptoms,
   });
 
   factory Patient.fromMap(Map<String, dynamic> data, [String id = '']) {
@@ -41,6 +43,7 @@ class Patient {
       cnp: data['cnp'] ?? '',
       parentId: data['parentId'] ?? '',
       hasEmergency: data['hasEmergency'] ?? false,
+      emergencySymptoms: data['emergencySymptoms'] ?? '',
     );
   }
 
@@ -58,6 +61,7 @@ class Patient {
       'cnp': cnp,
       'parentId': parentId,
       'hasEmergency': hasEmergency,
+      'emergencySymptoms': emergencySymptoms,
     };
   }
 
@@ -75,6 +79,7 @@ class Patient {
       cnp: '',
       parentId: '',
       hasEmergency: false,
+      emergencySymptoms: '',
     );
   }
 
@@ -89,7 +94,8 @@ class Patient {
         cabinetId.isEmpty &&
         cnp.isEmpty &&
         parentId.isEmpty &&
-        !hasEmergency;
+        !hasEmergency &&
+        (emergencySymptoms == null || emergencySymptoms!.isEmpty);
   }
 
   bool get isNotEmpty {

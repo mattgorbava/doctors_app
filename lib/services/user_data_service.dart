@@ -1,10 +1,10 @@
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class UserDataService {
   static final UserDataService _instance = UserDataService._internal();
@@ -13,54 +13,20 @@ class UserDataService {
   }
   UserDataService._internal();
 
-  Patient? _patient;
-  List<Booking>? _patientBookings;
-  List<Patient>? _children;
-  Cabinet? _cabinet;
-  List<Cabinet>? _cabinets;
-  Doctor? _doctor;
-  List<Patient>? _doctorPatients;
-  bool _isDataLoaded = false;
+  var logger = Logger();
+
+  Patient? patient;
+  List<Booking>? patientBookings;
+  List<Patient>? children;
+  Cabinet? cabinet;
+  List<Cabinet>? cabinets;
+  Doctor? doctor;
+  List<Patient>? doctorPatients;
+  bool isDataLoaded = false;
   bool isPatient = false;
 
-  Patient? get patient => _patient;
-  List<Booking>? get patientBookings => _patientBookings;
-  Cabinet? get cabinet => _cabinet;
-  Doctor? get doctor => _doctor;
-  List<Patient>? get doctorPatients => _doctorPatients;
-  bool get isDataLoaded => _isDataLoaded;
-  List<Patient>? get children => _children;
-  List<Cabinet>? get cabinets => _cabinets;
-  bool get isPatientUser => isPatient;
-
-  set patient(Patient? value) {
-    _patient = value;
-  }
-  set cabinet(Cabinet? value) {
-    _cabinet = value;
-  }
-  set doctor(Doctor? value) {
-    _doctor = value;
-  }
-  set doctorPatients(List<Patient>? value) {
-    _doctorPatients = value;
-  }
-  set patientBookings(List<Booking>? value) {
-    _patientBookings = value;
-  }
-  set children(List<Patient>? value) {
-    _children = value;
-  }
-  set cabinets(List<Cabinet>? value) {
-    _cabinets = value;
-  }
-  set isPatientUser(bool value) {
-    isPatient = value;
-  }
-  
-
   Future<void> loadPatientData() async {
-    if (_isDataLoaded) return;
+    if (isDataLoaded) return;
     
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -68,27 +34,27 @@ class UserDataService {
 
       await _loadPatient(userId);
       
-      if (_patient != null) {
-        if (_patient!.cabinetId != null && _patient!.cabinetId!.isNotEmpty) {
-          await _loadCabinet(_patient!.cabinetId!);
+      if (patient != null) {
+        if (patient!.cabinetId.isNotEmpty) {
+          await _loadCabinet(patient!.cabinetId);
         }
-        if (_cabinet != null && _cabinet!.doctorId.isNotEmpty) {
-          await _loadDoctor(_cabinet!.doctorId);
+        if (cabinet != null && cabinet!.doctorId.isNotEmpty) {
+          await _loadDoctor(cabinet!.doctorId);
         }
         await _loadBookings(userId);
         await loadChildren(userId);
         await loadCabinets();
       }
 
-      _isDataLoaded = true;
+      isDataLoaded = true;
       isPatient = true;
     } catch (e) {
-      print('Error loading patient data: $e');
+      logger.e('Error loading patient data: $e');
     }
   }
 
   Future<void> loadDoctorData() async {
-    if (_isDataLoaded) return;
+    if (isDataLoaded) return;
     
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -96,16 +62,16 @@ class UserDataService {
 
       await _loadDoctor(userId);
       
-      if (_doctor != null && _doctor!.cabinetId != null && _doctor!.cabinetId!.isNotEmpty) {
-        await _loadCabinet(_doctor!.cabinetId!);
-        if (_cabinet != null) {
-          await loadPatients(_cabinet!.uid);
+      if (doctor != null && doctor!.cabinetId != null && doctor!.cabinetId!.isNotEmpty) {
+        await _loadCabinet(doctor!.cabinetId!);
+        if (cabinet != null) {
+          await loadPatients(cabinet!.uid);
         }
       }
       
-      _isDataLoaded = true;
+      isDataLoaded = true;
     } catch (e) {
-      print('Error loading doctor data: $e');
+      logger.e('Error loading doctor data: $e');
     }
   }
 
@@ -127,7 +93,7 @@ class UserDataService {
         ));
       });
       if (children.isNotEmpty) {
-        _children = children;
+        children = children;
       }
     }
   }
@@ -147,7 +113,7 @@ class UserDataService {
           key
         ));
       });
-      _cabinets = cabinets;
+      cabinets = cabinets;
     }
   }
 
@@ -160,7 +126,7 @@ class UserDataService {
     
     if (snapshot.snapshot.value != null) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      _patient = Patient.fromMap(
+      patient = Patient.fromMap(
         Map<String, dynamic>.from(data), 
         snapshot.snapshot.key!
       );
@@ -176,7 +142,7 @@ class UserDataService {
     
     if (snapshot.snapshot.value != null) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      _cabinet = Cabinet.fromMap(
+      cabinet = Cabinet.fromMap(
         Map<String, dynamic>.from(data), 
         snapshot.snapshot.key!
       );
@@ -193,13 +159,13 @@ class UserDataService {
       
       if (snapshot.snapshot.value != null) {
         final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-        _doctor = Doctor.fromMap(
+        doctor = Doctor.fromMap(
           Map<String, dynamic>.from(data), 
           snapshot.snapshot.key!
         );
       }
     } catch (e) {
-      print('Error loading doctor data: $e');
+      logger.e('Error loading doctor data: $e');
     }
   }
 
@@ -220,7 +186,7 @@ class UserDataService {
           key
         ));
       });
-      _doctorPatients = patients;
+      doctorPatients = patients;
     }
   }
 
@@ -241,17 +207,19 @@ class UserDataService {
           key
         ));
       });
-      _patientBookings = bookings;
+      patientBookings = bookings;
     }
   }
   
   void clearUserData() {
-    _patient = null;
-    _cabinet = null;
-    _doctor = null;
-    _doctorPatients = null;
-    _patientBookings = null;
-    _children = [];
-    _isDataLoaded = false;
+    patient = null;
+    cabinet = null;
+    doctor = null;
+    doctorPatients = null;
+    patientBookings = null;
+    children = [];
+    isDataLoaded = false;
+    isPatient = false;
+    cabinets = [];
   }
 }

@@ -24,7 +24,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   final DatabaseReference _patientsDatabase = FirebaseDatabase.instance.ref().child('Patients');
   final DatabaseReference _requestDatabase = FirebaseDatabase.instance.ref().child('Requests');
 
-  TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
@@ -69,7 +69,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        '${widget.doctor.city}',
+                        widget.doctor.city,
                         style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
                       ),
                       Row(
@@ -87,6 +87,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                               DataSnapshot lastNameSnapshot = await _patientsDatabase.child(currentUserId).child('lastName').get();
                               String currentUserName = '${firstNameSnapshot.value} ${lastNameSnapshot.value}';
                               String doctorName = '${widget.doctor.firstName} ${widget.doctor.lastName}';
+                              if (!mounted) return;
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => ChatScreen(
@@ -204,6 +205,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         throw 'Could not call $phoneCall';
       }
     } catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Could not call $phoneNumber'),
         backgroundColor: Colors.red,
@@ -235,10 +237,11 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
       firstDate: DateTime.now(),
       lastDate: DateTime(DateTime.now().year + 1),
     );
-    if (picked != null && picked != _selectedDate)
+    if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
       });
+    }
   }
 
   void _selectTime(BuildContext context) async {
@@ -246,10 +249,11 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (picked != null && picked != _selectedTime)
+    if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
       });
+    }
   }
 
   void _bookAppointment() {
@@ -283,12 +287,14 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         _selectedTime = null;
         _descriptionController.clear();
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Appointment booked successfully'),
         backgroundColor: Colors.green,
       ));
       _sendNotification();
     }).catchError((error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Failed to book appointment'),
         backgroundColor: Colors.red,

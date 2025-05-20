@@ -3,6 +3,7 @@ import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/booking_service.dart';
+import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/widgets/patient_card.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/services/user_data_service.dart';
@@ -26,6 +27,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
 
   final UserDataService _userDataService = UserDataService();
   final BookingService _bookingService = BookingService();
+  final PatientService _patientService = PatientService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Booking> _bookings = [];
   List<Patient> _children = [];
@@ -35,6 +37,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
   String? analysisResultsPdfUrl;
   bool _isPatient = true;
   Patient? _patient;
+  Patient? _parent;
 
   final cloudinary = CloudinaryPublic(
     '',  
@@ -45,7 +48,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
   @override
   void initState() {
     super.initState();
-    _isPatient = _userDataService.isPatient ?? true;
+    _isPatient = _userDataService.isPatient;
     _patient = widget.patient ?? _userDataService.patient;
     if (_isPatient) {
       _bookings = _userDataService.patientBookings ?? <Booking>[];
@@ -53,6 +56,13 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
       _fetchChildrenBookings();
     } else {
       _fetchBookings();
+      if (_patient!.parentId.isNotEmpty) {
+        _patientService.getPatientById(_patient!.parentId).then((parent) {
+          setState(() {
+            _parent = parent;
+          });
+        });
+      }
     }
     _isLoading = false;
   }
@@ -66,6 +76,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch bookings. Please try again later.'),
@@ -81,6 +92,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
         _bookings = bookings;
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch bookings. Please try again later.'),
@@ -153,11 +165,16 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
         throw 'Could not call $phoneCall';
       }
     } catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Could not call $phoneNumber'),
         backgroundColor: Colors.red,
       ));
     }
+  }
+
+  void _completeEmergency() {
+    _patientService.updatePatientEmergencyStatus(_patient!.uid, false);
   }
 
   @override
@@ -174,6 +191,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
             onPressed: () async {
               await _auth.signOut();
               _userDataService.clearUserData();
+              if (!mounted) return;
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
                     (Route<dynamic> route) => false);
             },
@@ -187,20 +205,50 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
               children: [
                 PatientCard(patient: _patient!),
                 if (!_isPatient) ... [
+                  _patient!.hasEmergency ?
+                    SizedBox(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Emergency Symptoms: ${_patient!.emergencySymptoms}',
+                            style: const TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: 0.5 * MediaQuery.of(context).size.width,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _completeEmergency;
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                              ),
+                              child: const Text('Complete Emergency', style: TextStyle(fontSize: 16, color: Colors.white)),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                    : const SizedBox.shrink(),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: 0.5 * MediaQuery.of(context).size.width,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        _makePhoneCall(_patient!.phoneNumber);
+                        if (_parent != null) {
+                          _makePhoneCall(_parent!.phoneNumber);
+                        } else {
+                          _makePhoneCall(_patient!.phoneNumber);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.phone),
                           SizedBox(width: 8),
                           Text('Call Patient', style: TextStyle(fontSize: 16, color: Colors.white)),
@@ -215,9 +263,17 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => ChatScreen(
+                          builder: (context) => 
+                          _parent == null ?
+                          ChatScreen(
                             patientId: _patient!.uid,
                             patientName: '${_patient!.firstName} ${_patient!.lastName}',
+                            doctorId: _userDataService.doctor!.uid,
+                            doctorName: '${_userDataService.doctor!.firstName} ${_userDataService.doctor!.lastName}',
+                          )
+                          : ChatScreen(
+                            patientId: _parent!.uid,
+                            patientName: '${_parent!.firstName} ${_parent!.lastName}',
                             doctorId: _userDataService.doctor!.uid,
                             doctorName: '${_userDataService.doctor!.firstName} ${_userDataService.doctor!.lastName}',
                           ),
@@ -322,7 +378,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                     ),
                                 ],
                               ),
-                              if (booking.status != null && booking.status == 'Completed') ... [
+                              if (booking.status == 'Completed') ... [
                                 const SizedBox(height: 8),
                                 Text(
                                   'Results: ${booking.results}',
@@ -334,11 +390,11 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                                 )
                               ],
-                              if (booking.analysisResultsPdf != null && booking.analysisResultsPdf!.isNotEmpty) ... [
+                              if (booking.analysisResultsPdf.isNotEmpty) ... [
                                 const SizedBox(height: 8),
                                 ElevatedButton(
                                   onPressed: () async {
-                                    final url = booking.analysisResultsPdf!;
+                                    final url = booking.analysisResultsPdf;
                                     if (await canLaunchUrl(Uri.parse(url))) {
                                       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
                                     } else {

@@ -78,6 +78,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
           }
         }
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid email or password')));
       }
 

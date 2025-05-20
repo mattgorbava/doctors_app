@@ -21,7 +21,7 @@ class _PatientCardState extends State<PatientCard> {
   @override
   void initState() {
     super.initState();
-    if (widget.patient.parentId != null && widget.patient.parentId.isNotEmpty) {
+    if (widget.patient.parentId.isNotEmpty) {
       _getParent();
     }
   }
@@ -53,7 +53,7 @@ class _PatientCardState extends State<PatientCard> {
               borderRadius: BorderRadius.circular(60),
               border: Border.all(color: const Color(0xff0064FA)),
             ),
-            child: widget.patient.profileImageUrl != null && widget.patient.profileImageUrl.isNotEmpty 
+            child: widget.patient.profileImageUrl.isNotEmpty 
             ? ClipRRect(
               borderRadius: BorderRadius.circular(60),
               child: CachedNetworkImage(

@@ -163,6 +163,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
         String cabinetId = FirebaseDatabase.instance.ref().child('Cabinets').push().key!;
         await FirebaseDatabase.instance.ref().child('Cabinets').child(cabinetId).set(cabinetData);
 
+        if (!mounted) return;
         Navigator.of(context).pop();
       } catch (e) {
         _showErrorDialog('Failed to register cabinet');
@@ -218,7 +219,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
         };
 
         await FirebaseDatabase.instance.ref().child('Cabinets').child(widget.cabinet!.uid).update(cabinetData);
-
+  
+        if (!mounted) return;
         Navigator.of(context).pop();
       } catch (e) {
         _showErrorDialog('Failed to register cabinet');

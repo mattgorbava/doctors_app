@@ -52,6 +52,7 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
           (bounds.southwest.longitude + bounds.northeast.longitude) / 2,
         );
 
+        if (!mounted) return;
         Navigator.of(context).pop(selectedLocation);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

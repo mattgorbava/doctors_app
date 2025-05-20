@@ -4,9 +4,8 @@ import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
 import 'package:doctors_app/registration_request/registration_requests_page.dart';
 import 'package:doctors_app/services/user_data_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 
 class DoctorHomePage extends StatefulWidget {
   const DoctorHomePage({super.key});
@@ -17,8 +16,7 @@ class DoctorHomePage extends StatefulWidget {
 
 class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObserver {
   final UserDataService _userDataService = UserDataService();
-
-  final String _doctorId = FirebaseAuth.instance.currentUser?.uid ?? '';
+  var logger = Logger();
 
   bool _isLoading = true;
 
@@ -46,7 +44,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
       if (!mounted) return;
 
       if (_userDataService.doctor == null) {
-        print("Error: Doctor data could not be loaded in DoctorHomePage.");
+        logger.e("Doctor data could not be loaded in DoctorHomePage.");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to load doctor details.'), backgroundColor: Colors.red),
         );
@@ -63,12 +61,12 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
           const RegistrationRequestsPage(key: PageStorageKey('doctorRequestsPage')),
           const DoctorBookingsPage(key: PageStorageKey('doctorBookingsPage')),
           const DoctorChatlistPage(key: PageStorageKey('doctorChatlistPage')),
-          const DoctorProfile(key: const PageStorageKey('doctorProfilePage')),
+          const DoctorProfile(key: PageStorageKey('doctorProfilePage')),
         ];
-        _isLoading = false; // Stop loading
+        _isLoading = false;
       });
     } catch (e) {
-      print('Error initializing doctor home page data: $e');
+      logger.e("Error initializing doctor home page data: $e");
       if (!mounted) return;
       setState(() {
          _isLoading = false;

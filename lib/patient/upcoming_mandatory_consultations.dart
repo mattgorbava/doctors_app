@@ -31,38 +31,18 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
   List<Patient> children = [];
 
   Future<void> _loadConsultations() async {
-    if (patient == null) {
-      throw Exception('Patient not loaded yet');
-    }
-
     try {
       String jsonString = await rootBundle.loadString('lib/assets/json/consultations.json');
       Map<String, dynamic> jsonData = json.decode(jsonString);
       
       if (jsonData.containsKey('consultations')) {
         List<dynamic> consultationsJson = jsonData['consultations'];
-        // DateTime now = DateTime.now();
-        // DateTime date = patient.birthDate;
-        // int patientAgeInMonths = ((now.year - date.year) * 12 + now.month - date.month).toInt();
-        // consultationsJson = consultationsJson.where((consultation) {
-        //   int ageInMonthsStart = int.parse(consultation['ageInMonthsStart']);
-        //   int ageInMonthsEnd = int.parse(consultation['ageInMonthsEnd']);
-        //   return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
-        // }).toList();
         setState(() {
           consultations = consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
         });
       } else {
         try {
           List<dynamic> consultationsJson = jsonData as List<dynamic>;
-          // DateTime now = DateTime.now();
-          // DateTime date = patient.birthDate;
-          // int patientAgeInMonths = ((now.year - date.year) * 12 + now.month - date.month).toInt();
-          // consultationsJson = consultationsJson.where((consultation) {
-          //   int ageInMonthsStart = consultation['ageInMonthsStart'] as int;
-          //   int ageInMonthsEnd = consultation['ageInMonthsEnd'] as int;
-          //   return patientAgeInMonths >= ageInMonthsStart && patientAgeInMonths <= ageInMonthsEnd;
-          // }).toList();
           setState(() {
             consultations = consultationsJson.map((consultation) => Consultation.fromMap(consultation)).toList();
           });
@@ -71,6 +51,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not get consultations.'),
         backgroundColor: Colors.red,

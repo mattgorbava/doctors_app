@@ -1,9 +1,7 @@
 import 'package:doctors_app/cabinet/register_cabinet_page.dart';
 import 'package:doctors_app/doctor/patients_list_page.dart';
 import 'package:doctors_app/model/cabinet.dart';
-import 'package:doctors_app/services/cabinet_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,10 +16,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
   @override
   bool get wantKeepAlive => true;
 
-  final CabinetService _cabinetService = CabinetService();
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _db = FirebaseDatabase.instance.ref();
+  final UserDataService _userDataService = UserDataService();
 
   Cabinet? _cabinet;
   bool _isLoading = true;
@@ -33,41 +28,10 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
   }
 
   void getCabinet() async {
-    Cabinet cabinet = await _cabinetService.getCabinetByDoctorId(_auth.currentUser!.uid);
     setState(() {
-      _cabinet = cabinet;
+      _cabinet = _userDataService.cabinet;
       _isLoading = false;
     });
-  }
-
-  Future<void> _fetchCabinet() async {
-    String? currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
-      final cabinetReference = await FirebaseDatabase.instance.ref().child('Cabinets').once();
-      Cabinet? cabinet;
-      if (cabinetReference.snapshot.exists) {
-        final snapshot = await _db
-          .child('Cabinets')
-          .orderByChild('doctorId')
-          .equalTo(currentUserId)
-          .once();
-
-
-        if (snapshot.snapshot.exists) {
-          final Map<dynamic, dynamic> values = snapshot.snapshot.value as Map<dynamic, dynamic>;
-        
-          if (values.isNotEmpty) {
-            final key = values.keys.first;
-            cabinet = Cabinet.fromMap(Map<String, dynamic>.from(values[key]), key);
-          }
-        }
-
-      }
-      setState(() {
-        _cabinet = cabinet;
-        _isLoading = false;
-      });
-    }
   }
 
   @override
@@ -125,7 +89,8 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () { 
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => PatientsListPage()));
+                    if (!mounted) return;
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientsListPage()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B962B),

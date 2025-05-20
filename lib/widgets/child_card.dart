@@ -19,6 +19,7 @@ class ChildCard extends StatefulWidget {
 class _ChildCardState extends State<ChildCard> {
   final CabinetService _cabinetService = CabinetService();
   final PatientService _patientService = PatientService();
+  final TextEditingController _symptomsController = TextEditingController();
 
   Cabinet? _cabinet;
 
@@ -35,10 +36,82 @@ class _ChildCardState extends State<ChildCard> {
   }
 
   void _makeEmergency() {
+    if (widget.child.hasEmergency) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Emergency already reported.'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    _showEmergencyDialog();
+  }
+
+  Future<void> _showEmergencyDialog() async {
+    _symptomsController.clear();
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Report Emergency'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('Please describe the symptoms:'),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _symptomsController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter symptoms here',
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Report'),
+              onPressed: () {
+                if (_symptomsController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Please enter symptoms.'),
+                    backgroundColor: Colors.red,
+                  ));
+                  return;
+                }
+                Navigator.of(dialogContext).pop();
+                _proceedWithEmergency(_symptomsController.text);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _proceedWithEmergency(String symptoms) {
+    if (!mounted) return;
+
     setState(() {
       widget.child.hasEmergency = true;
+      widget.child.emergencySymptoms = symptoms;
     });
-    _patientService.updatePatientEmergencyStatus(widget.child.uid, true);
+
+    _patientService.updatePatientEmergencyStatus(widget.child.uid, widget.child.hasEmergency, symptoms);
+  
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Emergency reported successfully.'),
+      backgroundColor: Colors.green,
+    ));
   }
 
   @override
@@ -119,7 +192,7 @@ class _ChildCardState extends State<ChildCard> {
                     )
                     : null,
                   ),
-                  if (widget.child.cabinetId != null && widget.child.cabinetId.isNotEmpty) ... [
+                  if (widget.child.cabinetId.isNotEmpty) ... [
                     const SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -151,6 +224,7 @@ class _ChildCardState extends State<ChildCard> {
                             ),
                           ),
                         ),
+                        widget.child.hasEmergency == false ?
                         SizedBox(
                           width: 150,
                           height: 50,
@@ -169,7 +243,8 @@ class _ChildCardState extends State<ChildCard> {
                               child: Text('Emergency', style: TextStyle(color: Colors.white)),
                             ),
                           ),
-                        ),
+                        )
+                        : const SizedBox.shrink(),
                       ],
                     ),
                     const SizedBox(height: 10),

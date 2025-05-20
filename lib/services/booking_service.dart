@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/booking.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class BookingService {
   static final BookingService _instance = BookingService._internal();
@@ -7,6 +8,8 @@ class BookingService {
     return _instance;
   }
   BookingService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _bookingRef = FirebaseDatabase.instance.ref().child('Bookings');
 
@@ -21,7 +24,7 @@ class BookingService {
         });
       }
     } catch (e) {
-      print('Error fetching bookings: $e');
+      logger.e('Error fetching bookings: $e');
     }
     return bookings;
   }
@@ -37,7 +40,7 @@ class BookingService {
         });
       }
     } catch (e) {
-      print('Error fetching bookings: $e');
+      logger.e('Error fetching bookings: $e');
     }
     return bookings;
   }
@@ -47,7 +50,7 @@ class BookingService {
       String bookingId = _bookingRef.push().key!;
       await _bookingRef.child(bookingId).set(bookingData);
     } catch (e) {
-      print('Error adding booking: $e');
+      logger.e('Error adding booking: $e');
     }
   }
 
@@ -55,7 +58,7 @@ class BookingService {
     try {
       await _bookingRef.child(booking.id).update(booking.toMap());
     } catch (e) {
-      print('Error updating booking: $e');
+      logger.e('Error updating booking: $e');
     }
   }
 
@@ -63,7 +66,7 @@ class BookingService {
     try {
       await _bookingRef.child(id).remove();
     } catch (e) {
-      print('Error deleting booking: $e');
+      logger.e('Error deleting booking: $e');
     }
   }
 }

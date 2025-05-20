@@ -1,5 +1,6 @@
 import 'package:doctors_app/model/patient.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 class PatientService {
   static final PatientService _instance = PatientService._internal();
@@ -7,6 +8,8 @@ class PatientService {
     return _instance;
   }
   PatientService._internal();
+
+  var logger = Logger();
 
   final DatabaseReference _patientRef = FirebaseDatabase.instance.ref().child('Patients');
 
@@ -21,7 +24,7 @@ class PatientService {
         });
       }
     } catch (e) {
-      print('Error fetching patients: $e');
+      logger.e('Error fetching patients: $e');
     }
     return patients;
   }
@@ -40,7 +43,7 @@ class PatientService {
       final snapshot = await _patientRef.orderByChild('cnp').equalTo(cnp).once();
       return !snapshot.snapshot.exists;
     } catch (e) {
-      print('Error checking unique CNP: $e');
+      logger.e('Error checking unique CNP: $e');
       return false;
     }
   }
@@ -56,7 +59,7 @@ class PatientService {
         });
       }
     } catch (e) {
-      print('Error fetching patients by cabinet ID: $e');
+      logger.e('Error fetching patients by cabinet ID: $e');
     }
     return patients;
   }
@@ -72,7 +75,7 @@ class PatientService {
         });
       }
     } catch (e) {
-      print('Error fetching patients by parent ID: $e');
+      logger.e('Error fetching patients by parent ID: $e');
     }
     return patients;
   }
@@ -82,7 +85,7 @@ class PatientService {
       String patientId = _patientRef.push().key!;
       await _patientRef.child(patientId).set(patientData);
     } catch (e) {
-      print('Error adding patient: $e');
+      logger.e('Error adding patient: $e');
     }
   }
 
@@ -90,7 +93,7 @@ class PatientService {
     try {
       await _patientRef.child(patient.uid).update(patient.toMap());
     } catch (e) {
-      print('Error updating patient: $e');
+      logger.e('Error updating patient: $e');
     }
   }
 
@@ -98,7 +101,7 @@ class PatientService {
     try {
       await _patientRef.child(id).remove();
     } catch (e) {
-      print('Error deleting patient: $e');
+      logger.e('Error deleting patient: $e');
     }
   }
 
@@ -106,7 +109,7 @@ class PatientService {
     try {
       await _patientRef.child(patientId).update({'cabinetId': cabinetId});
     } catch (e) {
-      print('Error updating cabinet: $e');
+      logger.e('Error updating cabinet: $e');
     }
   }
 
@@ -115,16 +118,21 @@ class PatientService {
       final snapshot = await _patientRef.child(id).once();
       return snapshot.snapshot.exists;
     } catch (e) {
-      print('Error checking if patient exists: $e');
+      logger.e('Error checking if patient exists: $e');
       return false;
     }
   }
 
-  Future<void> updatePatientEmergencyStatus(String patientId, bool hasEmergency) async {
+  Future<void> updatePatientEmergencyStatus(String patientId, bool hasEmergency, [String symptoms = '']) async {
     try {
-      await _patientRef.child(patientId).update({'hasEmergency': hasEmergency});
+      await _patientRef.child(patientId).update(
+        {
+          'hasEmergency': hasEmergency,
+          'emergencySymptoms': symptoms,
+        }
+      );
     } catch (e) {
-      print('Error updating patient emergency status: $e');
+      logger.e('Error updating patient emergency status: $e');
     }
   }
 }

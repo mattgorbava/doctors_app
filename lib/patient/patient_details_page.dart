@@ -1,8 +1,5 @@
-import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/patient.dart';
-import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PatientDetailsPage extends StatefulWidget {
   const PatientDetailsPage({super.key, required this.patient});
@@ -14,24 +11,6 @@ class PatientDetailsPage extends StatefulWidget {
 }
 
 class _PatientDetailsPageState extends State<PatientDetailsPage> {
-  final UserDataService _userDataService = UserDataService();
-
-  void _makePhoneCall() async {
-    final Uri phoneCall = Uri(scheme: 'tel', path: widget.patient.phoneNumber);
-    try {
-      if (await canLaunchUrl(phoneCall)) {
-        await launchUrl(phoneCall);
-      } else {
-        throw 'Could not call $phoneCall';
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not call ${widget.patient.phoneNumber}'),
-        backgroundColor: Colors.red,
-      ));
-    }
-  }
- 
   @override
   Widget build(BuildContext context) {
     return const Placeholder();

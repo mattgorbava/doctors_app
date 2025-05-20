@@ -1,7 +1,5 @@
-import 'package:doctors_app/model/child.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
-import 'package:doctors_app/services/children_service.dart';
 import 'package:doctors_app/services/patient_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +21,7 @@ class _RegistrationRequestCardState extends State<RegistrationRequestCard> {
   late Future<void> _dataFuture;
 
   Future<void> _getPatient() async {
-    patient = await _patientService.getPatientById(widget.request.patientId!);
+    patient = await _patientService.getPatientById(widget.request.patientId);
   }
 
   @override
@@ -67,7 +65,7 @@ class _RegistrationRequestCardState extends State<RegistrationRequestCard> {
                   ),
                 ),
                 subtitle: Text(
-                  'Status: ${widget.request.status}\nDate of request: ${DateFormat('dd.MM.yyyy').format(widget.request.createdAt!)}',
+                  'Status: ${widget.request.status}\nDate of request: ${DateFormat('dd.MM.yyyy').format(widget.request.createdAt)}',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,

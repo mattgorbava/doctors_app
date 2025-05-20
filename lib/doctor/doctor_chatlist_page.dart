@@ -3,6 +3,7 @@ import 'package:doctors_app/model/patient.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class DoctorChatlistPage extends StatefulWidget {
   const DoctorChatlistPage({super.key});
@@ -21,6 +22,8 @@ class _DoctorChatlistPageState extends State<DoctorChatlistPage> with AutomaticK
   List<Patient> _chatList = [];
   bool _isLoading = true;
   late String doctorId;
+
+  var logger = Logger();
 
   @override
   void initState() {
@@ -54,12 +57,13 @@ class _DoctorChatlistPageState extends State<DoctorChatlistPage> with AutomaticK
         });
 
       } catch (e) {
-        print('Error: $e');
+        logger.e('Error fetching chat list: $e');
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get chats.'),
-        backgroundColor: Colors.red,
-      ));
-    }
+          content: Text('Could not get chats.'),
+          backgroundColor: Colors.red,
+        ));
+      }
   }
   }
 

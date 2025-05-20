@@ -1,5 +1,4 @@
 import 'package:doctors_app/patient/patient_cabinet_page.dart';
-import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
 import 'package:doctors_app/patient/patient_children_page.dart';
 import 'package:doctors_app/patient/upcoming_mandatory_consultations.dart';
@@ -7,7 +6,6 @@ import 'package:doctors_app/patient/patient_user_profile.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class PatientHomePage extends StatefulWidget {
   const PatientHomePage({super.key});
@@ -21,7 +19,6 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
 
   final _userDataService = UserDataService();
 
-  List<Cabinet> _cabinets = [];
   bool _isLoading = true;
 
   final PageStorageBucket _bucket = PageStorageBucket();
@@ -50,10 +47,10 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
 
       setState(() {
         _children = <Widget>[
-          PatientCabinetPage(key: const PageStorageKey('patientCabinetPage')),
+          const PatientCabinetPage(key: PageStorageKey('patientCabinetPage')),
           const ChatListPage(key: PageStorageKey('patientChatlistPage'),),
           UpcomingMandatoryConsultations(key: const PageStorageKey('patientMandatoryConsultationsPage'), patientId: _auth.currentUser!.uid),
-          PatientChildrenPage(key: const PageStorageKey('patientChildrenPage')),
+          const PatientChildrenPage(key: PageStorageKey('patientChildrenPage')),
           const PatientUserProfile(key: PageStorageKey('patientProfilePage')),
         ];
         _isLoading = false;

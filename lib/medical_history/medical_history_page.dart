@@ -1,7 +1,6 @@
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/medical_history.dart';
 import 'package:doctors_app/model/patient.dart';
-import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/services/medical_history_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ class MedicalHistoryPage extends StatefulWidget {
 
 class _MedicalHistoryPageState extends State<MedicalHistoryPage> {
   final UserDataService _userDataService = UserDataService();
-  final BookingService _bookingService = BookingService();
   final MedicalHistoryService _medicalHistoryService = MedicalHistoryService();
 
   List<Booking> _bookings = <Booking>[];
@@ -46,6 +44,7 @@ class _MedicalHistoryPageState extends State<MedicalHistoryPage> {
         _history = await _medicalHistoryService.getBookingHistory(widget.booking!.id);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to fetch medical history. Please try again later.'),
@@ -107,8 +106,7 @@ class _MedicalHistoryPageState extends State<MedicalHistoryPage> {
             : ListView.builder(
                 itemCount: _history.length,
                 itemBuilder: (context, index) {
-                  final history = _history[index];
-                  return ListTile(
+                  return const ListTile(
                     title: Text(''),
                     subtitle: Text(''),
                   );

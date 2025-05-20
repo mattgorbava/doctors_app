@@ -1,4 +1,3 @@
-import 'package:doctors_app/model/booking.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +36,7 @@ class _AddMedicalHistoryPageState extends State<AddMedicalHistoryPage> {
       } else {
         newStatus = 'Completed';
       }
+      if (!mounted) return;
       Navigator.of(context).pop(newStatus);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

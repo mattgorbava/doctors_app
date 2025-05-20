@@ -14,9 +14,9 @@ class Consultation {
   factory Consultation.fromMap(Map<String, dynamic> map) {
     return Consultation(
       title: map['title'] ?? '',
-      periodInMonths: int.parse(map['periodInMonths']) ?? 0,
-      ageInMonthsStart: int.parse(map['ageInMonthsStart']) ?? 0,
-      ageInMonthsEnd: int.parse(map['ageInMonthsEnd']) ?? 0,
+      periodInMonths: int.parse(map['periodInMonths']),
+      ageInMonthsStart: int.parse(map['ageInMonthsStart']),
+      ageInMonthsEnd: int.parse(map['ageInMonthsEnd']),
     );
   }
 
