@@ -69,4 +69,24 @@ class BookingService {
       logger.e('Error deleting booking: $e');
     }
   }
+
+  Future<List<Booking>> getAllBookingsInPeriod(DateTime periodStart, DateTime periodEnd) async {
+    List<Booking> bookings = [];
+    try {
+      final snapshot = await _bookingRef
+          .orderByChild('date')
+          .startAt(periodStart.toIso8601String())
+          .endAt(periodEnd.toIso8601String())
+          .once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        data.forEach((key, value) {
+          bookings.add(Booking.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+    } catch (e) {
+      logger.e('Error fetching bookings in the specified period: $e');
+    }
+    return bookings;
+  }
 }

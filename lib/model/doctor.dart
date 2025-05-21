@@ -51,4 +51,31 @@ class Doctor {
       'cabinetId': cabinetId,
     };
   }
+
+  factory Doctor.empty() {
+    return Doctor(
+      uid: '', 
+      email: '', 
+      profileImageUrl: '', 
+      city: '', 
+      firstName: '', 
+      lastName: '', 
+      phoneNumber: '', 
+      cvUrl: '', 
+      legitimationNumber: ''
+    );
+  }
+
+  bool get isEmpty {
+    return 
+      uid.isEmpty &&
+      email.isEmpty &&
+      profileImageUrl.isEmpty &&
+      city.isEmpty &&
+      firstName.isEmpty &&
+      lastName.isEmpty &&
+      phoneNumber.isEmpty &&
+      cvUrl.isEmpty &&
+      legitimationNumber.isEmpty;
+  }
 }
