@@ -1,55 +1,28 @@
-import 'package:doctors_app/auth/register_screen.dart';
-import 'package:doctors_app/doctor/doctor_home_page.dart';
-import 'package:doctors_app/patient/patient_home_page.dart';
+import 'package:doctors_app/services/admin_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class AdminLogin extends StatefulWidget {
+  static const String routeName = '/oxdpttc0q4';
+
+  const AdminLogin({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<AdminLogin> createState() => _AdminLoginState();
 }
 
-class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
-
-  final _formKey = GlobalKey<FormState>();
-
+class _AdminLoginState extends State<AdminLogin> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _db = FirebaseDatabase.instance.ref();
-
+  final _formKey = GlobalKey<FormState>();
+  final AdminService _adminService = AdminService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-
-  bool _isLoading = false;
-  bool _isNavigating = false;
-
   bool _obscureText = true;
-  bool _rememberMe = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  Future<void> _saveRememberMePreference(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('rememberMe', value);
-  }
+  bool _isLoading = false;
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -65,21 +38,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
         User? user = userCredential.user;
 
         if (user != null) {
-          DatabaseReference userRef = _db.child('Doctors').child(user.uid);
-          DataSnapshot snapshot = await userRef.get();
-          _saveRememberMePreference(_rememberMe);
-          
-          if (snapshot.exists) {
-            _navigateToDoctorHomePage();
+          bool isAdmin = await _adminService.isAdmin(user.email!);
+          if (isAdmin) {
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(context, '/admin-dashboard');
           } else {
-            userRef = _db.child('Patients').child(user.uid);
-            snapshot = await userRef.get();
-            if (snapshot.exists) {
-              _navigateToPatientHomePage();
-            } else {
-              _showErrorDialog('User not found');
-            }
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You are not an admin')));
           }
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login failed')));
         }
       } catch (e) {
         if (!mounted) return;
@@ -92,40 +61,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     }
   }
 
-  void _navigateToDoctorHomePage() {
-    if (!_isNavigating) {
-      _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DoctorHomePage()));
-    }
-  }
-  
-  void _navigateToPatientHomePage() {
-    if (!_isNavigating) {
-      _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientHomePage()));
-    }
-  }
-  
-  void _showErrorDialog(String s) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(s),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            )
-          ],
-        );
-      }
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -135,7 +70,8 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Login'),
+          title: const Text('Admin Login'),
+          backgroundColor: const Color(0xFF2B962B),
           automaticallyImplyLeading: false,
         ),
         body: _isLoading ? const Center(child: CircularProgressIndicator(),) : 
@@ -190,21 +126,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         ),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        }
-                        return null;
-                      },
                     ),
                   ),
                   SizedBox(
                     height: 44,
                     child: TextFormField(
-                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
+                      controller: _passwordController,
+                      obscureText: _obscureText,
                       focusNode: _passwordFocusNode,
                       onFieldSubmitted: (value) => _login(),
-                      controller: _passwordController,
+                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color.fromARGB(255, 191, 230, 191),
@@ -240,27 +171,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           },
                         ),
                       ),
-                      obscureText: _obscureText,
                       keyboardType: TextInputType.text,
-                      validator: (value) {
-                        if (value!= null && value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
                     ),
                   ),
                   const SizedBox(height: 20,),
-                  CheckboxListTile(
-                    title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
-                    value: _rememberMe,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _rememberMe = value ?? false;
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: ElevatedButton(
@@ -275,15 +189,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       child: const Text('Login', style: TextStyle(fontSize: 16, color: Colors.white),),
                     ),
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
-                      },
-                      child: Text('Register new account', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
-                    ),
-                  ),
                 ],
                )
             ),
@@ -292,6 +197,4 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
       ),
     );
   }
-
-  
 }

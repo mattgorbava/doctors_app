@@ -69,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final PatientService _patientService = PatientService();
 
   final cloudinary = CloudinaryPublic(
-    '',  
+    '',
     'doctors-app', 
     cache: false,
   );

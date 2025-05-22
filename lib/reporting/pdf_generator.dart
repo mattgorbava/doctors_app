@@ -67,7 +67,7 @@ class PdfGenerator {
                         ),
                       ),
                       pw.Text(
-                        "Dated between: ${DateFormat("dd:MM:yyyy").format(periodStart)} ${DateFormat("dd:MM:yyyy").format(periodEnd)}",
+                        "Dated between: ${DateFormat("dd.MM.yyyy").format(periodStart)} ${DateFormat("dd.MM.yyyy").format(periodEnd)}",
                         style: const pw.TextStyle(
                           fontSize: 16,
                         ),
@@ -246,12 +246,20 @@ class PdfGenerator {
                             style: const pw.TextStyle(fontSize: 6),
                           ),
                         ),
-                        pw.UrlLink(
-                          child: pw.Text(
-                            'Link',
-                            style: const pw.TextStyle(fontSize: 6)
-                          ), 
-                          destination: item.booking.analysisResultsPdf,
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: item.booking.analysisResultsPdf.isNotEmpty ? 
+                          pw.UrlLink(
+                            child: pw.Text(
+                              'Link',
+                              style: const pw.TextStyle(fontSize: 6, color: PdfColors.blue, decoration: pw.TextDecoration.underline),
+                            ), 
+                            destination: item.booking.analysisResultsPdf,
+                          )
+                          : pw.Text(
+                            'N/A',
+                            style: const pw.TextStyle(fontSize: 6),
+                          ),
                         ),
                       ],
                     )
