@@ -210,8 +210,6 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
           'address': _cabinetAddress,
           'capacity': int.parse(_cabinetCapacityController.text),
           'numberOfPatients': widget.cabinet!.numberOfPatients,
-          'rating': widget.cabinet!.rating,
-          'totalReviews': widget.cabinet!.totalReviews,
           'createdAt': widget.cabinet!.createdAt.toIso8601String(),
           'updatedAt': DateTime.now().toIso8601String(),
           'openingTime': _openingTimeController.text,

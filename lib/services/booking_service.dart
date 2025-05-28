@@ -9,9 +9,14 @@ class BookingService {
   }
   BookingService._internal();
 
+
   var logger = Logger();
 
-  final DatabaseReference _bookingRef = FirebaseDatabase.instance.ref().child('Bookings');
+  late DatabaseReference _bookingRef = FirebaseDatabase.instance.ref().child('Bookings');
+  
+  BookingService.withDbRef({DatabaseReference? bookingRef}) {
+    _bookingRef = bookingRef ?? FirebaseDatabase.instance.ref().child('Bookings');
+  }
 
   Future<List<Booking>> getAllBookingsByPatientId(String patientId) async {
     List<Booking> bookings = [];

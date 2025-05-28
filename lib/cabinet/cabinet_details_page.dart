@@ -135,12 +135,9 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 20.0,),
             Text(
-              'Rating: ${widget.cabinet.rating}',
-              style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
-            ),
-            Text(
-              'Number of reviews: ${widget.cabinet.totalReviews}',
+              'Working hours ${widget.cabinet.openingTime} - ${widget.cabinet.closingTime}',
               style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
             ),
             Text(

@@ -107,9 +107,9 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _getDateOfBirth() async {
     DateTime? selectedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
+      lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
     );
     setState(() {
       if (selectedDate != null) {
@@ -899,6 +899,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                       keyboardType: TextInputType.number,
+                      maxLength: 13,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your CNP';

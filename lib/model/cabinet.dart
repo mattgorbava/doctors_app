@@ -9,8 +9,6 @@ class Cabinet {
   DateTime updatedAt;
   LatLng location;
   String address;
-  double rating;
-  int totalReviews;
   int capacity;
   int numberOfPatients;
   String openingTime;
@@ -25,8 +23,6 @@ class Cabinet {
     required this.updatedAt,
     required this.location,
     required this.address,
-    required this.rating,
-    required this.totalReviews,
     required this.capacity,
     required this.numberOfPatients,
     required this.openingTime,
@@ -43,8 +39,6 @@ class Cabinet {
       updatedAt: DateTime.parse(map['updatedAt']),
       location: LatLng(map['location']['latitude'], map['location']['longitude']),
       address: map['address'],
-      rating: double.parse(map['rating'].toString()),
-      totalReviews: map['totalReviews'],
       capacity: map['capacity'],
       numberOfPatients: map['numberOfPatients'],
       openingTime: map['openingTime'],
@@ -64,8 +58,6 @@ class Cabinet {
         'longitude': location.longitude,
       },
       'address': address,
-      'rating': rating,
-      'totalReviews': totalReviews,
       'capacity': capacity,
       'numberOfPatients': numberOfPatients,
       'openingTime': openingTime,
@@ -83,8 +75,6 @@ class Cabinet {
       updatedAt: DateTime(2003, 09, 30),
       location: const LatLng(0, 0),
       address: '',
-      rating: 0.0,
-      totalReviews: 0,
       capacity: 0,
       numberOfPatients: 0,
       openingTime: '',
@@ -102,8 +92,6 @@ class Cabinet {
       updatedAt == DateTime(2003, 09, 30) &&
       location == const LatLng(0, 0) &&
       address.isEmpty &&
-      rating == 0.0 &&
-      totalReviews == 0 &&
       capacity == 0 &&
       numberOfPatients == 0 &&
       openingTime.isEmpty &&

@@ -11,7 +11,11 @@ class PatientService {
 
   var logger = Logger();
 
-  final DatabaseReference _patientRef = FirebaseDatabase.instance.ref().child('Patients');
+  late DatabaseReference _patientRef = FirebaseDatabase.instance.ref().child('Patients');
+
+  PatientService.withDbRef({required DatabaseReference patientRef}) {
+    _patientRef = patientRef;
+  }
 
   Future<List<Patient>> getAllPatients() async {
     List<Patient> patients = [];

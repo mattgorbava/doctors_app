@@ -85,14 +85,14 @@ class UserDataService {
     
     if (snapshot.snapshot.value != null) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      List<Patient> children = [];
+      List<Patient> childrenList = [];
       data.forEach((key, value) {
-        children.add(Patient.fromMap(
+        childrenList.add(Patient.fromMap(
           Map<String, dynamic>.from(value), 
           key
         ));
       });
-      if (children.isNotEmpty) {
+      if (childrenList.isNotEmpty) {
         children = children;
       }
     }
@@ -106,14 +106,16 @@ class UserDataService {
     
     if (snapshot.snapshot.value != null) {
       final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      List<Cabinet> cabinets = [];
+      List<Cabinet> cabinetsList = [];
       data.forEach((key, value) {
-        cabinets.add(Cabinet.fromMap(
+        cabinetsList.add(Cabinet.fromMap(
           Map<String, dynamic>.from(value), 
           key
         ));
       });
-      cabinets = cabinets;
+      if (cabinetsList.isNotEmpty) {
+        cabinets = cabinetsList;
+      }
     }
   }
 
@@ -186,7 +188,9 @@ class UserDataService {
           key
         ));
       });
-      doctorPatients = patients;
+      if (patients.isNotEmpty) {
+        doctorPatients = patients;
+      }
     }
   }
 
@@ -207,7 +211,9 @@ class UserDataService {
           key
         ));
       });
-      patientBookings = bookings;
+      if (bookings.isNotEmpty) {
+        patientBookings = bookings;
+      }
     }
   }
   

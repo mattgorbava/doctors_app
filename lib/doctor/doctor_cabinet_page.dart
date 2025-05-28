@@ -72,18 +72,48 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
             ),)
           : Column(
             children: <Widget>[
-              ListTile(
-                title: Text(_cabinet!.name),
-                subtitle: Text('Rating: ${_cabinet!.rating}'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _cabinet!.image.isNotEmpty
+                  ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                        radius: 60, // Adjust size as needed (30 = 60px diameter)
+                        backgroundImage: NetworkImage(_cabinet!.image),
+                        backgroundColor: Colors.grey[200], // Fallback color while loading
+                      ),
+                  )
+                  : const CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.person, size: 30, color: Colors.white),
+                    ),
+                  const SizedBox(width: 20,),
+                  Flexible(
+                    child: Text(
+                      _cabinet!.name,
+                      style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.visible,
+                      softWrap: true,
+                    ),
+                  ),
+                ],
               ),
-              ListTile(
-                title: Text('Total Reviews: ${_cabinet!.totalReviews}'),
-                subtitle: Text('Capacity: ${_cabinet!.capacity}'),
-              ),
+              const SizedBox(height: 15,),
               ListTile(
                 title: Text('Number of Patients: ${_cabinet!.numberOfPatients}'),
               ),
-              const SizedBox(height: 20,),
+              ListTile(
+                title: Text('Capacity: ${_cabinet!.capacity}'),
+              ),
+              ListTile(
+                title: Text('Address: ${_cabinet!.address}'),
+              ),
+              ListTile(
+                title: Text('Working hours: ${_cabinet!.openingTime} to ${_cabinet!.closingTime}'),
+              ),
+              const SizedBox(height: 10,),
               SizedBox(
                 width: 0.5 * MediaQuery.of(context).size.width,
                 height: 50,
