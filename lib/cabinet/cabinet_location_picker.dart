@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/directions_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -56,8 +58,8 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
         Navigator.of(context).pop(selectedLocation);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to select location'),
+          SnackBar(
+            content: Text(LocaleData.failedToSelectLocation.getString(context)),
           ),
         );
       }
@@ -68,7 +70,7 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
     return Scaffold(
       appBar: AppBar( 
         centerTitle: false,
-        title: const Text('Google Maps'),
+        title: Text(LocaleData.googleMapsTitle.getString(context)),
         automaticallyImplyLeading: true,
         actions: [
           TextButton(
@@ -78,7 +80,7 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
               backgroundColor: Colors.blue,
               textStyle: GoogleFonts.poppins(),
             ),
-            child: const Text('Select'),
+            child: Text(LocaleData.selectButton.getString(context)),
           )
         ],
       ),

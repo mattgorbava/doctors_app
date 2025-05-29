@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
@@ -8,6 +9,7 @@ import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_localization/flutter_localization.dart';
 
 class UpcomingMandatoryConsultations extends StatefulWidget {
   const UpcomingMandatoryConsultations({super.key, required this.patientId});
@@ -52,8 +54,8 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get consultations.'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(LocaleData.couldNotGetConsultations.getString(context)),
         backgroundColor: Colors.red,
       ));
     }
@@ -176,7 +178,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upcoming Mandatory Consultations'),
+        title: Text(LocaleData.upcomingMandatoryConsultationsTitle.getString(context)),
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Consultation>>(
@@ -189,63 +191,6 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No consultations available'));
           } else {
-            // List<Widget> displayItems = [];
-
-            // if (patient != null && bookings.isNotEmpty && bookings[0] != null) {
-            //   final (nextDate, consultation) = _nextConsultationDate(0); 
-            //     displayItems.add(
-            //       Padding(
-            //         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            //         child: Text(
-            //           'Your consultations',
-            //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
-            //         ),
-            //       ),
-            //     );
-            //     displayItems.add(
-            //       ConsultationCard(
-            //         consultation: consultation!,
-            //         patient: patient,
-            //         nextConsultationDate: nextDate,
-            //       ),
-            //     );
-            // }
-
-            // bool childrenHeaderAdded = false;
-            // if (children.isNotEmpty) {
-            //   for (int i = 0; i < children.length; i++) {
-            //     int bookingListIndex = i + 1;
-            //     if (bookingListIndex < bookings.length && bookings[bookingListIndex] != null) {
-            //       final (nextDate, consultation) = _nextConsultationDate(bookingListIndex);
-            //         if (!childrenHeaderAdded) {
-            //           displayItems.add(
-            //             Padding(
-            //               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            //               child: Text(
-            //                 "Your children's consultations",
-            //                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
-            //               ),
-            //             ),
-            //           );
-            //           childrenHeaderAdded = true;
-            //         }
-            //         displayItems.add(
-            //           ConsultationCard(
-            //             consultation: consultation!,
-            //             patient: children[i],
-            //             nextConsultationDate: nextDate,
-            //           ),
-            //         );
-            //     }
-            //   }
-            // }
-
-            // return ListView.builder(
-            //   itemCount: displayItems.length,
-            //   itemBuilder: (context, index) {
-            //     return displayItems[index];
-            //   },
-            // );
             return ListView.builder(
               itemCount: children.isNotEmpty ? children.length + 1 : 1,
               itemBuilder: (context, index) {

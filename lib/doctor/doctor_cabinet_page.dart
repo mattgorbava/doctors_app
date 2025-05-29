@@ -1,8 +1,10 @@
 import 'package:doctors_app/cabinet/register_cabinet_page.dart';
 import 'package:doctors_app/doctor/patients_list_page.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabinetPage extends StatefulWidget {
@@ -46,7 +48,8 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
           body: _cabinet == null ? Center(child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('You haven\'t registered\nyour cabinet yet.', 
+              Text(
+                LocaleData.notRegisteredToCabinetPrompt.getString(context), // Assuming a key for this message
                 style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),
                 textAlign: TextAlign.center,
               ),
@@ -65,7 +68,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text('Register', style: TextStyle(fontSize: 16, color: Colors.white),),
+                    child: Text(LocaleData.registerCabinet.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),),
                   ),
                 ),
             ]
@@ -102,16 +105,16 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
               ),
               const SizedBox(height: 15,),
               ListTile(
-                title: Text('Number of Patients: ${_cabinet!.numberOfPatients}'),
+                title: Text('${LocaleData.numberOfPatients.getString(context)}: ${_cabinet!.numberOfPatients}'),
               ),
               ListTile(
-                title: Text('Capacity: ${_cabinet!.capacity}'),
+                title: Text('${LocaleData.capacity.getString(context)}: ${_cabinet!.capacity}'),
               ),
               ListTile(
-                title: Text('Address: ${_cabinet!.address}'),
+                title: Text('${LocaleData.address.getString(context)}: ${_cabinet!.address}'),
               ),
               ListTile(
-                title: Text('Working hours: ${_cabinet!.openingTime} to ${_cabinet!.closingTime}'),
+                title: Text('${LocaleData.workingHours.getString(context)}: ${_cabinet!.openingTime} - ${_cabinet!.closingTime}'),
               ),
               const SizedBox(height: 10,),
               SizedBox(
@@ -129,7 +132,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('See Patient List', style: TextStyle(fontSize: 16, color: Colors.white),),
+                  child: Text(LocaleData.patientList.getString(context), style: TextStyle(fontSize: 16, color: Colors.white),),
                 ),
               ),
               const SizedBox(height: 20,),
@@ -147,7 +150,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('See Emergencies List', style: TextStyle(fontSize: 16, color: Colors.white),),
+                  child: Text(LocaleData.emergencies.getString(context), style: TextStyle(fontSize: 16, color: Colors.white),),
                 ),
               ),
               const SizedBox(height: 20,),
@@ -167,7 +170,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Edit Cabinet', style: TextStyle(fontSize: 16, color: Colors.white),),
+                  child: Text(LocaleData.editCabinet.getString(context), style: TextStyle(fontSize: 16, color: Colors.white),),
                 ),
               )
             ],

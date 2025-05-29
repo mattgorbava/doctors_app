@@ -1,9 +1,11 @@
 import 'package:doctors_app/auth/register_screen.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:doctors_app/widgets/child_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 
 class PatientChildrenPage extends StatefulWidget {
   const PatientChildrenPage({super.key});
@@ -46,7 +48,7 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Children'),
+        title: Text(LocaleData.childrenTitle.getString(context)),
         automaticallyImplyLeading: false,
       ),
       body: Center(
@@ -55,12 +57,12 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('No children found.'),
+                    Text(LocaleData.noChildrenFound.getString(context)),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
                       onPressed: () => _navigateAndRegisterChild(),
                       icon: const Icon(Icons.add),
-                      label: const Text('Register Child'),
+                      label: Text(LocaleData.registerChildButton.getString(context)),
                     ),
                   ],
                 ),
@@ -79,7 +81,7 @@ class _PatientChildrenPageState extends State<PatientChildrenPage> with Automati
                 ElevatedButton.icon(
                   onPressed: () => _navigateAndRegisterChild(),
                   icon: const Icon(Icons.add),
-                  label: const Text('Register Child'),
+                  label: Text(LocaleData.registerChildButton.getString(context)),
                 ),
               ],
             ),

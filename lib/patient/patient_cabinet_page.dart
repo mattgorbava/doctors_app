@@ -1,4 +1,5 @@
 import 'package:doctors_app/booking/book_appointment_page.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/patient/find_cabinet_page.dart';
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/model/cabinet.dart';
@@ -7,6 +8,7 @@ import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +23,8 @@ class PatientCabinetPage extends StatefulWidget {
 class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticKeepAliveClientMixin<PatientCabinetPage> {
   @override
   bool get wantKeepAlive => true;
+
+  final FlutterLocalization _localization = FlutterLocalization.instance;
 
   Cabinet? _cabinet;
   Patient? _patient;
@@ -46,14 +50,15 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
         _userDataService.doctor = null;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('You have been deregistered from the cabinet.'),
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(LocaleData.deregisteredSuccess.getString(context)),
         backgroundColor: Colors.green,
       ));
 
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not deregister from cabinet: $error'),
+        content: Text(LocaleData.deregisteredFailed.getString(context)),
         backgroundColor: Colors.red,
       ));
       
@@ -74,8 +79,9 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
         throw 'Could not call $phoneCall';
       }
     } catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not call $phoneNumber'),
+        content: Text('${LocaleData.couldNotCall.getString(context)} $phoneNumber'),
         backgroundColor: Colors.red,
       ));
     }
@@ -102,7 +108,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
       : _cabinet == null ? Center(child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('You haven\'t registered\nto any cabinet yet.', 
+            Text(LocaleData.notRegisteredToCabinetPrompt.getString(context), 
               style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
@@ -121,7 +127,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Register', style: TextStyle(fontSize: 16, color: Colors.white),),
+                child: Text(LocaleData.registerToCabinetButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),),
               ),
             ),
           ],
@@ -129,13 +135,13 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
       )
       : Column(
         children: [
-          Text('You are registered to:', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
+            Text(LocaleData.registeredToLabel.getString(context), style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
           ListTile(
-            title: Text('Cabinet Name: ${_cabinet!.name}', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
-            subtitle: Text('Address: ${_cabinet!.address}', style: GoogleFonts.poppins(fontSize: 14),),
+              title: Text('${LocaleData.cabinetNamePrefixLabel.getString(context)}${_cabinet!.name}', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
+              subtitle: Text('${LocaleData.addressPrefixLabel.getString(context)}${_cabinet!.address}', style: GoogleFonts.poppins(fontSize: 14),),
           ),
           ListTile(
-            title: Text('Doctor: ${_doctor!.firstName} ${_doctor!.lastName}', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
+            title: Text('${LocaleData.doctorPrefixLabel.getString(context)}${_doctor!.firstName} ${_doctor!.lastName}', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
             subtitle: SizedBox(
               width: 0.5 * MediaQuery.of(context).size.width,
               child: ElevatedButton(
@@ -150,7 +156,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('View Profile', style: TextStyle(fontSize: 16, color: Colors.white),),
+                child: Text(LocaleData.viewDoctorProfile.getString(context), style: const TextStyle(fontSize: 14, color: Colors.white), textAlign: TextAlign.center,), // Adjusted font size
               ),
             ),
           ),
@@ -186,7 +192,9 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
                     ),
                   ),
                   SizedBox(
-                    width: 0.4 * MediaQuery.of(context).size.width,
+                    width: _localization.currentLocale?.languageCode == 'en'
+                    ? 0.4 * MediaQuery.of(context).size.width
+                    : 0.5 * MediaQuery.of(context).size.width,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2B962B),
@@ -209,7 +217,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
                           const Icon(Icons.message, color: Colors.white, size: 20),
                           const SizedBox(width: 10,),
                           Text(
-                            'Message',
+                            LocaleData.message.getString(context),
                             style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
                           ),
                         ],
@@ -221,7 +229,9 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
           ),
           const SizedBox(height: 20,),
           SizedBox(
-            width: 0.6 * MediaQuery.of(context).size.width,
+            width: _localization.currentLocale?.languageCode == 'en' 
+            ? 0.6 * MediaQuery.of(context).size.width
+            : 0.7 * MediaQuery.of(context).size.width,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2B962B),
@@ -239,7 +249,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
                   const Icon(Icons.calendar_today, color: Colors.white, size: 20),
                   const SizedBox(width: 10,),
                   Text(
-                    'Book Appointment',
+                    LocaleData.bookAppointment.getString(context),
                     style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
                   ),
                 ],
@@ -261,7 +271,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
                 _deregisterFromCabinet();
               },
               child: Text(
-                'Deregister from cabinet',
+                LocaleData.deregisterFromCabinetButton.getString(context),
                 style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
               ),
             )

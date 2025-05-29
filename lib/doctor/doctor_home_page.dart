@@ -2,9 +2,11 @@ import 'package:doctors_app/doctor/doctor_cabinet_page.dart';
 import 'package:doctors_app/booking/doctor_bookings_page.dart';
 import 'package:doctors_app/doctor/doctor_chatlist_page.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/registration_request/registration_requests_page.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:logger/logger.dart';
 
 class DoctorHomePage extends StatefulWidget {
@@ -46,11 +48,11 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
       if (_userDataService.doctor == null) {
         logger.e("Doctor data could not be loaded in DoctorHomePage.");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load doctor details.'), backgroundColor: Colors.red),
+          SnackBar(content: Text(LocaleData.failedToLoadDoctorDetails.getString(context)), backgroundColor: Colors.red),
         );
         setState(() {
            _isLoading = false;
-           _children = List.generate(5, (_) => const Center(child: Text('Error loading page.')));
+           _children = List.generate(5, (_) => Center(child: Text(LocaleData.errorLoadingPage.getString(context))));
         });
         return;
       }
@@ -73,7 +75,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
          _children = List.generate(5, (_) => Center(child: Text('Error: ${e.toString()}')));
       });
        ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Error initializing data: ${e.toString()}'), backgroundColor: Colors.red),
+         SnackBar(content: Text(LocaleData.errorLoadingData.getString(context)), backgroundColor: Colors.red),
        );
     }
   }
@@ -99,26 +101,26 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
         : _children[_selectedIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Cabinet'
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_add),
-            label: 'Requests',
+            label: LocaleData.navRequests.getString(context),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
-            label: 'Bookings',
+            label: LocaleData.navBookings.getString(context),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
-            label: 'Chat',
+            label: LocaleData.navChat.getString(context),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: LocaleData.navProfile.getString(context),
           ),
         ],
         currentIndex: _selectedIndex,

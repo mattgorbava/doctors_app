@@ -1,8 +1,10 @@
 import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:logger/logger.dart';
 
 class DoctorChatlistPage extends StatefulWidget {
@@ -59,8 +61,8 @@ class _DoctorChatlistPageState extends State<DoctorChatlistPage> with AutomaticK
       } catch (e) {
         logger.e('Error fetching chat list: $e');
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Could not get chats.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(LocaleData.couldNotGetChats.getString(context)),
           backgroundColor: Colors.red,
         ));
       }
@@ -72,18 +74,18 @@ class _DoctorChatlistPageState extends State<DoctorChatlistPage> with AutomaticK
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat List'),
+        title: Text(LocaleData.chatListTitle.getString(context)),
         automaticallyImplyLeading: false,
       ),
       body: _isLoading ? const Center(child: CircularProgressIndicator(),) 
-      : _chatList.isEmpty ? const Center(child: Text('No chats found.')) 
+      : _chatList.isEmpty ? Center(child: Text(LocaleData.noChatsFound.getString(context))) 
       : ListView.builder(
         itemCount: _chatList.length,
         itemBuilder: (context, index) {
           Patient patient = _chatList[index];
           return Card(
             child: ListTile(
-              title: Text('Chat with ${patient.firstName} ${patient.lastName}'),
+              title: Text('${LocaleData.chatWithPrefix.getString(context)}${patient.firstName} ${patient.lastName}'),
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) => 
                   ChatScreen(doctorId: doctorId, 

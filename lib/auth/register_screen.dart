@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
@@ -11,6 +12,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -464,7 +466,7 @@ class _RegisterPageState extends State<RegisterPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Register', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
+          title: Text(LocaleData.register.getString(context), style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),),
           automaticallyImplyLeading: false,
         ),
         body: _isLoading ? const Center(child: CircularProgressIndicator()) :
@@ -482,10 +484,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Select user type', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black,)),
+                        Text(LocaleData.selectUserType.getString(context), style: GoogleFonts.poppins(fontSize: 14, color: Colors.black,)),
                         Wrap(
                           spacing: 10,
-                          children: ['Patient', 'Doctor'].map((String type) {
+                          children: [LocaleData.patient.getString(context), 'Doctor'].map((String type) {
                             final isSelected = userType == type;
                             return ChoiceChip(
                               checkmarkColor: Colors.black,
@@ -547,7 +549,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter email';
+                          return LocaleData.emailValidationError.getString(context);
                         }
                         return null;
                       },
@@ -562,7 +564,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: const Color.fromARGB(255, 191, 230, 191),
-                          labelText: 'Password',
+                          labelText: LocaleData.password.getString(context),
                           labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -598,7 +600,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         keyboardType: TextInputType.text,
                         validator: (value) {
                           if (value!= null && value.length < 6) {
-                            return 'Password must be at least 6 characters';
+                            return LocaleData.passwordValidationError.getString(context);
                           }
                           return null;
                         },
@@ -612,7 +614,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color.fromARGB(255, 191, 230, 191),
-                        labelText: 'Phone number',
+                        labelText: LocaleData.phoneNumber.getString(context),
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -650,7 +652,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: DropdownButtonFormField<String>(
                     value: city,
                     items: ['Alba Iulia', 'Alexandria', 'Arad', 'Bacău', 'Baia Mare', 'Bistrița', 'Botoșani', 'Brașov', 'Brăila', 'București', 'Buzău', 'Călărași', 'Cluj-Napoca', 'Constanța', 'Craiova', 'Deva', 'Focșani', 'Galați', 'Giurgiu', 'Iași', 'Miercurea Ciuc', 'Oradea', 'Piatra Neamț', 'Pitești', 'Ploiești', 'Râmnicu Vâlcea', 'Reșița', 'Satu Mare', 'Sfântu Gheorghe', 'Sibiu', 'Slatina', 'Slobozia', 'Suceava', 'Târgu Jiu', 'Târgu Mureș', 'Târgoviște', 'Timișoara', 'Tulcea', 'Vaslui', 'Zalău'].map((String city) {
-                    return DropdownMenuItem(value: city, child: Text(city, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
+                    return DropdownMenuItem(value: city, child: Text(LocaleData.city.getString(context), style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
                   }).toList(), 
                   onChanged: (val){
                     setState (() {
@@ -661,7 +663,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     filled: true,
                     fillColor: const Color.fromARGB(255, 191, 230, 191),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    labelText: 'City',
+                    labelText: LocaleData.city.getString(context),
                     labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -685,7 +687,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  validator: (val) => val == null ? 'Please select a city' : null,),
+                  validator: (val) => val == null ? LocaleData.cityValidationError.getString(context) : null,),
                 ),
                 GestureDetector(
                   onTap: _pickImage, 
@@ -720,7 +722,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: const Color.fromARGB(255, 191, 230, 191),
-                      labelText: 'First name',
+                      labelText: LocaleData.firstName.getString(context),
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -747,7 +749,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     keyboardType: TextInputType.text,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter first name';
+                        return LocaleData.firstNameValidationError.getString(context);
                       }
                       return null;
                     },
@@ -761,7 +763,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: const Color.fromARGB(255, 191, 230, 191),
-                      labelText: 'Last name',
+                      labelText: LocaleData.lastName.getString(context),
                       labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -788,7 +790,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     keyboardType: TextInputType.text,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter last name';
+                        return LocaleData.lastNameValidationError.getString(context);
                       }
                       return null;
                     },
@@ -805,7 +807,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color.fromARGB(255, 191, 230, 191),
-                        labelText: 'Legitimation number',
+                        labelText: LocaleData.legitimationNumber.getString(context),
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -832,7 +834,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       keyboardType: TextInputType.text,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your legitimation number';
+                          return LocaleData.legitimationNumberValidationError.getString(context);
                         }
                         return null;
                       },
@@ -855,7 +857,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            pdfFileName ?? 'Pick CV',
+                            pdfFileName ?? LocaleData.pickCv.getString(context),
                             style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
                           ),
                           const Icon(Icons.attach_file, color: Color(0xFF58ab58)),
@@ -864,7 +866,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ],
-                if (userType == 'Patient' || widget.isChild) ... [
+                if (userType == 'Patient' || userType == 'Pacient' || widget.isChild) ... [
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 44,
@@ -902,7 +904,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       maxLength: 13,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your CNP';
+                          return LocaleData.cnpValidationError.getString(context);
                         }
                         return null;
                       },
@@ -923,18 +925,18 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ),
-                      child: Text('Select date of birth', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
+                      child: Text(LocaleData.selectDate.getString(context), style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
                     ),
                   ),
                   if (birthDate != DateTime(1900, 1, 1)) ... [
                     const SizedBox(height: 10,),
-                    Text('Selected date: ${DateFormat('dd-MM-yyyy').format(birthDate)}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
+                    Text('${LocaleData.selectedDate.getString(context)}: ${DateFormat('dd-MM-yyyy').format(birthDate)}', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),),
                   ],
                 ],
                 const SizedBox(height: 10,),
                 if (!isEditting && !widget.isChild) 
                   CheckboxListTile(
-                      title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
+                      title: Text(LocaleData.rememberMe.getString(context), style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
                       value: _rememberMe,
                       onChanged: (bool? value) {
                         setState(() {
@@ -967,7 +969,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginPage()));
                       },
-                      child: Text('Already have an account? Login', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
+                      child: Text(LocaleData.alreadyHaveAnAccount.getString(context), style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
                     ),
                   ),
               ],),

@@ -1,7 +1,9 @@
 import 'package:doctors_app/cabinet/cabinet_details_page.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -146,9 +148,9 @@ class _CabinetMapState extends State<CabinetMap> {
                   ),
                 );
               },
-              child: const Text(
-                'View Details',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                LocaleData.viewDetails.getString(context),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ),
@@ -163,7 +165,7 @@ class _CabinetMapState extends State<CabinetMap> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: const Text('Cabinet Map'),
+        title: Text(LocaleData.cabinetMap.getString(context)),
       ),
       body: _isLoading
     ? const Center(child: CircularProgressIndicator())

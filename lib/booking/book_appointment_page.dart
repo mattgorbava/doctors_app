@@ -1,8 +1,10 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BookAppointmentPage extends StatefulWidget {
@@ -173,7 +175,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Select a time slot'),
+            title: Text(LocaleData.selectTimeSlotTitle.getString(context)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: availableSlots.map((slot) {
@@ -197,7 +199,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No available time slots for this date')),
+        SnackBar(content: Text(LocaleData.noAvailableSlots.getString(context))),
       );
     }
   }
@@ -221,13 +223,13 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       _bookingService.addBooking(bookingData).then((_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Appointment booked successfully')),
+          SnackBar(content: Text(LocaleData.bookingSuccessful.getString(context))),
         );
         Navigator.pop(context);
       }).catchError((error) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to book appointment')),
+          SnackBar(content: Text(LocaleData.bookingFailed.getString(context))),
         );
       }).whenComplete(() {
         setState(() {
@@ -245,7 +247,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Book Appointment'),
+          title: Text(LocaleData.bookAppointment.getString(context)),
         ),
         body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -257,9 +259,9 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Select a date:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        LocaleData.selectDate.getString(context),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
                       
@@ -303,7 +305,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                               _selectTimeSlot();
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('No available slots for this day')),
+                                SnackBar(content: Text(LocaleData.noAvailableSlots.getString(context))),
                               );
                             }
                           },
@@ -359,7 +361,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                         Padding(
                           padding: const EdgeInsets.only(top: 16.0),
                           child: Text(
-                            'Selected Date: ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}\n\nSelectedTime: ${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+                            '${LocaleData.selectedDate}: ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}\n\n${LocaleData.selectedTime}: ${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
                             style: const TextStyle(fontSize: 16),
                           ),
                         ),
@@ -374,7 +376,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Colors.grey),
                           ),
-                          labelText: 'Description',
+                          labelText: LocaleData.description.getString(context),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -392,7 +394,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text('Book Appointment', style: TextStyle(fontSize: 16, color: Colors.white),),
+                          child: Text(LocaleData.bookAppointment.getString(context), style: TextStyle(fontSize: 16, color: Colors.white),),
                         ),
                       )
                     ],

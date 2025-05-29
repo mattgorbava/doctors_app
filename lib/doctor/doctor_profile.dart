@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/auth/register_screen.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoctorProfile extends StatefulWidget {
@@ -43,7 +45,7 @@ class _DoctorProfileState extends State<DoctorProfile> with AutomaticKeepAliveCl
     return _isLoading == true ? const Center(child: CircularProgressIndicator(),) 
     : Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+          title: Text(LocaleData.profileTitle.getString(context)),
         automaticallyImplyLeading: false,
         actions: [
           widget.patientSideRequest == false ?
@@ -91,15 +93,15 @@ class _DoctorProfileState extends State<DoctorProfile> with AutomaticKeepAliveCl
                     } else {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Could not open CV.'),
+                        SnackBar(
+                          content: Text(LocaleData.couldNotOpenCv.getString(context)),
                           backgroundColor: Colors.red,
                         ),
                       );
                     }
                   },
                   icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('Open CV'),
+                  label: Text(LocaleData.openCvButton.getString(context), style: const TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green,),
                 ),
               if (!widget.patientSideRequest) ... [
@@ -119,7 +121,7 @@ class _DoctorProfileState extends State<DoctorProfile> with AutomaticKeepAliveCl
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text('Edit Profile', style: TextStyle(fontSize: 16, color: Colors.white),),
+                    child: Text(LocaleData.editProfileButton.getString(context), style: TextStyle(fontSize: 16, color: Colors.white),),
                   ),
                 )
               ]

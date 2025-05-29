@@ -1,3 +1,4 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/patient/patient_cabinet_page.dart';
 import 'package:doctors_app/patient/chat_list_page.dart';
 import 'package:doctors_app/patient/patient_children_page.dart';
@@ -6,6 +7,7 @@ import 'package:doctors_app/patient/patient_user_profile.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 
 class PatientHomePage extends StatefulWidget {
   const PatientHomePage({super.key});
@@ -61,8 +63,8 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch cabinets. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.couldNotLoadData.getString(context)),
         ),
       );
     }
@@ -91,26 +93,26 @@ class _PatientHomePageState extends State<PatientHomePage> with WidgetsBindingOb
           : _children[_selectedIndex],
         ),
         bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
+          items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled),
-              label: 'Home',
+              icon: const Icon(Icons.home_filled),
+              label: LocaleData.navHome.getString(context),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat),
-              label: 'Chat',
+              icon: const Icon(Icons.chat),
+              label: LocaleData.navChat.getString(context),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.medical_services),
-              label: 'Consultations',
+              icon: const Icon(Icons.medical_services),
+              label: LocaleData.navConsultations.getString(context),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.child_care),
-              label: 'Children',
+              icon: const Icon(Icons.child_care),
+              label: LocaleData.navChildren.getString(context),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
+              icon: const Icon(Icons.person),
+              label: LocaleData.navProfile.getString(context),
             ),
           ],
           currentIndex: _selectedIndex,

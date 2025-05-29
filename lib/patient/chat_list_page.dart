@@ -1,8 +1,10 @@
 import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
@@ -54,8 +56,8 @@ class _ChatListPageState extends State<ChatListPage> with AutomaticKeepAliveClie
           _isLoading = false;
         });
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not get chats.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(LocaleData.couldNotGetChats.getString(context)),
         backgroundColor: Colors.red,
       ));
     }
@@ -67,7 +69,7 @@ class _ChatListPageState extends State<ChatListPage> with AutomaticKeepAliveClie
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat List'),
+        title: Text(LocaleData.chatListTitle.getString(context)),
         automaticallyImplyLeading: false,
       ),
       body: _isLoading ? const Center(child: CircularProgressIndicator(),) :

@@ -1,5 +1,7 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 
 class AddMedicalHistoryPage extends StatefulWidget {
   const AddMedicalHistoryPage({
@@ -39,8 +41,8 @@ class _AddMedicalHistoryPageState extends State<AddMedicalHistoryPage> {
       if (!mounted) return;
       Navigator.of(context).pop(newStatus);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Could not save medical history.'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(LocaleData.errorCouldNotSaveMedicalHistory.getString(context)),
         backgroundColor: Colors.red,
       ));
     }
@@ -52,26 +54,26 @@ class _AddMedicalHistoryPageState extends State<AddMedicalHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Medical History'),
+        title: Text(LocaleData.addMedicalHistoryTitle.getString(context)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              decoration: const InputDecoration(labelText: 'Results'),
+              decoration: InputDecoration(labelText: LocaleData.resultsLabel.getString(context)),
               controller: _resultsController,
             ),
             const SizedBox(height: 10),
             TextField(
-              decoration: const InputDecoration(labelText: 'Recommendations'),
+              decoration: InputDecoration(labelText: LocaleData.recommendationsLabel.getString(context)),
               controller: _recommendationsController,
             ),
             const SizedBox(height: 20),
             if (widget.isMandatory) 
               Row(
                 children: [
-                  const Text('Add Analysis'),
+                  Text(LocaleData.addAnalysisLabel.getString(context)),
                   const SizedBox(width: 10),
                   Checkbox(
                     value: _addAnalysis,
@@ -88,7 +90,7 @@ class _AddMedicalHistoryPageState extends State<AddMedicalHistoryPage> {
               onPressed: () async {
                 await _saveMedicalHistory();
               },
-              child: const Text('Save'),
+              child: Text(LocaleData.saveButton.getString(context)),
             ),
           ],
         ),

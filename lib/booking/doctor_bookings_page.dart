@@ -1,9 +1,11 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/reporting/pdf_generator.dart';
 import 'package:doctors_app/widgets/booking_card.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:logger/logger.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -47,7 +49,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
       context: context, 
       builder: (context) {
         return AlertDialog(
-          title: const Text('PDF Preview'),
+          title: Text(LocaleData.pdfPreviewTitle.getString(context)),
           content: SizedBox(
             height: 600,
             width: 400,
@@ -83,9 +85,9 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
       initialDateRange: DateTimeRange(start: initialStartDate, end: initialEndDate),
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime.now(),
-      helpText: 'Select Date Range for Report',
-      cancelText: 'Cancel',
-      confirmText: 'Generate',
+      helpText: LocaleData.selectDateRangeReportHelpText.getString(context),
+      cancelText: LocaleData.cancelDatePickerButton.getString(context),
+      confirmText: LocaleData.confirmButton.getString(context),
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.light().copyWith(
@@ -124,7 +126,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
           showPdfPreview(pdf);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No bookings found for the selected period.')),
+            SnackBar(content: Text(LocaleData.noBookingsForPeriod.getString(context))),
           );
         }
 
@@ -132,7 +134,7 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
         if (!mounted) return;
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error generating PDF: $e')),
+          SnackBar(content: Text("${LocaleData.errorPrefix.getString(context)} ${LocaleData.errorGeneratingPdfGeneric.getString(context)}")),
         );
         logger.e("Error generating PDF: $e");
       }
@@ -146,20 +148,20 @@ class _DoctorBookingsPageState extends State<DoctorBookingsPage> with AutomaticK
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bookings'),
+        title: Text(LocaleData.bookings.getString(context)),
         automaticallyImplyLeading: false,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _bookings.isEmpty
-              ? const Center(child: Text('No bookings found.'))
+              ? Center(child: Text(LocaleData.noBookings.getString(context)))
               : Column(
                 children: [
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
                       onPressed: _generateReportBookingsInPeriod, 
-                      child: const Text('Generate Report'),
+                      child: Text(LocaleData.generateReport.getString(context)),
                     )
                   ),
                   Expanded(

@@ -1,9 +1,11 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/widgets/registration_request_card.dart';
 import 'package:doctors_app/registration_request/registration_request_details_page.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 
 class RegistrationRequestsPage extends StatefulWidget {
   const RegistrationRequestsPage({super.key});
@@ -32,8 +34,8 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> wit
     } catch (e) {
       if (!mounted) return; 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch registration requests. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.failedToFetchRegistrationRequests.getString(context)),
         ),
       );
     }
@@ -53,13 +55,13 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> wit
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registration Requests'),
+        title: Text(LocaleData.registrationRequests.getString(context)),
         automaticallyImplyLeading: false,
       ),
       body: _isLoading
     ? const Center(child: CircularProgressIndicator())
     : _registrationRequests.isEmpty
-        ? const Center(child: Text('No registration requests found.'))
+        ? Center(child: Text(LocaleData.noRequests.getString(context)))
         : ListView.builder(
           itemCount: _registrationRequests.length,
           itemBuilder: (context, index) {

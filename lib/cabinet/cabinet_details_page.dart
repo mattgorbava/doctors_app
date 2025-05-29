@@ -1,5 +1,6 @@
 import 'package:doctors_app/chat_screen.dart';
 import 'package:doctors_app/doctor/doctor_profile.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/model/patient.dart';
@@ -9,6 +10,7 @@ import 'package:doctors_app/services/patient_service.dart';
 import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -58,13 +60,13 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
       RegistrationRequest request = RegistrationRequest.fromMap(data, FirebaseAuth.instance.currentUser!.uid);
       await _registrationRequestService.addRequest(request);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Registration request sent successfully.'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(LocaleData.registrationRequestSentSuccess.getString(context)),
         backgroundColor: Colors.green,
       ));
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to send registration request: $error'),
+        content: Text("${LocaleData.registrationRequestFailed.getString(context)}: $error"),
         backgroundColor: Colors.red,
       ));
     }
@@ -81,7 +83,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not call $phoneNumber'),
+        content: Text("${LocaleData.couldNotCall.getString(context)} $phoneNumber"),
         backgroundColor: Colors.red,
       ));
     }
@@ -137,13 +139,13 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
             ),
             const SizedBox(height: 20.0,),
             Text(
-              'Working hours ${widget.cabinet.openingTime} - ${widget.cabinet.closingTime}',
+              '${LocaleData.workingHours} ${widget.cabinet.openingTime} - ${widget.cabinet.closingTime}',
               style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
             ),
             Text(
               widget.cabinet.numberOfPatients >= widget.cabinet.capacity
-            ? 'Not taking new patients at the moment'
-            : 'Accepting new patients',
+            ? LocaleData.notAcceptingPatients.getString(context)
+            : LocaleData.acceptingPatients.getString(context),
               style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
             ),
             if (widget.cabinet.numberOfPatients < widget.cabinet.capacity) ... [
@@ -160,14 +162,14 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Send request to register', style: TextStyle(fontSize: 16, color: Colors.white),),
+                  child: Text(LocaleData.sendRequestToRegister.getString(context), style: TextStyle(fontSize: 16, color: Colors.white),),
                   ),
                 ),
               ),
             ],
             const SizedBox(height: 20.0,),
             Text(
-              'Contact doctor',
+              LocaleData.contactDoctorLabel.getString(context),
               style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),
             ),
             const SizedBox(height: 10.0,),
@@ -192,7 +194,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                         const Icon(Icons.phone, color: Colors.white, size: 20),
                         const SizedBox(width: 10,),
                         Text(
-                          'Call',
+                          LocaleData.call.getString(context),
                           style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
                         ),
                       ],
@@ -227,7 +229,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                         const Icon(Icons.message, color: Colors.white, size: 20),
                         const SizedBox(width: 10,),
                         Text(
-                          'Message',
+                          LocaleData.message.getString(context),
                           style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
                         ),
                       ],
@@ -253,7 +255,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                   );
                 }, 
                 child: Text(
-                  'View doctor profile',
+                  LocaleData.viewDoctorProfile.getString(context),
                   style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white),
                 )
               ),

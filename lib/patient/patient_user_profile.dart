@@ -1,6 +1,7 @@
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/booking_service.dart';
 import 'package:doctors_app/services/patient_service.dart';
@@ -10,6 +11,7 @@ import 'package:doctors_app/services/user_data_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PatientUserProfile extends StatefulWidget {
@@ -78,8 +80,8 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch bookings. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.couldNotLoadData.getString(context)),
         ),
       );
     }
@@ -94,8 +96,8 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch bookings. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.couldNotLoadData.getString(context)),
         ),
       );
     }
@@ -141,7 +143,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('An error occurred'),
+          title: Text(LocaleData.errorDialogTitle.getString(context)),
         content: Text(message),
         actions: [
           TextButton(
@@ -167,7 +169,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not call $phoneNumber'),
+        content: Text(LocaleData.couldNotCall.getString(context)),
         backgroundColor: Colors.red,
       ));
     }
@@ -183,7 +185,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('User Profile'),
+        title: Text(LocaleData.userProfileTitle.getString(context)),
         actions: [
           _isPatient 
           ? IconButton(
@@ -210,7 +212,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                       child: Column(
                         children: [
                           Text(
-                            'Emergency Symptoms: ${_patient!.emergencySymptoms}',
+                            '${LocaleData.emergencySymptoms.getString(context)}: ${_patient!.emergencySymptoms}',
                             style: const TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
@@ -224,7 +226,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.redAccent,
                               ),
-                              child: const Text('Complete Emergency', style: TextStyle(fontSize: 16, color: Colors.white)),
+                              child: Text(LocaleData.completeEmergencyButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
                             ),
                           )
                         ],
@@ -246,12 +248,12 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.phone),
-                          SizedBox(width: 8),
-                          Text('Call Patient', style: TextStyle(fontSize: 16, color: Colors.white)),
+                          const Icon(Icons.phone),
+                          const SizedBox(width: 8),
+                          Text(LocaleData.callParentButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
                         ],
                       ),
                     ),
@@ -282,19 +284,19 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.message),
-                          SizedBox(width: 8),
-                          Text('Message', style: TextStyle(fontSize: 16, color: Colors.white)),
+                          const Icon(Icons.message),
+                          const SizedBox(width: 8),
+                          Text(LocaleData.messageParentButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
                         ],
                       ),
                     ),
                   ),
                 ],
                 Expanded(child: 
-                  _bookings.isEmpty ? const Center(child: Text('No bookings found.')) 
+                  _bookings.isEmpty ? Center(child: Text(LocaleData.noBookings.getString(context))) 
                   : ListView.builder(
                       itemCount: _bookings.length,
                       itemBuilder: (context, index) {
@@ -318,11 +320,11 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                 children: [
                                   const Icon(Icons.calendar_today, size: 16),
                                   const SizedBox(width: 4),
-                                  Text('Date: ${booking.date}'),
+                                  Text('${LocaleData.selectDate.getString(context)}: ${booking.date}'),
                                   const SizedBox(width: 16),
                                   const Icon(Icons.access_time, size: 16),
                                   const SizedBox(width: 4),
-                                  Text('Time: ${booking.time}'),
+                                  Text('${LocaleData.selectTime.getString(context)}: ${booking.time}'),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -371,7 +373,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                         }
                                       },
                                       icon: const Icon(Icons.add_chart),
-                                      label: const Text("Add Test Results"),
+                                      label: Text(LocaleData.addAnalysisLabel.getString(context), style: const TextStyle(color: Colors.white)), // Reused addAnalysisLabel
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.blueAccent,
                                       ),
@@ -381,12 +383,12 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                               if (booking.status == 'Completed') ... [
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Results: ${booking.results}',
+                                  '${LocaleData.resultsLabel.getString(context)}: ${booking.results}',
                                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Recommendations: ${booking.recommendations}',
+                                  '${LocaleData.recommendationsLabel.getString(context)}: ${booking.recommendations}',
                                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                                 )
                               ],
@@ -404,7 +406,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green,
                                   ),
-                                  child: const Text('View Test Results'),
+                                  child: Text(LocaleData.viewDetails.getString(context), style: const TextStyle(color: Colors.white)), // Reused viewDetails
                                 ),
                               ],
                             ],

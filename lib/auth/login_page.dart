@@ -1,9 +1,11 @@
 import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,6 +35,9 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
 
   bool _obscureText = true;
   bool _rememberMe = false;
+
+  String language = 'en';
+  final FlutterLocalization localization = FlutterLocalization.instance;
 
   @override
   void initState() {
@@ -135,8 +140,65 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Login'),
+          title: Text(LocaleData.login.getString(context), style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),),
           automaticallyImplyLeading: false,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      if (language != 'ro') {
+                        setState(() {
+                          language = 'ro';
+                          localization.translate('ro');
+                        });
+                      }
+                    },
+                    child: Text(
+                      'RO',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: language == 'ro' ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      '|',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey, // Separator color
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      if (language != 'en') {
+                        setState(() {
+                          language = 'en';
+                          localization.translate('en');
+                        });
+                      }
+                    },
+                    child: Text(
+                      'EN',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: language == 'en' ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         body: _isLoading ? const Center(child: CircularProgressIndicator(),) : 
         SingleChildScrollView(
@@ -150,8 +212,8 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   const SizedBox(height: 48,),
                   Image.asset('lib/assets/images/doctors_symbol.png', height: 200,),
                   const SizedBox(height: 10,),
-                  Text('Welcome', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w600),),
-                  Text('Login to continue', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w400),),
+                  Text(LocaleData.welcome.getString(context), style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w600),),
+                  Text(LocaleData.loginToContinue.getString(context), style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w400),),
                   const SizedBox(height: 60,),
                   SizedBox(
                     height: 44,
@@ -192,7 +254,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter email';
+                          return LocaleData.emailValidationError.getString(context);
                         }
                         return null;
                       },
@@ -208,7 +270,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color.fromARGB(255, 191, 230, 191),
-                        labelText: 'Password',
+                        labelText: LocaleData.password.getString(context),
                         labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -244,7 +306,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       keyboardType: TextInputType.text,
                       validator: (value) {
                         if (value!= null && value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return LocaleData.passwordValidationError.getString(context);
                         }
                         return null;
                       },
@@ -252,7 +314,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 20,),
                   CheckboxListTile(
-                    title: Text('Remember Me', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
+                    title: Text(LocaleData.rememberMe.getString(context), style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
                     value: _rememberMe,
                     onChanged: (bool? value) {
                       setState(() {
@@ -272,7 +334,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text('Login', style: TextStyle(fontSize: 16, color: Colors.white),),
+                      child: Text(LocaleData.login.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),),
                     ),
                   ),
                   SizedBox(
@@ -281,7 +343,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
                       },
-                      child: Text('Register new account', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
+                      child: Text(LocaleData.registerNewAccount.getString(context), style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w400),),
                     ),
                   ),
                 ],

@@ -1,10 +1,12 @@
 import 'package:doctors_app/chat_screen.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/main.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -32,7 +34,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Doctor details'),
+        title: Text(LocaleData.doctorDetailsTitle.getString(context)),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -104,7 +106,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               ),
               const SizedBox(height: 30),
               const SizedBox(height: 50),
-              Text('Select date and time', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
+              Text(LocaleData.selectDateAndTimeLabel.getString(context), style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),),
               const SizedBox(height: 8,),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -130,7 +132,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                             ),
                             child: Text(
                               _selectedDate == null ? 
-                              'Select date' : DateFormat('dd/MM/yyyy').format(_selectedDate!),
+                              LocaleData.selectDate.getString(context) : DateFormat('dd/MM/yyyy').format(_selectedDate!),
                               style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
                             ),
                           )
@@ -148,7 +150,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                             ),
                             child: Text(
                               _selectedTime == null ? 
-                              'Select time' : _selectedTime!.format(context),
+                              LocaleData.selectTime.getString(context) : _selectedTime!.format(context),
                               style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),
                             ),
                           )
@@ -161,7 +163,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                       style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
                       maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: 'Description',
+                        hintText: LocaleData.description.getString(context),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -186,7 +188,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   onPressed: (){
                     _bookAppointment();
                   },
-                  child: Text('Book appointment', style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),),
+                  child: Text(LocaleData.bookAppointment.getString(context), style: GoogleFonts.poppins(fontSize: 16, color: Colors.white),),
                 ),
               )
             ],
@@ -207,28 +209,11 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not call $phoneNumber'),
+        content: Text("${LocaleData.couldNotCall.getString(context)} $phoneNumber"),
         backgroundColor: Colors.red,
       ));
     }
   }
-
-  // void _openMap() async {
-  //   String google = 'https://www.google.com/maps/search/?api=1&query=${widget.doctor.latitude},${widget.doctor.longitude}';
-  //   Uri googleUrl = Uri.parse(google);
-  //   try {
-  //     if (await canLaunchUrl(googleUrl)) {
-  //       await launchUrl(googleUrl);
-  //     } else {
-  //       throw 'Could not open the map.';
-  //     }
-  //   } catch (error) {
-  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //       content: Text('Could not open the map.'),
-  //       backgroundColor: Colors.red,
-  //     ));
-  //   }
-  // }
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -258,8 +243,8 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
 
   void _bookAppointment() {
     if(_selectedDate == null || _selectedTime == null){
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please select date and time'),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(LocaleData.selectDateAndTimeLabel.getString(context)),
         backgroundColor: Colors.red,
       ));
       return;

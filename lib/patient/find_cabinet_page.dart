@@ -1,9 +1,11 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:doctors_app/widgets/cabinet_card.dart';
 import 'package:doctors_app/cabinet/cabinet_details_page.dart';
 import 'package:doctors_app/cabinet/cabinet_map.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 
 class FindCabinetPage extends StatefulWidget {
   const FindCabinetPage({super.key, this.child});
@@ -21,7 +23,7 @@ class _FindCabinetPageState extends State<FindCabinetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Find Cabinet'),
+        title: Text(LocaleData.cabinetTitle.getString(context)),
         actions: [
           Padding(
             padding: const EdgeInsets.all(10.0),
@@ -40,16 +42,16 @@ class _FindCabinetPageState extends State<FindCabinetPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: const Text(
-                'Open Map',
+              child: Text(
+                LocaleData.openMap.getString(context),
               ),
             ),
           ),
         ],
       ),
       body: _userDataService.cabinets == null || _userDataService.cabinets!.isEmpty ? 
-        const Center(
-          child: Text('No cabinets available'),
+        Center(
+          child: Text(LocaleData.failedToFetchCabinets.getString(context)),
         ) 
       : ListView.builder(
         itemCount: _userDataService.cabinets!.length,

@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/cabinet/cabinet_location_picker.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -111,7 +113,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
       }
     } catch (e) {
       setState(() {
-        _cabinetAddress = 'Could not get address';
+        _cabinetAddress = LocaleData.failedToSelectLocation.getString(context); // Fallback if address is not found
       });
     }
   }
@@ -133,7 +135,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
               );
               _cabinetPhotoUrl = response.secureUrl;
           } catch (e) {
-            _showErrorDialog('Failed to upload image');
+            if (!mounted) return;
+            _showErrorDialog(LocaleData.failedToUploadImage.getString(context));
             setState(() {
               _isLoading = false;
             });
@@ -166,7 +169,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
         if (!mounted) return;
         Navigator.of(context).pop();
       } catch (e) {
-        _showErrorDialog('Failed to register cabinet');
+        if (!mounted) return;
+        _showErrorDialog(LocaleData.failedToRegisterCabinet.getString(context));      
       } finally {
         setState(() {
           _isLoading = false;
@@ -192,8 +196,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
               );
               _cabinetPhotoUrl = response.secureUrl;
           } catch (e) {
-            _showErrorDialog('Failed to upload image');
-            setState(() {
+            if (!mounted) return;
+            _showErrorDialog(LocaleData.failedToUploadImage.getString(context));            setState(() {
               _isLoading = false;
             });
             return;
@@ -221,7 +225,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
         if (!mounted) return;
         Navigator.of(context).pop();
       } catch (e) {
-        _showErrorDialog('Failed to register cabinet');
+        _showErrorDialog(LocaleData.failedToRegisterCabinet.getString(context));
       } finally {
         setState(() {
           _isLoading = false;
@@ -235,7 +239,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('An error occurred'),
+          title: Text(LocaleData.errorDialogTitle.getString(context)),
         content: Text(message),
         actions: [
           TextButton(
@@ -258,8 +262,9 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: widget.cabinet == null ? Text('Register Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500))
-          : Text('Edit Cabinet', style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500)),
+          title: widget.cabinet == null 
+          ? Text(LocaleData.registerCabinet.getString(context), style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500))
+          : Text(LocaleData.editCabinet.getString(context), style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500)),
           automaticallyImplyLeading: true,
         ),
         body: _isLoading ? const Center(child: CircularProgressIndicator(),)
@@ -280,7 +285,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: const Color.fromARGB(255, 191, 230, 191),
-                          labelText: 'Cabinet name',
+                          labelText: LocaleData.cabinetName.getString(context),
                           labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -307,7 +312,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                         keyboardType: TextInputType.text,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter cabinet name';
+                            return LocaleData.cabinetNameValidationError.getString(context);
                           }
                           return null;
                         },
@@ -322,7 +327,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: const Color.fromARGB(255, 191, 230, 191),
-                          labelText: 'Cabinet patients capacity',
+                          labelText: LocaleData.capacity.getString(context),
                           labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -352,7 +357,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                         ],
                         validator: (value) {
                           if (value == null || value.isEmpty || int.parse(value) <= 0) {
-                            return 'Please enter capacity';
+                            return LocaleData.capacityValidationError.getString(context);
                           }
                           return null;
                         },
@@ -371,7 +376,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: const Color.fromARGB(255, 191, 230, 191),
-                                labelText: 'Cabinet opening time',
+                                labelText: LocaleData.openingTime.getString(context),
                                 labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -399,7 +404,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                               onTap: _selectOpening,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please select opening time';
+                                  return LocaleData.openingTimeValidationError.getString(context);
                                 }
                                 return null;
                               },
@@ -416,7 +421,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: const Color.fromARGB(255, 191, 230, 191),
-                                labelText: 'Cabinet closing time',
+                                labelText: LocaleData.closingTime.getString(context),
                                 labelStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.black),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -444,7 +449,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                               onTap: _selectClosing,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please select closing time';
+                                  return LocaleData.closingTimeValidationError.getString(context);
                                 }
                                 return null;
                               },
@@ -478,7 +483,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                         ),
                       ),
                     ),
-                    _imageFile == null ? const Text('Pick an image') 
+                    _imageFile == null 
+                    ? Text(LocaleData.pickImage.getString(context)) 
                     : const SizedBox.shrink(),
                     const SizedBox(height: 10,),
                     SizedBox(
@@ -506,7 +512,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text('Open map', style: TextStyle(fontSize: 16, color: Colors.white),),
+                            child: Text(LocaleData.openMap.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),),
                           ),
                         ],
                       ),
@@ -514,7 +520,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                     const SizedBox(height: 10,),
                     _cabinetLocation == null 
                   ? Text(
-                      'Choose cabinet location', 
+                      LocaleData.chooseLocation.getString(context), 
                       style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
                     )
                   : Container(
@@ -529,7 +535,7 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Cabinet location:',
+                            LocaleData.location.getString(context),
                             style: GoogleFonts.poppins(
                               fontSize: 16, 
                               fontWeight: FontWeight.bold,
@@ -538,12 +544,12 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Coordinates: ${_cabinetLocation!.latitude.toStringAsFixed(6)}, ${_cabinetLocation!.longitude.toStringAsFixed(6)}',
+                            '${LocaleData.coordinates}: ${_cabinetLocation!.latitude.toStringAsFixed(6)}, ${_cabinetLocation!.longitude.toStringAsFixed(6)}',
                             style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Address: ${_cabinetAddress ?? "Loading..."}',
+                            '${LocaleData.address}: ${_cabinetAddress ?? "Loading..."}',
                             style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
                           ),
                         ],
@@ -561,8 +567,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: widget.cabinet == null ? const Text('Register', style: TextStyle(fontSize: 16, color: Colors.white),)
-                        : const Text('Edit', style: TextStyle(fontSize: 16, color: Colors.white),),
+                        child: widget.cabinet == null ? Text(LocaleData.registerCabinet.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),)
+                        : Text(LocaleData.editCabinet.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),),
                       ),
                     ),
                   ],

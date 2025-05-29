@@ -1,3 +1,4 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/model/registration_request.dart';
@@ -7,6 +8,7 @@ import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:intl/intl.dart';
 
 class RegistrationRequestDetailsPage extends StatefulWidget {
@@ -33,8 +35,8 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       if (patient.isEmpty) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No patient details available.'),
+          SnackBar(
+            content: Text(LocaleData.noPatientDetailsAvailable.getString(context)),
           ),
         );
       } else {
@@ -45,8 +47,8 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch patient details. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.failedToFetchPatientDetails.getString(context)),
         ),
       );
     } finally {
@@ -61,8 +63,8 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       Cabinet? cabinet = _userDataService.cabinet;
       if (cabinet!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No cabinet details available.'),
+          SnackBar(
+            content: Text(LocaleData.noCabinetDetailsAvailable.getString(context)),
           ),
         );
       } else {
@@ -72,8 +74,8 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch cabinet details. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.failedToFetchCabinetDetails.getString(context)),
         ),
       );
     } finally {
@@ -91,14 +93,14 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       await _userDataService.loadPatients(_userDataService.cabinet!.uid);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration request accepted successfully.'),
+        SnackBar(
+          content: Text(LocaleData.requestAcceptedSuccess.getString(context)),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to accept registration request. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.failedToAcceptRequest.getString(context)),
         ),
       );
     }
@@ -113,14 +115,14 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration request rejected successfully.'),
+        SnackBar(
+          content: Text(LocaleData.requestRejectedSuccess.getString(context)),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to reject registration request. Please try again later.'),
+        SnackBar(
+          content: Text(LocaleData.failedToRejectRequest.getString(context)),
         ),
       );
     }
@@ -141,7 +143,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registration Request Details'),
+        title: Text(LocaleData.registrationRequestDetailsTitle.getString(context)),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -151,7 +153,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Patient Name: ${_patient!.firstName} ${_patient!.lastName}'),
+                      Text('${LocaleData.patientName.getString(context)}: ${_patient!.firstName} ${_patient!.lastName}'),
                       const SizedBox(height: 8),
                       _patient!.profileImageUrl.isNotEmpty 
                       ? ClipRRect(
@@ -166,14 +168,15 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                       : const Icon(Icons.person, size: 100),
                       const SizedBox(height: 8),
                       _patient!.phoneNumber.isNotEmpty 
-                      ? Text('Patient Phone: ${_patient!.phoneNumber}')
-                      : const Text('No phone number available'),
+                      ? Text('${LocaleData.patientPhone.getString(context)}: ${_patient!.phoneNumber}')
+                      : Text('${LocaleData.patientPhone.getString(context)}: ${LocaleData.noPatientDetailsAvailable.getString(context)}'), // Or a more specific "not available"
                       const SizedBox(height: 8),
-                      Text('Request Status: ${widget.request.status}'),
+                      Text('${LocaleData.requestStatusLabel.getString(context)}${widget.request.status}'),
                       const SizedBox(height: 8),
-                      Text('Request Date: ${DateFormat('dd.MM.yyyy').format(widget.request.createdAt)}'),
+                      Text('${LocaleData.dateOfRequest.getString(context)}: ${DateFormat('dd.MM.yyyy').format(widget.request.createdAt)}'),
                       const SizedBox(height: 8),
-                      Row(
+                      widget.request.status == 'pending' 
+                      ? Row(
                         children: [
                           SizedBox(
                             width: 0.35 * MediaQuery.of(context).size.width,
@@ -183,9 +186,10 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              child: const Text('Accept Request'),
+                              child: Text(LocaleData.accept.getString(context), style: const TextStyle(color: Colors.white)), // Added text color
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -197,13 +201,14 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              child: const Text('Reject Request'),
+                                child: Text(LocaleData.reject.getString(context), style: const TextStyle(color: Colors.white)), // Added text color
                             ),
                           ),
                         ],
-                      )
+                      ) : const SizedBox.shrink(),
                     ],
                   ),
                 )

@@ -1,7 +1,9 @@
 import 'package:doctors_app/doctor/doctor_details_page.dart';
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/doctor.dart';
 import 'package:doctors_app/widgets/doctor_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DoctorListPage extends StatefulWidget {
@@ -25,7 +27,7 @@ class _DoctorListPageState extends State<DoctorListPage> {
           children: [
             const SizedBox(height: 40),
             Text(
-              'Find your doctor, \nand book an appointment',
+              LocaleData.findDoctorPrompt.getString(context),
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
