@@ -220,9 +220,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                             width: 0.5 * MediaQuery.of(context).size.width,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: () {
-                                _completeEmergency;
-                              },
+                              onPressed: _completeEmergency,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.redAccent,
                               ),

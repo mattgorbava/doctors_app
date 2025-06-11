@@ -30,19 +30,40 @@ class Cabinet {
   });
 
   factory Cabinet.fromMap(Map<String, dynamic> map, [String id = '']) {
+    DateTime safeParseDateTime(String? dateString, DateTime defaultValue) {
+      if (dateString == null) {
+        return defaultValue;
+      }
+      return DateTime.tryParse(dateString) ?? defaultValue;
+    }
+
+    LatLng parseLocation(dynamic locationData) {
+      if (locationData is Map &&
+          locationData.containsKey('latitude') &&
+          locationData.containsKey('longitude') &&
+          locationData['latitude'] is num &&
+          locationData['longitude'] is num) {
+        return LatLng(
+          (locationData['latitude'] as num).toDouble(),
+          (locationData['longitude'] as num).toDouble(),
+        );
+      }
+      return const LatLng(0, 0);
+    }
+
     return Cabinet(
       uid: id,
-      doctorId: map['doctorId'],
-      name: map['name'],
-      image: map['image'],
-      createdAt: DateTime.parse(map['createdAt']),
-      updatedAt: DateTime.parse(map['updatedAt']),
-      location: LatLng(map['location']['latitude'], map['location']['longitude']),
-      address: map['address'],
-      capacity: map['capacity'],
-      numberOfPatients: map['numberOfPatients'],
-      openingTime: map['openingTime'],
-      closingTime: map['closingTime'],
+      doctorId: map['doctorId'] ?? '',
+      name: map['name'] ?? '',
+      image: map['image'] ?? '',
+      createdAt: safeParseDateTime(map['createdAt'], DateTime(2003, 09, 30)),
+      updatedAt: safeParseDateTime(map['updatedAt'], DateTime(2003, 09, 30)),
+      location: parseLocation(map['location']),
+      address: map['address'] ?? '',
+      capacity: map['capacity'] ?? 0,
+      numberOfPatients: map['numberOfPatients'] ?? 0,
+      openingTime: map['openingTime'] ?? '',
+      closingTime: map['closingTime'] ?? '',
     );
   }
 

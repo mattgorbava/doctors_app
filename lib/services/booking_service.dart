@@ -34,6 +34,22 @@ class BookingService {
     return bookings;
   }
 
+  Future<List<Booking>> getAllBookingsByCabinetId(String cabinetId) async {
+    List<Booking> bookings = [];
+    try {
+      final snapshot = await _bookingRef.orderByChild('cabinetId').equalTo(cabinetId).once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        data.forEach((key, value) {
+          bookings.add(Booking.fromMap(Map<String, dynamic>.from(value), key));
+        });
+      }
+    } catch (e) {
+      logger.e('Error fetching bookings: $e');
+    }
+    return bookings;
+  }
+
   Future<List<Booking>> getAllBookingsByDoctorId(String doctorId) async {
     List<Booking> bookings = [];
     try {
@@ -75,7 +91,7 @@ class BookingService {
     }
   }
 
-  Future<List<Booking>> getAllBookingsInPeriod(DateTime periodStart, DateTime periodEnd) async {
+  Future<List<Booking>> getAllDoctorBookingsInPeriod(String doctorId, DateTime periodStart, DateTime periodEnd) async {
     List<Booking> bookings = [];
     try {
       final snapshot = await _bookingRef
@@ -89,6 +105,7 @@ class BookingService {
           bookings.add(Booking.fromMap(Map<String, dynamic>.from(value), key));
         });
       }
+      bookings = bookings.where((booking) => booking.doctorId == doctorId).toList();
     } catch (e) {
       logger.e('Error fetching bookings in the specified period: $e');
     }

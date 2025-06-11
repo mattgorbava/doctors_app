@@ -42,15 +42,6 @@ class _PatientsListPageState extends State<PatientsListPage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _patients.isEmpty 
-          ? Center(
-              child: Text(
-                widget.emergencies 
-                  ? LocaleData.noEmergenciesFound.getString(context) 
-                  : LocaleData.noPatientsFound.getString(context),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-            )
           : ListView.builder(
               itemCount: _patients.length,
               itemBuilder: (context, index) {

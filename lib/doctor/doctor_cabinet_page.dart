@@ -49,7 +49,7 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                LocaleData.notRegisteredToCabinetPrompt.getString(context), // Assuming a key for this message
+                LocaleData.noCabinetRegisteredYet.getString(context),
                 style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500),
                 textAlign: TextAlign.center,
               ),
@@ -58,8 +58,11 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                   width: 0.5 * MediaQuery.of(context).size.width,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () { 
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterCabinetPage()));
+                    onPressed: () async { 
+                      await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterCabinetPage()));
+                      setState(() {
+                        _cabinet = _userDataService.cabinet;
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2B962B),
@@ -68,11 +71,11 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Text(LocaleData.registerCabinet.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white),),
+                    child: Text(LocaleData.registerYourCabinet.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ),
             ]
-            ),)
+          ),)
           : Column(
             children: <Widget>[
               Row(
@@ -158,10 +161,13 @@ class _CabinetPageState extends State<CabinetPage> with AutomaticKeepAliveClient
                 width: 0.5 * MediaQuery.of(context).size.width,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () { 
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterCabinetPage(
+                  onPressed: () async { 
+                    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => RegisterCabinetPage(
                       cabinet: _cabinet,
                     )));
+                    setState(() {
+                      _cabinet = _userDataService.cabinet;
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B962B),

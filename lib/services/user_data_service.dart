@@ -26,7 +26,6 @@ class UserDataService {
   bool isPatient = false;
 
   Future<void> loadPatientData() async {
-    if (isDataLoaded) return;
     
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -54,7 +53,6 @@ class UserDataService {
   }
 
   Future<void> loadDoctorData() async {
-    if (isDataLoaded) return;
     
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -93,7 +91,7 @@ class UserDataService {
         ));
       });
       if (childrenList.isNotEmpty) {
-        children = children;
+        children = childrenList;
       }
     }
   }

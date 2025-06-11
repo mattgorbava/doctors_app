@@ -41,7 +41,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   bool _mandatoryConsultation = false;
 
   void initAvailability() async {
-    _bookings = await _bookingService.getAllBookingsByPatientId(widget.patient.uid);
+    _bookings = await _bookingService.getAllBookingsByDoctorId(widget.cabinet.doctorId);
     _precomputeAvailability(widget.desiredDate);
   }
   
@@ -225,7 +225,7 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(LocaleData.bookingSuccessful.getString(context))),
         );
-        Navigator.pop(context);
+        Navigator.of(context).pop(true);
       }).catchError((error) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

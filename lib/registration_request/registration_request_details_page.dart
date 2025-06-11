@@ -97,6 +97,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
           content: Text(LocaleData.requestAcceptedSuccess.getString(context)),
         ),
       );
+      Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -119,6 +120,7 @@ class _RegistrationRequestDetailsPageState extends State<RegistrationRequestDeta
           content: Text(LocaleData.requestRejectedSuccess.getString(context)),
         ),
       );
+      Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

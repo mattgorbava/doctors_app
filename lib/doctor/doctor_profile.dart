@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/localization/locales.dart';
+import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/doctor.dart';
+import 'package:doctors_app/services/doctor_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +12,10 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DoctorProfile extends StatefulWidget {
-  const DoctorProfile({super.key, this.patientSideRequest = false});
+  const DoctorProfile({super.key, required this.patientSideRequest, this.cabinet});
 
   final bool patientSideRequest;
+  final Cabinet? cabinet;
 
   @override
   State<DoctorProfile> createState() => _DoctorProfileState();
@@ -24,13 +27,27 @@ class _DoctorProfileState extends State<DoctorProfile> with AutomaticKeepAliveCl
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserDataService _userDataService = UserDataService();
+  final _doctorService = DoctorService();
   Doctor? _doctor;
   bool _isLoading = true;
 
+  void getDoctor() async {
+    if (!widget.patientSideRequest) {
+      setState(() {
+        _doctor = _userDataService.doctor;
+      });
+    } else {
+      Doctor? doctor = await _doctorService.getDoctorById(widget.cabinet?.doctorId ?? '',);
+      setState(() {
+        _doctor = doctor;
+      });
+    }
+    _isLoading = false;
+  }
+
   @override
   void initState() {
-    _doctor = _userDataService.doctor;
-    _isLoading = false;
+    getDoctor();
     super.initState();
   }
 

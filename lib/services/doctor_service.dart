@@ -11,7 +11,11 @@ class DoctorService {
 
   var logger = Logger();
 
-  final DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
+  late DatabaseReference _doctorRef = FirebaseDatabase.instance.ref().child('Doctors');
+
+  DoctorService.withDbRef({DatabaseReference? doctorRef}) {
+    _doctorRef = doctorRef ?? FirebaseDatabase.instance.ref().child('Doctors');
+  }
 
   Future<List<Doctor>> getAllDoctors() async {
     List<Doctor> doctors = [];
@@ -29,13 +33,25 @@ class DoctorService {
     return doctors;
   }
 
-  Future<Doctor?> getDoctorById(String id) async {
-    final snapshot = await _doctorRef.child(id).once();
-    if (snapshot.snapshot.exists) {
-      final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      return Doctor.fromMap(Map<String, dynamic>.from(data), id);
+  Future<void> updateCabinetIdForDoctor(String doctorId, String cabinetId) async {
+    try {
+      await _doctorRef.child(doctorId).update({'cabinetId': cabinetId});
+    } catch (e) {
+      logger.e('Error updating cabinet ID for doctor: $e');
     }
-    return null;
+  }
+
+  Future<Doctor> getDoctorById(String id) async {
+    try {
+      final snapshot = await _doctorRef.child(id).once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        return Doctor.fromMap(Map<String, dynamic>.from(data), id);
+      }
+    } catch (e) {
+      logger.e('Error fetching doctor by ID: $e');
+    }
+    return Doctor.empty();
   }
 
   Future<void> addDoctor(Doctor doctor) async {
@@ -60,5 +76,18 @@ class DoctorService {
     } catch (e) {
       logger.e('Error deleting doctor: $e');
     }
+  }
+
+  Future<Doctor> getDoctorByCabinetId(String cabinetId) async {
+    try {
+      final snapshot = await _doctorRef.orderByChild('cabinetId').equalTo(cabinetId).once();
+      if (snapshot.snapshot.exists) {
+        final data = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        return Doctor.fromMap(Map<String, dynamic>.from(data.entries.first.value), data.keys.first);
+      }
+    } catch (e) {
+      logger.e('Error fetching doctor by cabinet ID: $e');
+    }
+    throw Exception('Doctor not found for this cabinet');
   }
 }

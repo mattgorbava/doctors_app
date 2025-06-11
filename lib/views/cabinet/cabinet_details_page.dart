@@ -251,7 +251,7 @@ class _CabinetDetailsPageState extends State<CabinetDetailsPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => DoctorProfile(patientSideRequest: true, cabinet: widget.cabinet,)),
+                    MaterialPageRoute(builder: (context) => const DoctorProfile(patientSideRequest: false,)),
                   );
                 }, 
                 child: Text(

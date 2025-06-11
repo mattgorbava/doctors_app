@@ -2,6 +2,7 @@ import 'package:doctors_app/auth/register_screen.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
 import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
+  final UserDataService _userDataService = UserDataService();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -36,12 +38,16 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   bool _obscureText = true;
   bool _rememberMe = false;
 
-  String language = 'en';
+  late String language;
   final FlutterLocalization localization = FlutterLocalization.instance;
 
   @override
   void initState() {
     super.initState();
+    language = localization.currentLocale?.languageCode ?? 'en';
+    if (language != 'en' && language != 'ro') {
+      language = 'en';
+    }
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -76,11 +82,13 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
           
           if (snapshot.exists) {
             _navigateToDoctorHomePage();
+            _userDataService.loadDoctorData();
           } else {
             userRef = _db.child('Patients').child(user.uid);
             snapshot = await userRef.get();
             if (snapshot.exists) {
               _navigateToPatientHomePage();
+              _userDataService.loadPatientData();
             } else {
               _showErrorDialog('User not found');
             }

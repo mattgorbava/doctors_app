@@ -23,7 +23,7 @@ class PdfGenerator {
   final PatientService _patientService = PatientService();
 
   Future<pw.Document> bookingsInPeriod(DateTime periodStart, DateTime periodEnd) async {
-    List<Booking> bookings = await _bookingService.getAllBookingsInPeriod(periodStart, periodEnd);
+    List<Booking> bookings = await _bookingService.getAllDoctorBookingsInPeriod(_userDataService.doctor!.uid, periodStart, periodEnd);
     Cabinet cabinet = _userDataService.cabinet ?? Cabinet.empty();
     Doctor doctor = _userDataService.doctor ?? Doctor.empty();
     final pdf = pw.Document();
@@ -60,14 +60,14 @@ class PdfGenerator {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        "Bookings",
+                        "Programări",
                         style: pw.TextStyle(
                           fontSize: 18,
                           fontWeight: pw.FontWeight.bold
                         ),
                       ),
                       pw.Text(
-                        "Dated between: ${DateFormat("dd.MM.yyyy").format(periodStart)} ${DateFormat("dd.MM.yyyy").format(periodEnd)}",
+                        "În perioada: ${DateFormat("dd.MM.yyyy").format(periodStart)} ${DateFormat("dd.MM.yyyy").format(periodEnd)}",
                         style: const pw.TextStyle(
                           fontSize: 16,
                         ),

@@ -11,7 +11,11 @@ class CabinetService {
 
   var logger = Logger();
 
-  final DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
+  late DatabaseReference _cabinetRef = FirebaseDatabase.instance.ref().child('Cabinets');
+  
+  CabinetService.withDbRef({DatabaseReference? cabinetRef}) {
+    _cabinetRef = cabinetRef ?? FirebaseDatabase.instance.ref().child('Cabinets');
+  }
 
   Future<Cabinet> getCabinetById(String id) async {
     if (id.isEmpty) {
@@ -50,12 +54,19 @@ class CabinetService {
     return cabinets;
   }
 
-  Future<void> addCabinet(Cabinet cabinet) async {
+  Future<String> addCabinet(Cabinet cabinet) async {
+    String? key;
     try {
-      await _cabinetRef.push().set(cabinet.toMap());
+      key = _cabinetRef.push().key;
+      if (key == null) {
+        throw Exception('Failed to generate a unique key for the cabinet');
+      }
+      cabinet.uid = key;
+      await _cabinetRef.child(key).set(cabinet.toMap());
     } catch (e) {
       logger.e('Error adding cabinet: $e');
     }
+    return key ?? '';
   }
 
   Future<void> updateCabinet(Cabinet cabinet) async {

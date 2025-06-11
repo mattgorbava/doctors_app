@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:doctors_app/localization/locales.dart';
-import 'package:doctors_app/model/directions_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,7 +18,6 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
   dynamic _initialCameraPosition;
 
   GoogleMapController? _googleMapController;
-  Directions? _info;
   LatLng? _currentPosition;
   bool _isLoading = false;
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -65,6 +63,48 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
       }
     }
 
+    Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+      
+      setState(() {
+        _currentPosition = LatLng(position.latitude, position.longitude);
+        _isLoading = false;
+      });
+      
+      _googleMapController?.animateCamera(
+        CameraUpdate.newLatLng(_currentPosition!),
+      );
+
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,9 +148,7 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
         foregroundColor: Colors.black,
         shape: const CircleBorder(),
         onPressed: () => _googleMapController!.animateCamera(
-          _info != null 
-            ? CameraUpdate.newLatLngBounds(_info!.bounds, 100.0)
-            : _currentPosition != null
+            _currentPosition != null
               ? CameraUpdate.newLatLng(_currentPosition!)
               : CameraUpdate.newCameraPosition(_initialCameraPosition),
         ),
@@ -119,45 +157,5 @@ class _CabinetLocationPickerState extends State<CabinetLocationPicker> {
     );
   }
 
-  Future<void> _getCurrentLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-    }
-    
-    if (permission == LocationPermission.deniedForever) {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    try {
-      Position position = await Geolocator.getCurrentPosition();
-      
-      setState(() {
-        _currentPosition = LatLng(position.latitude, position.longitude);
-        _isLoading = false;
-      });
-      
-      _googleMapController?.animateCamera(
-        CameraUpdate.newLatLng(_currentPosition!),
-      );
-
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+  
 }

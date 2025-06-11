@@ -1,6 +1,6 @@
 import 'package:doctors_app/localization/locales.dart';
-import 'package:doctors_app/widgets/registration_request_card.dart';
 import 'package:doctors_app/registration_request/registration_request_details_page.dart';
+import 'package:doctors_app/widgets/registration_request_card.dart';
 import 'package:doctors_app/model/registration_request.dart';
 import 'package:doctors_app/services/registration_request_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,9 +25,6 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> wit
   bool _isLoading = true;
 
   Future<void> _fetchRegistrationRequests() async {
-    setState(() {
-      _isLoading = true;
-    });
     String? doctorId = _auth.currentUser?.uid;
     try {
       List<RegistrationRequest> requests = await _registrationRequestService.getAllRequestsByDoctorId(doctorId!);
@@ -70,16 +67,13 @@ class _RegistrationRequestsPageState extends State<RegistrationRequestsPage> wit
           itemBuilder: (context, index) {
             final request = _registrationRequests[index];
             return GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push(
+              onTap: () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => RegistrationRequestDetailsPage(request: request),
                   ),
                 );
-                if (result == true) {
-                  _fetchRegistrationRequests();
-                }
               },
               child: RegistrationRequestCard(request: request)
             );

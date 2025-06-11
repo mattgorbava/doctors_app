@@ -63,7 +63,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> with WidgetsBindingObse
           const RegistrationRequestsPage(key: PageStorageKey('doctorRequestsPage')),
           const DoctorBookingsPage(key: PageStorageKey('doctorBookingsPage')),
           const DoctorChatlistPage(key: PageStorageKey('doctorChatlistPage')),
-          const DoctorProfile(key: PageStorageKey('doctorProfilePage')),
+          const DoctorProfile(key: PageStorageKey('doctorProfilePage'), patientSideRequest: false,),
         ];
         _isLoading = false;
       });

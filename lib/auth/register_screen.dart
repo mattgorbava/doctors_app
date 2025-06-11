@@ -107,12 +107,22 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _getDateOfBirth() async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-    );
+    DateTime? selectedDate;
+    if (!widget.isChild) {
+      selectedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+        firstDate: DateTime(1900),
+        lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      );
+    } else {
+      selectedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+        lastDate: DateTime.now(),
+      );
+    }
     setState(() {
       if (selectedDate != null) {
         birthDate = selectedDate;
@@ -478,7 +488,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 spacing: 10,
                 children: [
-                if (!widget.isChild) ... [
+                if (!widget.isChild && !isEditting) ... [
                   SizedBox(
                     width: double.infinity,
                     child: Column(
@@ -652,7 +662,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: DropdownButtonFormField<String>(
                     value: city,
                     items: ['Alba Iulia', 'Alexandria', 'Arad', 'Bacău', 'Baia Mare', 'Bistrița', 'Botoșani', 'Brașov', 'Brăila', 'București', 'Buzău', 'Călărași', 'Cluj-Napoca', 'Constanța', 'Craiova', 'Deva', 'Focșani', 'Galați', 'Giurgiu', 'Iași', 'Miercurea Ciuc', 'Oradea', 'Piatra Neamț', 'Pitești', 'Ploiești', 'Râmnicu Vâlcea', 'Reșița', 'Satu Mare', 'Sfântu Gheorghe', 'Sibiu', 'Slatina', 'Slobozia', 'Suceava', 'Târgu Jiu', 'Târgu Mureș', 'Târgoviște', 'Timișoara', 'Tulcea', 'Vaslui', 'Zalău'].map((String city) {
-                    return DropdownMenuItem(value: city, child: Text(LocaleData.city.getString(context), style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
+                    return DropdownMenuItem(value: city, child: Text(city, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),));
                   }).toList(), 
                   onChanged: (val){
                     setState (() {

@@ -73,8 +73,6 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     if (_userDataService.children != null && _userDataService.children!.isNotEmpty) {
       children = _userDataService.children!;
     }
-    consultations.clear();
-    bookings.clear();
     await _loadConsultations();
     await _fetchBookings(widget.patientId, 0);
     if (children.isNotEmpty) {
@@ -84,18 +82,22 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         patientIndex++;
       }
     }
+    _filterConsultations(0);
+    for (int i = 1; i < bookings.length; i++) {
+      _filterConsultations(i);
+    }
     return consultations;
   }
 
-  List<Consultation> _filterConsultations(int patientIndex) {  //testeaza aici: baga o consultatie care sa fie in trecut, dar sa aiba statusul "Completed" si sa fie mandatory
-    if (consultations.isEmpty || bookings[patientIndex].isEmpty) {
-      return consultations;
+  void _filterConsultations(int patientIndex) {
+    if (consultations.isEmpty || bookings.isEmpty) {
+      return;
     }
 
     DateTime now = DateTime.now();
-    List<Consultation> filteredConsultations;
     
-      filteredConsultations = consultations.where((consultation) {
+    setState(() {
+      consultations = consultations.where((consultation) {
         bool hasMatchingBooking = bookings[patientIndex].any((booking) {
           bool titleMatches = booking.description.toLowerCase().contains(consultation.title.toLowerCase());
           
@@ -113,8 +115,7 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
         });
         return !hasMatchingBooking;
       }).toList();
-
-    return filteredConsultations;
+    });
   }
 
   int _ageInMonths(Patient patient) {
@@ -124,16 +125,14 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
     return ageInMonths;
   }
 
-  List<(DateTime, Consultation?)> _nextConsultationDate(int patientIndex) {
+  (DateTime, Consultation?) _nextConsultationDate(int patientIndex) {
     DateTime nextConsultationDate = DateTime.now();
     Patient patient = patientIndex == 0 ? this.patient : children[patientIndex - 1];
-    List<Consultation> filteredConsultations = _filterConsultations(patientIndex);
     int patientAgeInMonths = _ageInMonths(patient);
     DateTime now = DateTime.now();
     Consultation fittingConsultation = Consultation.empty();
-    List<(DateTime, Consultation?)> nextConsultations = [];
 
-    for (var consultation in filteredConsultations) {
+    for (var consultation in consultations) {
       if (consultation.periodInMonths > 0 &&
           patientAgeInMonths >= consultation.ageInMonthsStart &&
           patientAgeInMonths <= consultation.ageInMonthsEnd) {
@@ -148,33 +147,24 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
           bookingDate.add(Duration(days: (consultation.periodInMonths * 30.44).floor()));
           nextConsultationDate = bookingDate;
           fittingConsultation = consultation;
-          if (nextConsultationDate.isBefore(now)) {
-            nextConsultationDate = now.add(const Duration(days: 7));
-          }
-          nextConsultations.add((nextConsultationDate, fittingConsultation));
         } else {
           if (patient.parentId.isNotEmpty) {
             nextConsultationDate = now.add(const Duration(days: 7));
             fittingConsultation = consultation;
-            if (nextConsultationDate.isBefore(now)) {
-              nextConsultationDate = now.add(const Duration(days: 7));
-            }
-            nextConsultations.add((nextConsultationDate, fittingConsultation));
           } else {
             int consultationPeriod = consultation.periodInMonths;
             int monthsUntilNextConsultation = consultationPeriod - (patientAgeInMonths % consultationPeriod);
             nextConsultationDate = DateTime(now.year, now.month + monthsUntilNextConsultation, patient.birthDate.day);
             fittingConsultation = consultation;
-            if (nextConsultationDate.isBefore(now)) {
-              nextConsultationDate = now.add(const Duration(days: 7));
-            }
-            nextConsultations.add((nextConsultationDate, fittingConsultation));
           }
         }
       }
     }
 
-    return nextConsultations;
+    if (nextConsultationDate.isBefore(now)) {
+      nextConsultationDate = now.add(const Duration(days: 7));
+    }
+    return (nextConsultationDate, fittingConsultation);
   }
 
   @override
@@ -204,56 +194,15 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
             return ListView.builder(
               itemCount: children.isNotEmpty ? children.length + 1 : 1,
               itemBuilder: (context, index) {
-                final nextConsultations = _nextConsultationDate(index);
-                final currentPatient = index == 0 ? patient : children[index - 1];
-                if (nextConsultations.isEmpty) {
-                  return ConsultationCard(
-                    consultation: Consultation.empty(),
-                    patient: index == 0 ? patient : children[index - 1],
-                    nextConsultationDate: DateTime(1970, 1, 1), 
-                  );
-                } else {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${currentPatient.firstName} ${currentPatient.lastName}',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-
-                            SizedBox(
-                              height: 200,
-                              child: ListView.builder(
-                                itemCount: nextConsultations.length,
-                                itemBuilder: (context, consultationIndex) {
-                                  final (nextConsultationDate, consultation) = nextConsultations[consultationIndex];
-
-                                  return ConsultationCard(
-                                    consultation: consultation ?? Consultation.empty(),
-                                    patient: currentPatient,
-                                    nextConsultationDate: nextConsultationDate,
-                                    onBookingSuccess: () {
-                                      setState(() {
-                                        consultationsFuture = _loadPatientAndConsultations();
-                                      });
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                final (nextConsultationDate, consultation) = _nextConsultationDate(index);
+                if (nextConsultationDate.isBefore(DateTime.now())) {
+                  return const SizedBox.shrink();
                 }
+                return ConsultationCard(
+                  consultation: consultation!,
+                  patient: index == 0 ? patient : children[index - 1],
+                  nextConsultationDate: nextConsultationDate,
+                );
               },
             );
           }

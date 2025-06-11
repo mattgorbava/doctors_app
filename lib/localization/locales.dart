@@ -215,6 +215,12 @@ mixin LocaleData {
   static const String selectTime = 'selectTime';
   static const String couldNotLoadData = 'couldNotLoadData';
   static const String emergencySymptoms = 'emergencySymptoms';
+  static const String couldNotOpenUrl = 'couldNotOpenUrl';
+  static const String noCabinetRegisteredYet = 'noCabinetRegisteredYet';
+  static const String registerYourCabinet = 'registerYourCabinet';
+  static const String invalidBookingData = 'invalidBookingData';
+  static const String noPatientsFound = 'noPatientsFound';
+  static const String noEmergenciesFound = 'noEmergenciesFound';
 
   // ignore: constant_identifier_names
   static const Map<String, dynamic> EN = {
@@ -427,6 +433,12 @@ mixin LocaleData {
     selectTime: 'Select Time',
     couldNotLoadData: 'Could not load data.',
     emergencySymptoms: 'Emergency Symptoms',
+    couldNotOpenUrl: 'Could not open URL.',
+    noCabinetRegisteredYet: 'You have not registered your cabinet yet.',
+    registerYourCabinet: 'Register cabinet',
+    invalidBookingData: 'Invalid booking data',
+    noPatientsFound: 'No patients found.',
+    noEmergenciesFound: 'No emergencies found.',
   };
 
   // ignore: constant_identifier_names
@@ -640,5 +652,11 @@ mixin LocaleData {
     selectTime: 'Alegeți ora',
     couldNotLoadData: 'Nu s-au putut încărca datele.',
     emergencySymptoms: 'Simptomele urgenței',
+    couldNotOpenUrl: 'Nu s-a putut deschide URL-ul.',
+    noCabinetRegisteredYet: 'Nu ați înregistrat încă cabinetul dvs.',
+    registerYourCabinet: 'Înregistrați cabinetul',
+    invalidBookingData: 'Datele de rezervare sunt invalide',
+    noPatientsFound: 'Nu au fost găsiți pacienți.',
+    noEmergenciesFound: 'Nu au fost găsite urgențe.',
   };
 }

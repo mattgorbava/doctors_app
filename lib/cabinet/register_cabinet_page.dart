@@ -4,6 +4,8 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:doctors_app/cabinet/cabinet_location_picker.dart';
 import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/model/cabinet.dart';
+import 'package:doctors_app/services/cabinet_service.dart';
+import 'package:doctors_app/services/doctor_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:doctors_app/services/user_data_service.dart';
 
 class RegisterCabinetPage extends StatefulWidget {
   const RegisterCabinetPage({super.key, this.cabinet});
@@ -24,6 +27,10 @@ class RegisterCabinetPage extends StatefulWidget {
 }
 
 class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
+  final _cabinetService = CabinetService();
+  final _doctorService = DoctorService();
+  final _userDataservice = UserDataService();
+  
   final _cabinetNameController = TextEditingController();
   final _cabinetCapacityController = TextEditingController();
   final _openingTimeController = TextEditingController();
@@ -163,8 +170,16 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
           'closingTime': _closingTimeController.text,
         };
 
-        String cabinetId = FirebaseDatabase.instance.ref().child('Cabinets').push().key!;
-        await FirebaseDatabase.instance.ref().child('Cabinets').child(cabinetId).set(cabinetData);
+        String key = await _cabinetService.addCabinet(Cabinet.fromMap(cabinetData));
+        if (key.isEmpty) {
+          if (!mounted) return;
+          _showErrorDialog(LocaleData.failedToRegisterCabinet.getString(context));
+          return;
+        }
+
+        await _doctorService.updateCabinetIdForDoctor(_userDataservice.doctor!.uid, key);
+
+        await _userDataservice.loadDoctorData();
 
         if (!mounted) return;
         Navigator.of(context).pop();
@@ -197,7 +212,8 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
               _cabinetPhotoUrl = response.secureUrl;
           } catch (e) {
             if (!mounted) return;
-            _showErrorDialog(LocaleData.failedToUploadImage.getString(context));            setState(() {
+            _showErrorDialog(LocaleData.failedToUploadImage.getString(context));
+            setState(() {
               _isLoading = false;
             });
             return;
@@ -218,9 +234,14 @@ class _RegisterCabinetPageState extends State<RegisterCabinetPage> {
           'updatedAt': DateTime.now().toIso8601String(),
           'openingTime': _openingTimeController.text,
           'closingTime': _closingTimeController.text,
+          'doctorId': widget.cabinet!.doctorId,
         };
 
-        await FirebaseDatabase.instance.ref().child('Cabinets').child(widget.cabinet!.uid).update(cabinetData);
+        Cabinet cabinet = Cabinet.fromMap(cabinetData, widget.cabinet!.uid);
+
+        await _cabinetService.updateCabinet(cabinet,);
+
+        await _userDataservice.loadDoctorData();
   
         if (!mounted) return;
         Navigator.of(context).pop();

@@ -1,9 +1,12 @@
+import 'package:doctors_app/localization/locales.dart';
 import 'package:doctors_app/medical_history/add_medical_history_page.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/patient_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BookingCard extends StatelessWidget {
   BookingCard({super.key, required this.booking, required this.onStatusUpdated});
@@ -141,22 +144,37 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 5),
-                SizedBox(
-                  width: 0.5 * MediaQuery.of(context).size.width,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      
+                if (booking.status == 'Completed') ... [
+                  const SizedBox(height: 8),
+                  Text(
+                    '${LocaleData.resultsLabel.getString(context)}: ${booking.results}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${LocaleData.recommendationsLabel.getString(context)}: ${booking.recommendations}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  )
+                ],
+                if (booking.analysisResultsPdf.isNotEmpty) ... [
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final url = booking.analysisResultsPdf;
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(LocaleData.couldNotOpenUrl.getString(context)), backgroundColor: Colors.red),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2B962B),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      backgroundColor: Colors.green,
                     ),
-                    child: const Text('View Details', style: TextStyle(fontSize: 16, color: Colors.white),),
+                    child: Text(LocaleData.viewDetails.getString(context), style: const TextStyle(color: Colors.white)), // Reused viewDetails
                   ),
-                ),
+                ],
                 const SizedBox(height: 10),
               ],
             );

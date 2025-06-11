@@ -1,6 +1,8 @@
 import 'package:doctors_app/booking/book_appointment_page.dart';
+import 'package:doctors_app/model/cabinet.dart';
 import 'package:doctors_app/model/consultation.dart';
 import 'package:doctors_app/model/patient.dart';
+import 'package:doctors_app/services/cabinet_service.dart';
 import 'package:doctors_app/services/user_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,12 +13,15 @@ class ConsultationCard extends StatelessWidget {
     required this.consultation, 
     required this.patient,
     required this.nextConsultationDate,
+    this.onBookingSuccess,
   });
 
+  final CabinetService _cabinetService = CabinetService();
   final Consultation consultation;
   final Patient patient;
   final DateTime nextConsultationDate;
   final UserDataService _userDataService = UserDataService();
+  final VoidCallback? onBookingSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +67,35 @@ class ConsultationCard extends StatelessWidget {
                     ));
                   },
                   child: const Text('Book'),
+                )
+                : _userDataService.cabinet== null && patient.cabinetId.isNotEmpty
+                ? FutureBuilder(
+                  future: _cabinetService.getCabinetById(patient.cabinetId),
+                  initialData: null,
+                  builder: (context, asyncSnapshot) {
+                    return ElevatedButton(
+                      onPressed: () async {
+                        if (asyncSnapshot.hasData && asyncSnapshot.data != null) {
+                          final result = await Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => BookAppointmentPage(
+                              patient: patient,
+                              cabinet: asyncSnapshot.data!,
+                              desiredDate: nextConsultationDate,
+                              description: consultation.title,
+                            ),
+                          ));
+                          if (result == true && onBookingSuccess != null) {
+                            onBookingSuccess!();
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Cabinet not found!'))
+                          );
+                        }
+                      },
+                      child: const Text('Book'),
+                    );
+                  }
                 )
                 : const Text('Register to cabinet first!',
                   style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),

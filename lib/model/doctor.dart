@@ -26,15 +26,15 @@ class Doctor {
   factory Doctor.fromMap(Map<dynamic, dynamic> map, [String id = '']) {
     return Doctor(
       uid: id,
-      email: map['email'],
-      profileImageUrl: map['profileImageUrl'],
-      city: map['city'],
-      firstName: map['firstName'],
-      lastName: map['lastName'],
-      phoneNumber: map['phoneNumber'],
-      cvUrl: map['cvUrl'],
-      legitimationNumber: map['legitimationNumber'],
-      cabinetId: map['cabinetId'],
+      email: map['email'] ?? '',
+      profileImageUrl: map['profileImageUrl'] ?? '',
+      city: map['city'] ?? '',
+      firstName: map['firstName'] ?? '',
+      lastName: map['lastName'] ?? '',
+      phoneNumber: map['phoneNumber'] ?? '',
+      cvUrl: map['cvUrl'] ?? '',
+      legitimationNumber: map['legitimationNumber'] ?? '',
+      cabinetId: map['cabinetId'] ?? '',
     );
   }
 
