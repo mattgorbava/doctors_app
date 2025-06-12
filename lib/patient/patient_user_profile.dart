@@ -175,9 +175,34 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
     }
   }
 
-  void _completeEmergency() {
-    _patientService.updatePatientEmergencyStatus(_patient!.uid, false);
+  Future<void> _completeEmergency() async {
+  try {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    await _patientService.updatePatientEmergencyStatus(_patient!.uid, false, '');
+    
+    setState(() {
+      _patient!.hasEmergency = false;
+      _patient!.emergencySymptoms = '';
+    });
+    
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
+  } catch (e) {
+    print('Error completing emergency: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to update emergency status: $e'))
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +245,9 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                             width: 0.5 * MediaQuery.of(context).size.width,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: _completeEmergency,
+                              onPressed: () async {
+                                _completeEmergency();
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.redAccent,
                               ),
@@ -294,123 +321,146 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                   ),
                 ],
                 Expanded(child: 
-                  _bookings.isEmpty ? Center(child: Text(LocaleData.noBookings.getString(context))) 
+                  _bookings.isEmpty 
+                  ? Center(child: Text(LocaleData.noBookings.getString(context))) 
                   : ListView.builder(
                       itemCount: _bookings.length,
                       itemBuilder: (context, index) {
                         final Booking booking = _bookings[index];
-                        return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                booking.description,
-                                style: const TextStyle(
-                                  fontSize: 16, 
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
+                        return FutureBuilder(
+                          future: _patientService.getPatientById(booking.patientId),
+                          builder: (context, asyncSnapshot) {
+                            if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            if (asyncSnapshot.hasError) {
+                              return Center(child: Text(LocaleData.errorLoadingPatient.getString(context)));
+                            }
+                            if (!asyncSnapshot.hasData) {
+                              return Center(child: Text(LocaleData.noPatientData.getString(context)));
+                            }
+                            return Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.calendar_today, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text('${LocaleData.selectDate.getString(context)}: ${booking.date}'),
-                                  const SizedBox(width: 16),
-                                  const Icon(Icons.access_time, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text('${LocaleData.selectTime.getString(context)}: ${booking.time}'),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(booking.status),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      booking.status,
-                                      style: const TextStyle(color: Colors.white),
+                                  Text(
+                                    booking.description,
+                                    style: const TextStyle(
+                                      fontSize: 16, 
+                                      fontWeight: FontWeight.bold
                                     ),
                                   ),
-                                  if (booking.status == "AnalysisPending" && _isPatient)
-                                    ElevatedButton.icon(
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '$Patient: ${asyncSnapshot.data!.firstName} ${asyncSnapshot.data!.lastName}',
+                                    style: const TextStyle(
+                                      fontSize: 14, 
+                                      color: Colors.grey
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.calendar_today, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text('${LocaleData.selectedDate.getString(context)}: ${booking.date}'),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.access_time, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text('${LocaleData.selectedTime.getString(context)}: ${booking.time}'),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getStatusColor(booking.status),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          booking.status,
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                      if (booking.status == "AnalysisPending" && _isPatient)
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            _pickPdf();
+                                            if (pdfFilePath != null) {
+                                              try {
+                                                CloudinaryResponse response = await cloudinary.uploadFile(
+                                                  CloudinaryFile.fromFile(
+                                                    pdfFilePath!,
+                                                    folder: 'medical_history',
+                                                    resourceType: CloudinaryResourceType.Raw,
+                                                  ),
+                                                );
+                                                booking.analysisResultsPdf = response.secureUrl;
+                                                _bookingService.updateBooking(booking);
+                                                setState(() {
+                                                  analysisResultsPdfUrl = response.secureUrl;
+                                                  pdfFileName = null;
+                                                  pdfFilePath = null;
+                                                });
+                                              } catch (e) {
+                                                _showErrorDialog('Failed to upload PDF file');
+                                                
+                                                setState(() {
+                                                  _isLoading = false;
+                                                });
+                                                return;
+                                              }
+                                            }
+                                          },
+                                          icon: const Icon(Icons.add_chart),
+                                          label: Text(LocaleData.addAnalysisLabel.getString(context), style: const TextStyle(color: Colors.white)), // Reused addAnalysisLabel
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.blueAccent,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  if (booking.status == 'Completed') ... [
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${LocaleData.resultsLabel.getString(context)}: ${booking.results}',
+                                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${LocaleData.recommendationsLabel.getString(context)}: ${booking.recommendations}',
+                                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                    )
+                                  ],
+                                  if (booking.analysisResultsPdf.isNotEmpty) ... [
+                                    const SizedBox(height: 8),
+                                    ElevatedButton(
                                       onPressed: () async {
-                                        _pickPdf();
-                                        if (pdfFilePath != null) {
-                                          try {
-                                            CloudinaryResponse response = await cloudinary.uploadFile(
-                                              CloudinaryFile.fromFile(
-                                                pdfFilePath!,
-                                                folder: 'medical_history',
-                                                resourceType: CloudinaryResourceType.Raw,
-                                              ),
-                                            );
-                                            booking.analysisResultsPdf = response.secureUrl;
-                                            _bookingService.updateBooking(booking);
-                                            setState(() {
-                                              analysisResultsPdfUrl = response.secureUrl;
-                                              pdfFileName = null;
-                                              pdfFilePath = null;
-                                            });
-                                          } catch (e) {
-                                            _showErrorDialog('Failed to upload PDF file');
-                                            
-                                            setState(() {
-                                              _isLoading = false;
-                                            });
-                                            return;
-                                          }
+                                        final url = booking.analysisResultsPdf;
+                                        if (await canLaunchUrl(Uri.parse(url))) {
+                                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                                        } else {
+                                          _showErrorDialog('Could not open PDF file.');
                                         }
                                       },
-                                      icon: const Icon(Icons.add_chart),
-                                      label: Text(LocaleData.addAnalysisLabel.getString(context), style: const TextStyle(color: Colors.white)), // Reused addAnalysisLabel
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blueAccent,
+                                        backgroundColor: Colors.green,
                                       ),
+                                      child: Text(LocaleData.viewDetails.getString(context), style: const TextStyle(color: Colors.white)), // Reused viewDetails
                                     ),
+                                  ],
                                 ],
                               ),
-                              if (booking.status == 'Completed') ... [
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${LocaleData.resultsLabel.getString(context)}: ${booking.results}',
-                                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${LocaleData.recommendationsLabel.getString(context)}: ${booking.recommendations}',
-                                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                                )
-                              ],
-                              if (booking.analysisResultsPdf.isNotEmpty) ... [
-                                const SizedBox(height: 8),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    final url = booking.analysisResultsPdf;
-                                    if (await canLaunchUrl(Uri.parse(url))) {
-                                      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                                    } else {
-                                      _showErrorDialog('Could not open PDF file.');
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                  ),
-                                  child: Text(LocaleData.viewDetails.getString(context), style: const TextStyle(color: Colors.white)), // Reused viewDetails
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      );
+                            ),
+                                                  );
+                          }
+                        );
                       },
                     ),)
               ],

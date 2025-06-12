@@ -147,7 +147,7 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
               child: ElevatedButton(
                 onPressed: () { 
                   // ignore: prefer_const_constructors
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => DoctorProfile(patientSideRequest: true,)));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => DoctorProfile(patientSideRequest: true, cabinet: _cabinet,)));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2B962B),

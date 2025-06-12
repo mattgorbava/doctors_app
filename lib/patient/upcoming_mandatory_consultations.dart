@@ -138,11 +138,11 @@ class _UpcomingMandatoryConsultationsState extends State<UpcomingMandatoryConsul
           patientAgeInMonths >= consultation.ageInMonthsStart &&
           patientAgeInMonths <= consultation.ageInMonthsEnd) {
         if (bookings[patientIndex].any((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
-                              && booking.isMandatory == true)) {
+            && booking.isMandatory == true && booking.status != 'Cancelled')) {
           DateTime bookingDate = DateTime.parse(
             bookings[patientIndex].firstWhere((booking) => booking.description.toLowerCase().contains(consultation.title.toLowerCase())
             && booking.isMandatory == true
-            && booking.status == 'Completed')
+            && booking.status != 'Cancelled')
             .date
           );
           bookingDate.add(Duration(days: (consultation.periodInMonths * 30.44).floor()));

@@ -417,7 +417,7 @@ class _RegisterPageState extends State<RegisterPage> {
           };
 
           if (userType == 'Patient') {
-            userData['cabinetId'] = '';
+            userData['cabinetId'] = widget.patient?.cabinetId ?? '';
             userData['birthDate'] = birthDate.toIso8601String();
             userData['cnp'] = _cnpController.text;
           }
@@ -425,7 +425,7 @@ class _RegisterPageState extends State<RegisterPage> {
           if (userType == 'Doctor') {
             userData['legitimationNumber'] = _legitimationNumberController.text;
             userData['cvUrl'] = cvUrl;
-            userData['cabinetId'] = '';
+            userData['cabinetId'] = widget.doctor?.cabinetId ?? '';
           }
 
           await _db.child(userTypePath).child(user.uid).update(userData);

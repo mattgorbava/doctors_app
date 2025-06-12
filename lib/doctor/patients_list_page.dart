@@ -34,6 +34,33 @@ class _PatientsListPageState extends State<PatientsListPage> {
     });
   }
 
+  Future<void> _refreshPatientsList() async {
+  setState(() {
+    _isLoading = true;
+  });
+  
+  try {
+    await _userDataService.loadPatients(_userDataService.doctor?.cabinetId ?? '');
+    
+    setState(() {
+      _patients = _userDataService.doctorPatients ?? <Patient>[];
+      
+      if (widget.emergencies) {
+        _patients = _patients.where((patient) => patient.hasEmergency).toList();
+      }
+    });
+  } catch (e) {
+    print('Error refreshing patients list: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to refresh patients list: $e'))
+    );
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,19 +75,22 @@ class _PatientsListPageState extends State<PatientsListPage> {
                 widget.emergencies 
                   ? LocaleData.noEmergenciesFound.getString(context) 
                   : LocaleData.noPatientsFound.getString(context),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             )
           : ListView.builder(
               itemCount: _patients.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, 
+                  onTap: () async {
+                    final result = await Navigator.push(context, 
                       MaterialPageRoute(
                         builder: (context) => PatientUserProfile(patient: _patients[index]),
                       ),
                     );
+                    if (result == true) {
+                      await _refreshPatientsList();
+                    }
                   },
                   child: PatientCard(patient: _patients[index]),
                 );

@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:doctors_app/auth/login_page.dart';
 import 'package:doctors_app/doctor/doctor_home_page.dart';
+import 'package:doctors_app/no_internet_screen.dart';
 import 'package:doctors_app/patient/patient_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,10 +22,30 @@ class _SplashScreenState extends State<SplashScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
 
+  final bool internetConnection = true;
+
   @override
   void initState() {
     super.initState();
-    _checkAuthUser();
+    _checkInternetConnection();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> _checkInternetConnection() async {
+    final result = await Connectivity().checkConnectivity();
+    if (result[0] == ConnectivityResult.none) {
+      setState(() {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+        );
+      });
+    } else {
+      _checkAuthUser();
+    }
   }
 
   Future<void> _checkAuthUser() async {
