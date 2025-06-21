@@ -108,14 +108,14 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   void _navigateToDoctorHomePage() {
     if (!_isNavigating) {
       _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DoctorHomePage()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const DoctorHomePage()));
     }
   }
   
   void _navigateToPatientHomePage() {
     if (!_isNavigating) {
       _isNavigating = true;
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const PatientHomePage()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const PatientHomePage()));
     }
   }
   

@@ -223,6 +223,7 @@ mixin LocaleData {
   static const String noEmergenciesFound = 'noEmergenciesFound';
   static const String errorLoadingPatient = 'errorLoadingPatient';
   static const String noPatientData = 'noPatientData';
+  static const String loading = 'loading';
 
   // ignore: constant_identifier_names
   static const Map<String, dynamic> EN = {
@@ -442,7 +443,8 @@ mixin LocaleData {
     noPatientsFound: 'No patients found.',
     noEmergenciesFound: 'No emergencies found.',
     errorLoadingPatient: 'Error loading patient data.',
-    noPatientData: 'No patient data available.'
+    noPatientData: 'No patient data available.',
+    loading: 'Loading...',
   };
 
   // ignore: constant_identifier_names
@@ -663,6 +665,7 @@ mixin LocaleData {
     noPatientsFound: 'Nu au fost găsiți pacienți.',
     noEmergenciesFound: 'Nu au fost găsite urgențe.',
     errorLoadingPatient: 'Eroare la încărcarea datelor pacientului.',
-    noPatientData: 'Nu există date despre pacient disponibile.'
+    noPatientData: 'Nu există date despre pacient disponibile.',
+    loading: 'Se încarcă...',
   };
 }

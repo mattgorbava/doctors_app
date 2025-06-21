@@ -331,7 +331,13 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                           future: _patientService.getPatientById(booking.patientId),
                           builder: (context, asyncSnapshot) {
                             if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
+                              return Card(
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Center(child: Text(LocaleData.loading.getString(context))),
+                                ),
+                              );
                             }
                             if (asyncSnapshot.hasError) {
                               return Center(child: Text(LocaleData.errorLoadingPatient.getString(context)));

@@ -295,7 +295,7 @@ class _RegisterPageState extends State<RegisterPage> {
             await _db.child(userTypePath).child(user.uid).set(userData);
 
             if (!mounted) return;
-            Navigator.of(context).push(
+            Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) =>
                     userType == 'Doctor' ? const DoctorHomePage() : const PatientHomePage(),
@@ -305,7 +305,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } catch (e) {
         _showErrorDialog('Failed to register user');
         if (!mounted) return;
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RegisterPage()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const RegisterPage()));
         logger.d(e);
       }
     }
