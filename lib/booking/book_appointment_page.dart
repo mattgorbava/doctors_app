@@ -8,19 +8,27 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BookAppointmentPage extends StatefulWidget {
-  const BookAppointmentPage({super.key, required this.patient, required this.cabinet, required this.desiredDate, this.description});
+  const BookAppointmentPage({
+    super.key, 
+    required this.patient, 
+    required this.cabinet, 
+    required this.desiredDate, 
+    this.description,
+    this.bookingService
+  });
 
   final Patient patient;
   final Cabinet cabinet;
   final DateTime desiredDate;
   final String? description;
+  final BookingService? bookingService;
 
   @override
   State<BookAppointmentPage> createState() => _BookAppointmentPageState();
 }
 
 class _BookAppointmentPageState extends State<BookAppointmentPage> {
-  final BookingService _bookingService = BookingService();
+  late BookingService _bookingService;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -48,12 +56,13 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
   @override
   void initState() {
     super.initState();
-    initAvailability();
     if (widget.description != null) {
       _descriptionController.text = widget.description!;
       _prefillDescription = true;
       _mandatoryConsultation = true;
     }
+    _bookingService = widget.bookingService ?? BookingService();
+    initAvailability();
     selectedDate = widget.desiredDate;
     _focusedDay = widget.desiredDate;
   }

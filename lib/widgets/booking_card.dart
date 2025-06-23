@@ -1,5 +1,5 @@
+import 'package:doctors_app/booking/complete_booking_page.dart';
 import 'package:doctors_app/localization/locales.dart';
-import 'package:doctors_app/medical_history/add_medical_history_page.dart';
 import 'package:doctors_app/model/booking.dart';
 import 'package:doctors_app/model/patient.dart';
 import 'package:doctors_app/services/patient_service.dart';
@@ -114,19 +114,14 @@ class BookingCard extends StatelessWidget {
                           backgroundColor: Colors.blue,
                           ),
                           onPressed: () async {
-                            final String? newStatus = await Navigator.of(context).push<String>(
+                            await Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => AddMedicalHistoryPage(
-                                  bookingId: booking.id,
-                                  isMandatory: booking.isMandatory,
+                                builder: (context) => CompleteBookingPage(
+                                  booking: booking,
                                 ),
-                              )
+                              ),
                             );
-                            
-                            if (newStatus != null) {
-                              // ignore: use_build_context_synchronously
-                              _updateBookingStatus(context, booking.id, newStatus);
-                            }
+                            onStatusUpdated.call();
                           },
                           child: const Text('Complete', style: TextStyle(color: Colors.white),),
                         )

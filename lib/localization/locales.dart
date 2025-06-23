@@ -224,6 +224,12 @@ mixin LocaleData {
   static const String errorLoadingPatient = 'errorLoadingPatient';
   static const String noPatientData = 'noPatientData';
   static const String loading = 'loading';
+  static const String completeBooking = 'completeBooking';
+  static const String recommendations = 'recommendations';
+  static const String results = 'results';
+  static const String addAnalysis = 'addAnalysis';
+  static const String callButton = 'callButton';
+  static const String messageButton = 'messageButton';
 
   // ignore: constant_identifier_names
   static const Map<String, dynamic> EN = {
@@ -445,6 +451,12 @@ mixin LocaleData {
     errorLoadingPatient: 'Error loading patient data.',
     noPatientData: 'No patient data available.',
     loading: 'Loading...',
+    completeBooking: 'Complete Booking',
+    recommendations: 'Recommendations',
+    results: 'Results',
+    addAnalysis: 'Add Analysis',
+    callButton: 'Call',
+    messageButton: 'Message',
   };
 
   // ignore: constant_identifier_names
@@ -667,5 +679,11 @@ mixin LocaleData {
     errorLoadingPatient: 'Eroare la încărcarea datelor pacientului.',
     noPatientData: 'Nu există date despre pacient disponibile.',
     loading: 'Se încarcă...',
+    completeBooking: 'Finalizează Rezervarea',
+    recommendations: 'Recomandări',
+    results: 'Rezultate',
+    addAnalysis: 'Adaugă Analize',
+    callButton: 'Sună',
+    messageButton: 'Trimite Mesaj',
   };
 }

@@ -38,6 +38,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
   String? pdfFilePath;
   String? analysisResultsPdfUrl;
   bool _isPatient = true;
+  bool _isDoctor = false;
   Patient? _patient;
   Patient? _parent;
 
@@ -51,6 +52,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
   void initState() {
     super.initState();
     _isPatient = _userDataService.isPatient;
+    _isDoctor = _userDataService.isDoctor;
     _patient = widget.patient ?? _userDataService.patient;
     if (_isPatient) {
       _bookings = _userDataService.patientBookings ?? <Booking>[];
@@ -278,7 +280,9 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                         children: [
                           const Icon(Icons.phone),
                           const SizedBox(width: 8),
-                          Text(LocaleData.callParentButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
+                          !_isDoctor 
+                          ? Text(LocaleData.callParentButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white))
+                          : Text(LocaleData.callButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
                         ],
                       ),
                     ),
@@ -314,7 +318,9 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                         children: [
                           const Icon(Icons.message),
                           const SizedBox(width: 8),
-                          Text(LocaleData.messageParentButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
+                          !_isDoctor
+                          ? Text(LocaleData.messageParentButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white))
+                          : Text(LocaleData.messageButton.getString(context), style: const TextStyle(fontSize: 16, color: Colors.white)),
                         ],
                       ),
                     ),
@@ -397,7 +403,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                       if (booking.status == "AnalysisPending" && _isPatient)
                                         ElevatedButton.icon(
                                           onPressed: () async {
-                                            _pickPdf();
+                                            await _pickPdf();
                                             if (pdfFilePath != null) {
                                               try {
                                                 CloudinaryResponse response = await cloudinary.uploadFile(
@@ -408,6 +414,7 @@ class _PatientUserProfileState extends State<PatientUserProfile> with AutomaticK
                                                   ),
                                                 );
                                                 booking.analysisResultsPdf = response.secureUrl;
+                                                booking.status = 'Completed';
                                                 _bookingService.updateBooking(booking);
                                                 setState(() {
                                                   analysisResultsPdfUrl = response.secureUrl;

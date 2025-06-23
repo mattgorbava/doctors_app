@@ -24,6 +24,7 @@ class UserDataService {
   List<Patient>? doctorPatients;
   bool isDataLoaded = false;
   bool isPatient = false;
+  bool isDoctor = false;
 
   Future<void> loadPatientData() async {
     
@@ -68,6 +69,7 @@ class UserDataService {
       }
       
       isDataLoaded = true;
+      isDoctor = true;
     } catch (e) {
       logger.e('Error loading doctor data: $e');
     }

@@ -62,12 +62,10 @@ class _PatientCabinetPageState extends State<PatientCabinetPage> with AutomaticK
         backgroundColor: Colors.red,
       ));
       
-      if (mounted) {
-         setState(() {
-           _isLoading = false;
-         });
-      }
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _makePhoneCall(String phoneNumber) async {

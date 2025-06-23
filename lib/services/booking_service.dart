@@ -82,6 +82,18 @@ class BookingService {
       logger.e('Error updating booking: $e');
     }
   }
+  
+  Future<void> completeBooking(String id, String status, String recommendations, String results) async {
+    try {
+      await _bookingRef.child(id).update({
+        'recommendations': recommendations, 
+        'results': results, 
+        'status': status,
+      });
+    } catch (e) {
+      logger.e('Error completing booking: $e');
+    }
+  }
 
   Future<void> deleteBooking(String id) async {
     try {
